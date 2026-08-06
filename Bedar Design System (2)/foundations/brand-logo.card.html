@@ -1,0 +1,13 @@
+<!-- @dsCard group="Brand" viewport="700x220" name="Wordmark" subtitle="Official Bedar wordmark — currentColor variant" -->
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>html,body{overflow:hidden;background:var(--bg-app);margin:0}body{padding:0;display:grid;grid-template-columns:1fr 1fr;height:100%}
+.tile{display:flex;align-items:center;justify-content:center;height:100%;position:relative;overflow:hidden}
+.dark{background:var(--brand-950)}
+.dark::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 60% 55% at 50% 45%,rgba(169,225,211,0.28),transparent 60%);pointer-events:none}
+.light{background:var(--brand-25)}
+.tile img{width:200px;height:auto;position:relative;z-index:1}
+.dark img{filter:brightness(0) invert(1)}
+</style></head><body>
+<div class="tile dark"><img src="../assets/bedar-logo.svg" alt="Bedar"></div>
+<div class="tile light"><img src="../assets/bedar-logo.svg" alt="Bedar"></div>
+</body></html>

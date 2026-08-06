@@ -1,0 +1,32 @@
+/* ================================================================
+   BEDAR — global stylesheet entry point.
+   Imported once, from `src/main.jsx`. Nothing else imports CSS.
+
+   Load order matters:
+     1. Tailwind      — preflight + utility engine
+     2. tokens/*      — raw Bedar custom properties (source of truth)
+     3. theme.css     — @theme bridge: tokens → Tailwind utilities
+     4. base.css      — @layer base document defaults
+     5. rtl.css       — RTL rules + container/section primitives
+     6. animations.css— keyframes + surface treatments
+     7. admin.css     — the /admin shell's own surfaces
+   ================================================================ */
+
+@import 'tailwindcss';
+
+/* ── Design-system tokens (verbatim from Bedar Design System,
+      except the two documented renames noted in each file) ────── */
+@import './tokens/fonts.css';
+@import './tokens/colors.css';
+@import './tokens/typography.css';
+@import './tokens/spacing.css';
+@import './tokens/radii.css';
+@import './tokens/shadows.css';
+@import './tokens/motion.css';
+
+/* ── Tailwind bridge + app layers ───────────────────────────── */
+@import './theme.css';
+@import './base.css';
+@import './rtl.css';
+@import './animations.css';
+@import './admin.css';

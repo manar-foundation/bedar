@@ -1,0 +1,55 @@
+/* ================================================================
+   BEDAR SPACING — strict 8px grid.
+   Baseline unit = 4px for hair-line inner spacing only; every
+   layout spacing token is a multiple of 8.
+
+   NOTE — deliberate deviation from the design-system source file:
+   Upstream names the layout maxima `--container-sm … --container-2xl`.
+   Tailwind v4 owns the `--container-*` namespace (it drives `max-w-sm`,
+   `max-w-xl`, `@container` sizes …), so keeping those names would
+   silently redefine `max-w-xl` as 1280px app-wide. Renamed to
+   `--layout-*`; values are unchanged.
+   ================================================================ */
+:root {
+  --space-0: 0;
+  --space-1: 4px; /* hairline / icon-to-text */
+  --space-2: 8px; /* base unit */
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 48px;
+  --space-10: 64px;
+  --space-11: 80px;
+  --space-12: 96px;
+  --space-13: 120px;
+  --space-14: 160px;
+
+  /* Layout maxima (upstream: --container-*) */
+  --layout-sm: 640px;
+  --layout-md: 768px;
+  --layout-lg: 1024px;
+  --layout-xl: 1280px; /* Bedar page container */
+  --layout-2xl: 1440px;
+
+  /* Breakpoints (for JS/reference; usage via @media) */
+  --bp-xs: 360px;
+  --bp-sm: 640px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+  --bp-2xl: 1440px;
+
+  /* Grid */
+  --grid-cols: 12;
+  --grid-gutter: 24px;
+  --grid-gutter-md: 16px;
+
+  /* Navbar row height — matches `h-18` in Navbar.jsx. Kept as a
+     token because Hero's top padding has to clear a FIXED navbar
+     (see components/ui/Hero.jsx) and a magic 4.5rem repeated in two
+     files is how the two silently drift apart later. */
+  --nav-h: 4.5rem;
+}

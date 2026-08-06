@@ -1,0 +1,275 @@
+/* ================================================================
+   BEDAR COLORS — Teal-family only, plus one saturated CTA accent.
+   Anchors: #407479 primary, #a9e1d3 mint, #022124 near-black teal.
+   All primary/text pairings meet WCAG AA at body sizes.
+   ================================================================ */
+:root {
+  /* Brand — Teal (primary identity) */
+  --brand-25: #f1f8f7;
+  --brand-50: #e4f1ee;
+  --brand-100: #c8e2dd;
+  --brand-200: #a9e1d3; /* mint highlight */
+  --brand-300: #7cc0b4;
+  --brand-400: #569892;
+  --brand-500: #407479; /* primary */
+  --brand-600: #325c61;
+  --brand-700: #26474c;
+  --brand-800: #153337;
+  --brand-900: #0a2427;
+  --brand-950: #022124; /* deep dark teal (dark sections) */
+
+  /* Accent — Saturated turquoise, reserved for CTAs only.
+     Replaced the original warm bronze (#B08968): it read as a
+     foreign colour on a teal site and, at 3.1:1 against white, it
+     never actually met AA for button text. This scale is the same
+     hue family as the brand, pushed to full chroma so a CTA still
+     separates from the muted primary (#407479).
+     accent-400 is the vivid one — glows and gradients only; it is
+     too light to carry white text. accent-500 is 5.2:1 on white. */
+  --accent-50: #e6f5f3;
+  --accent-100: #cfebe7;
+  --accent-200: #a5dbd5;
+  --accent-300: #63c0b7;
+  --accent-400: #1e9e93;
+  --accent-500: #0b7a73; /* CTA */
+  --accent-600: #08635e;
+  --accent-700: #064b47;
+
+  /* Mint — companion pale accent (from brand-200), used for highlights */
+  --mint-100: #eaf7f2;
+  --mint-200: #cbede0;
+  --mint-300: #a9e1d3;
+  --mint-500: #7cc0b4;
+
+  /* Neutrals — cool-tinted teal-slate (align undertones with brand) */
+  --neutral-0: #ffffff;
+  --neutral-25: #f8fafa;
+  --neutral-50: #f1f4f4;
+  --neutral-100: #e5eaea;
+  --neutral-200: #d0d8d8;
+  --neutral-300: #aab6b6;
+  --neutral-400: #7a8687;
+  --neutral-500: #586263;
+  --neutral-600: #3d4547;
+  --neutral-700: #282f30;
+  --neutral-800: #181d1e;
+  --neutral-900: #0c1112;
+  --neutral-1000: #050809;
+
+  /* Semantic base — muted to sit inside the teal palette */
+  --success-500: #3b8f6a;
+  --success-100: #d9ede2;
+  --success-700: #1f5a41;
+
+  --warning-500: #b87a2e;
+  --warning-100: #f6e4cb;
+  --warning-700: #6e4718;
+
+  --error-500: #b14545;
+  --error-100: #f1d6d6;
+  --error-700: #70262a;
+
+  --info-500: #3c6e86;
+  --info-100: #d6e2ea;
+  --info-700: #1e3f52;
+}
+
+/* --------- LIGHT MODE (default) --------- */
+:root,
+[data-theme='light'] {
+  /* Page base is a whisper of mint rather than a cool grey-white, so
+     the light marketing sections read as brand surface instead of
+     stark paper — the ambient glow layer in PublicLayout builds on
+     this. `brand-950` ink still clears AA on it with huge headroom. */
+  --bg-app: var(--brand-25);
+  --bg-surface: var(--neutral-0);
+  --bg-raised: var(--neutral-0);
+  --bg-sunken: var(--neutral-50);
+  --bg-inverse: var(--brand-950);
+  --bg-overlay: rgba(2, 33, 36, 0.6);
+
+  --text-primary: var(--brand-950);
+  --text-secondary: var(--neutral-600);
+  --text-muted: var(--neutral-500);
+  --text-disabled: var(--neutral-400);
+  --text-inverse: var(--neutral-0);
+  --text-link: var(--brand-600);
+  --text-link-hover: var(--brand-800);
+
+  --border-subtle: var(--neutral-100);
+  --border-default: var(--neutral-200);
+  --border-strong: var(--neutral-300);
+  --border-focus: var(--brand-500);
+
+  --action-primary: var(--brand-500);
+  --action-primary-hover: var(--brand-600);
+  --action-primary-active: var(--brand-700);
+  --action-primary-on: var(--neutral-0);
+
+  --action-accent: var(--accent-500);
+  --action-accent-hover: var(--accent-600);
+  --action-accent-on: var(--neutral-0);
+  /* Halo under the primary CTA. The turquoise is a close relative of
+     the primary teal, so on the dark hero the button needs something
+     other than hue to separate it from a secondary action. */
+  --action-accent-glow: rgba(11, 122, 115, 0.55);
+
+  --action-danger: var(--error-500);
+  --action-danger-hover: var(--error-700);
+
+  --field-bg: var(--neutral-0);
+  --field-bg-disabled: var(--neutral-50);
+  --field-border: var(--neutral-300);
+
+  --state-hover-tint: rgba(64, 116, 121, 0.06);
+  --state-selected-tint: rgba(64, 116, 121, 0.12);
+
+  /* Tint chips — the small filled surfaces that carry an icon or a
+     short status line (metric-tile icons, page-header icons, empty
+     states, the unpublished-items callout).
+
+     These exist because the `*-100` steps are a STATIC scale: they
+     do not flip with `data-theme`, so using `bg-warning-100` for a
+     callout paints a pale beige block on a near-black page and the
+     text on it stops being readable. A chip needs its own pair per
+     theme — a wash in light, a low-alpha veil in dark — and that is
+     a semantic decision, not a step on a ramp. */
+  --tint-brand-bg: var(--brand-50);
+  --tint-brand-fg: var(--brand-600);
+  --tint-brand-ring: var(--brand-100);
+
+  --tint-warning-bg: var(--warning-100);
+  --tint-warning-fg: var(--warning-700);
+  --tint-warning-border: rgba(184, 122, 46, 0.32);
+
+  --tint-error-bg: var(--error-100);
+  --tint-error-fg: var(--error-700);
+
+  --tint-success-bg: var(--success-100);
+  --tint-success-fg: var(--success-700);
+
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.6);
+
+  /* Wash behind an empty card media slot. Two tints, lit from
+     opposite corners, so a grid of image-less cards reads as brand
+     surface instead of as three grey holes. */
+  --media-wash-a: rgba(64, 116, 121, 0.22);
+  --media-wash-b: rgba(11, 122, 115, 0.16);
+
+  /* Hero glow (dark-section treatment) */
+  --hero-bg: var(--brand-950);
+  --hero-glow: radial-gradient(
+    ellipse 60% 50% at 50% 0%,
+    rgba(169, 225, 211, 0.28),
+    transparent 60%
+  ); /* @kind other */
+  --hero-highlight: var(--brand-200);
+
+  /* Aurora — the three drifting blobs behind the homepage hero.
+     Stored as tokens rather than literals inside the keyframes so
+     the dark theme can dim them; alphas are low on purpose, the
+     effect should be felt and not seen. */
+  --hero-aurora-a: rgba(30, 158, 147, 0.34); /* accent-400 */
+  --hero-aurora-b: rgba(169, 225, 211, 0.24); /* mint */
+  --hero-aurora-c: rgba(86, 152, 146, 0.3); /* brand-400 */
+
+  /* Section decoration — for the plain-white marketing sections.
+     Punchier than the hero aurora on purpose: that one drifts behind
+     white text on a near-black field and any more alpha would fight
+     legibility. These sit behind dark ink text on a near-white
+     field, so there is far more headroom before contrast suffers —
+     spending some of it is the whole point here. */
+  --section-glow-a: rgba(64, 116, 121, 0.16); /* brand-500 */
+  --section-glow-b: rgba(11, 122, 115, 0.14); /* accent-500 */
+  --section-glow-c: rgba(169, 225, 211, 0.45); /* mint */
+  --section-wash-from: var(--brand-25);
+  --section-wash-via: var(--mint-100);
+  --section-wash-to: var(--brand-50);
+  --dot-grid-color: rgba(64, 116, 121, 0.09);
+}
+
+/* --------- DARK MODE --------- */
+[data-theme='dark'] {
+  --bg-app: #08181a;
+  --bg-surface: #0f2325;
+  --bg-raised: #132a2d;
+  --bg-sunken: #061416;
+  --bg-inverse: var(--neutral-25);
+  --bg-overlay: rgba(0, 0, 0, 0.66);
+
+  --text-primary: #e8f1f0;
+  --text-secondary: #a6b4b5;
+  --text-muted: #7b8a8b;
+  --text-disabled: #4f5b5c;
+  --text-inverse: var(--brand-950);
+  --text-link: var(--brand-200);
+  --text-link-hover: var(--mint-300);
+
+  --border-subtle: #1b2e31;
+  --border-default: #26393c;
+  --border-strong: #334a4d;
+  --border-focus: var(--brand-300);
+
+  --action-primary: var(--brand-300);
+  --action-primary-hover: var(--brand-200);
+  --action-primary-active: var(--mint-300);
+  --action-primary-on: #04120e;
+
+  --action-accent: var(--accent-300);
+  --action-accent-hover: var(--accent-500);
+  --action-accent-on: #04120e;
+  --action-accent-glow: rgba(99, 192, 183, 0.38);
+
+  --action-danger: #d46e6e;
+  --action-danger-hover: #e48f8f;
+
+  --field-bg: #0f2325;
+  --field-bg-disabled: #0a1b1d;
+  --field-border: #2a3d40;
+
+  --state-hover-tint: rgba(169, 225, 211, 0.08);
+  --state-selected-tint: rgba(169, 225, 211, 0.16);
+
+  /* A veil over the dark surface rather than a paler block: the
+     chip has to stay quieter than the card it sits on. Foregrounds
+     are the light ends of each family so they clear AA on it. */
+  --tint-brand-bg: rgba(169, 225, 211, 0.12);
+  --tint-brand-fg: var(--brand-200);
+  --tint-brand-ring: rgba(169, 225, 211, 0.2);
+
+  --tint-warning-bg: rgba(184, 122, 46, 0.16);
+  --tint-warning-fg: #e6b878;
+  --tint-warning-border: rgba(184, 122, 46, 0.38);
+
+  --tint-error-bg: rgba(177, 69, 69, 0.18);
+  --tint-error-fg: #e29a9a;
+
+  --tint-success-bg: rgba(59, 143, 106, 0.16);
+  --tint-success-fg: #7fc9a4;
+
+  --glass-bg: rgba(15, 35, 37, 0.66);
+  --glass-border: rgba(255, 255, 255, 0.06);
+
+  --media-wash-a: rgba(169, 225, 211, 0.12);
+  --media-wash-b: rgba(99, 192, 183, 0.1);
+
+  --hero-bg: #020f11;
+  --hero-glow: radial-gradient(
+    ellipse 60% 50% at 50% 0%,
+    rgba(169, 225, 211, 0.22),
+    transparent 60%
+  ); /* @kind other */
+  --hero-highlight: var(--brand-200);
+  --hero-aurora-a: rgba(30, 158, 147, 0.26);
+  --hero-aurora-b: rgba(169, 225, 211, 0.18);
+  --hero-aurora-c: rgba(86, 152, 146, 0.22);
+
+  --section-glow-a: rgba(30, 158, 147, 0.14);
+  --section-glow-b: rgba(169, 225, 211, 0.1);
+  --section-glow-c: rgba(99, 192, 183, 0.14);
+  --section-wash-from: #0b2224;
+  --section-wash-via: #0d2729;
+  --section-wash-to: var(--bg-sunken);
+  --dot-grid-color: rgba(169, 225, 211, 0.05);
+}

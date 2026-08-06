@@ -1,0 +1,181 @@
+/* ================================================================
+   BEDAR × TAILWIND v4 — theme bridge
+   ----------------------------------------------------------------
+   Turns the Bedar design tokens into Tailwind utilities.
+
+   Two blocks, on purpose:
+
+   1) `@theme`        — static values. Used for scales that never
+                        change at runtime (palette, fonts, radii,
+                        shadows, easings). Values here are byte-for-byte
+                        identical to `tokens/*.css`, so it does not
+                        matter which declaration wins the cascade.
+
+   2) `@theme inline` — values that point at runtime custom properties
+                        (`--bg-app`, `--text-primary` …). `inline` makes
+                        Tailwind emit `var(--bg-app)` directly in the
+                        utility, so flipping `data-theme="dark"` on
+                        <html> re-themes every utility instantly.
+
+   Do not edit values here without editing `tokens/*.css` too.
+   ================================================================ */
+
+@theme {
+  /* ── Typeface — Readex Pro only. Latin fallbacks are for
+        missing glyphs, never a secondary brand face. ────────── */
+  --font-sans: 'Readex Pro', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Readex Pro', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Readex Pro', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Readex Pro', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* ── Brand — teal (primary identity) ────────────────────── */
+  --color-brand-25: #f1f8f7;
+  --color-brand-50: #e4f1ee;
+  --color-brand-100: #c8e2dd;
+  --color-brand-200: #a9e1d3; /* mint highlight */
+  --color-brand-300: #7cc0b4;
+  --color-brand-400: #569892;
+  --color-brand-500: #407479; /* primary */
+  --color-brand-600: #325c61;
+  --color-brand-700: #26474c;
+  --color-brand-800: #153337;
+  --color-brand-900: #0a2427;
+  --color-brand-950: #022124; /* deep dark teal */
+
+  /* ── Accent — saturated turquoise. Primary CTAs ONLY.
+        400 is the vivid tint for glows and gradients; it cannot
+        carry white text. 500 is the CTA (5.2:1 on white). ────── */
+  --color-accent-50: #e6f5f3;
+  --color-accent-100: #cfebe7;
+  --color-accent-200: #a5dbd5;
+  --color-accent-300: #63c0b7;
+  --color-accent-400: #1e9e93;
+  --color-accent-500: #0b7a73;
+  --color-accent-600: #08635e;
+  --color-accent-700: #064b47;
+
+  /* ── Mint — pale companion accent ────────────────────────── */
+  --color-mint-100: #eaf7f2;
+  --color-mint-200: #cbede0;
+  --color-mint-300: #a9e1d3;
+  --color-mint-500: #7cc0b4;
+
+  /* ── Neutrals — cool teal-slate, undertone-matched to brand ─ */
+  --color-neutral-0: #ffffff;
+  --color-neutral-25: #f8fafa;
+  --color-neutral-50: #f1f4f4;
+  --color-neutral-100: #e5eaea;
+  --color-neutral-200: #d0d8d8;
+  --color-neutral-300: #aab6b6;
+  --color-neutral-400: #7a8687;
+  --color-neutral-500: #586263;
+  --color-neutral-600: #3d4547;
+  --color-neutral-700: #282f30;
+  --color-neutral-800: #181d1e;
+  --color-neutral-900: #0c1112;
+  --color-neutral-1000: #050809;
+
+  /* ── Semantic base — muted to sit inside the teal palette ── */
+  --color-success-100: #d9ede2;
+  --color-success-500: #3b8f6a;
+  --color-success-700: #1f5a41;
+  --color-warning-100: #f6e4cb;
+  --color-warning-500: #b87a2e;
+  --color-warning-700: #6e4718;
+  --color-error-100: #f1d6d6;
+  --color-error-500: #b14545;
+  --color-error-700: #70262a;
+  --color-info-100: #d6e2ea;
+  --color-info-500: #3c6e86;
+  --color-info-700: #1e3f52;
+
+  /* ── Radii — Bedar rhythm. Deliberately overrides Tailwind's
+        defaults so `rounded-lg` IS the Bedar card radius. ───── */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px; /* buttons + inputs */
+  --radius-lg: 14px; /* cards */
+  --radius-xl: 20px; /* modals */
+  --radius-2xl: 28px;
+
+  /* ── Elevation — teal-tinted, four steps ─────────────────── */
+  --shadow-e1: 0 1px 2px rgb(2 33 36 / 0.06), 0 1px 1px rgb(2 33 36 / 0.04);
+  --shadow-e2: 0 2px 4px rgb(2 33 36 / 0.06), 0 4px 8px rgb(2 33 36 / 0.06);
+  --shadow-e3: 0 6px 12px rgb(2 33 36 / 0.08), 0 12px 24px rgb(2 33 36 / 0.06);
+  --shadow-e4: 0 16px 32px rgb(2 33 36 / 0.1), 0 32px 64px rgb(2 33 36 / 0.1);
+  --shadow-focus: 0 0 0 4px rgb(64 116 121 / 0.24);
+  --shadow-hero-glow: 0 0 120px rgb(169 225 211 / 0.35);
+
+  /* ── Motion — 140–560ms, single standard curve ───────────── */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.3, 0, 0, 1.2);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+
+  /* ── Page container — 1280px max ─────────────────────────── */
+  --container-page: 1280px;
+
+  /* ── Named animations (keyframes live in animations.css) ─── */
+  --animate-spiral-spin: spiral-spin 24s linear infinite;
+  --animate-float-soft: float-soft 6s ease-in-out infinite;
+}
+
+/* ================================================================
+   Semantic colour aliases → Tailwind utilities.
+   `inline` keeps the var() reference live, so these follow
+   `data-theme` without regenerating any CSS.
+   e.g. bg-surface, text-ink, border-subtle, bg-action-primary
+   ================================================================ */
+@theme inline {
+  /* Surfaces */
+  --color-app: var(--bg-app);
+  --color-surface: var(--bg-surface);
+  --color-raised: var(--bg-raised);
+  --color-sunken: var(--bg-sunken);
+  --color-inverse: var(--bg-inverse);
+  --color-overlay: var(--bg-overlay);
+
+  /* Text */
+  --color-ink: var(--text-primary);
+  --color-ink-secondary: var(--text-secondary);
+  --color-ink-muted: var(--text-muted);
+  --color-ink-disabled: var(--text-disabled);
+  --color-ink-inverse: var(--text-inverse);
+  --color-ink-link: var(--text-link);
+
+  /* Borders */
+  --color-subtle: var(--border-subtle);
+  --color-default: var(--border-default);
+  --color-strong: var(--border-strong);
+  --color-focus: var(--border-focus);
+
+  /* Actions */
+  --color-action-primary: var(--action-primary);
+  --color-action-primary-hover: var(--action-primary-hover);
+  --color-action-primary-on: var(--action-primary-on);
+  --color-action-accent: var(--action-accent);
+  --color-action-accent-hover: var(--action-accent-hover);
+  --color-action-accent-on: var(--action-accent-on);
+  --color-action-danger: var(--action-danger);
+
+  /* Fields */
+  --color-field: var(--field-bg);
+  --color-field-border: var(--field-border);
+
+  /* Tint chips — theme-aware fills for icon discs and callouts.
+     e.g. bg-tint-brand text-tint-brand-fg ring-tint-brand-ring */
+  --color-tint-brand: var(--tint-brand-bg);
+  --color-tint-brand-fg: var(--tint-brand-fg);
+  --color-tint-brand-ring: var(--tint-brand-ring);
+  --color-tint-warning: var(--tint-warning-bg);
+  --color-tint-warning-fg: var(--tint-warning-fg);
+  --color-tint-warning-border: var(--tint-warning-border);
+  --color-tint-error: var(--tint-error-bg);
+  --color-tint-error-fg: var(--tint-error-fg);
+  --color-tint-success: var(--tint-success-bg);
+  --color-tint-success-fg: var(--tint-success-fg);
+
+  /* Hero / dark-section treatment */
+  --color-hero: var(--hero-bg);
+  --color-hero-highlight: var(--hero-highlight);
+}

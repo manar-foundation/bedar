@@ -1,0 +1,367 @@
+<!-- @dsCard group="Marketing Site" viewport="1280x900" name="Home (Arabic RTL)" subtitle="Bedar public marketing home — dark glow hero, impact stats, services, programs, testimonials" -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head>
+<meta charset="utf-8"><title>Bedar · منصة بدار للريادة المجتمعية</title>
+<link rel="icon" href="../../assets/bedar-favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+:root{--dark-bg:var(--brand-950);--dark-fg:#EEF6F3;--dark-fg-mute:rgba(238,246,243,0.62);--dark-border:rgba(169,225,211,0.14)}
+.hero-shell{position:relative;background:var(--dark-bg);color:var(--dark-fg);overflow:hidden}
+.hero-shell::before{content:"";position:absolute;inset:-20% -10% 30%;background:radial-gradient(ellipse 55% 55% at 50% 0%,rgba(169,225,211,0.28),transparent 60%),radial-gradient(ellipse 30% 40% at 20% 80%,rgba(64,116,121,0.28),transparent 70%);pointer-events:none}
+.hero-shell::after{content:"";position:absolute;inset:0;background:radial-gradient(1px 1px at 20% 30%,rgba(169,225,211,.35),transparent 60%),radial-gradient(1px 1px at 60% 20%,rgba(255,255,255,.2),transparent 60%),radial-gradient(1px 1px at 80% 60%,rgba(169,225,211,.18),transparent 60%),radial-gradient(1px 1px at 40% 80%,rgba(255,255,255,.15),transparent 60%);pointer-events:none}
+.hero-shell>*{position:relative;z-index:1}
+.nav-dark{background:transparent;border-bottom:1px solid var(--dark-border)}
+.nav-dark a{color:var(--dark-fg-mute)}
+.nav-dark a.active,.nav-dark a:hover{color:var(--dark-fg);text-decoration:none}
+.btn-dark-ghost{background:transparent;border:1px solid var(--dark-border);color:var(--dark-fg);padding:10px 18px;border-radius:var(--radius-full);font:var(--type-button);cursor:pointer;transition:background var(--dur-fast) var(--ease-standard)}
+.btn-dark-ghost:hover{background:rgba(169,225,211,0.06)}
+.btn-dark-primary{background:var(--brand-200);color:var(--brand-950);border:0;padding:12px 22px;border-radius:var(--radius-full);font:var(--type-button);cursor:pointer;transition:background var(--dur-fast) var(--ease-standard);display:inline-flex;align-items:center;gap:10px}
+.btn-dark-primary:hover{background:#BDEBDF}
+.tab-headline{color:var(--dark-fg);letter-spacing:-.03em}
+.tab-headline .hl{color:var(--brand-200)}
+.stat-card{background:#0F2A2D;border:1px solid var(--dark-border);border-radius:var(--radius-lg);padding:24px;display:flex;flex-direction:column;gap:6px;transition:transform var(--dur-fast) var(--ease-standard),border-color var(--dur-fast) var(--ease-standard)}
+.stat-card:hover{transform:translateY(-2px);border-color:rgba(169,225,211,0.32)}
+.stat-card.mint{background:var(--brand-200);color:var(--brand-950);border-color:transparent}
+.stat-card.mint .stat-label{color:var(--brand-800)}
+.stat-num{font:var(--type-stat);letter-spacing:-.03em;color:var(--dark-fg);font-feature-settings:"lnum" 1,"tnum" 1}
+.stat-card.mint .stat-num{color:var(--brand-950)}
+.stat-label{font:var(--type-body-sm);color:var(--dark-fg-mute)}
+.spiral-divider{display:flex;align-items:center;gap:16px;color:var(--brand-500);opacity:.6}
+.spiral-divider .line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--brand-300),transparent)}
+.svc-card{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-card);padding:28px;transition:transform var(--dur-fast) var(--ease-standard),box-shadow var(--dur-fast) var(--ease-standard);display:flex;flex-direction:column;gap:14px}
+.svc-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-e2)}
+.svc-icon{width:52px;height:52px;border-radius:var(--radius-md);background:var(--brand-50);color:var(--brand-600);display:inline-flex;align-items:center;justify-content:center}
+.audience-card{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-card);padding:28px;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden}
+.audience-card .idx{font:var(--type-overline);color:var(--brand-500);letter-spacing:.08em}
+.faq details{border-bottom:1px solid var(--border-subtle);padding:20px 0}
+.faq summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font:var(--type-h4);color:var(--text-primary)}
+.faq summary::-webkit-details-marker{display:none}
+.faq details[open] summary{color:var(--brand-600)}
+.faq summary .plus{width:32px;height:32px;border-radius:50%;background:var(--brand-50);color:var(--brand-600);display:inline-flex;align-items:center;justify-content:center;font-size:20px;font-weight:400;transition:transform var(--dur-fast) var(--ease-standard)}
+.faq details[open] summary .plus{transform:rotate(45deg);background:var(--brand-500);color:#fff}
+.faq p{font:var(--type-body);color:var(--text-secondary);margin:14px 0 0;line-height:1.75}
+.testimonial-card{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:32px;display:flex;flex-direction:column;gap:20px;height:100%}
+.testimonial-card .q{font:var(--type-body-lg);color:var(--text-primary);line-height:1.7;margin:0;flex:1}
+.testimonial-card .who{display:flex;gap:14px;align-items:center;border-top:1px solid var(--border-subtle);padding-top:20px}
+.testimonial-card .avatar{width:56px;height:56px;border-radius:50%;background:var(--brand-100);color:var(--brand-700);display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:20px;flex-shrink:0}
+.section-eyebrow{font:var(--type-overline);color:var(--brand-500);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;display:inline-block}
+.hero-shell .section-eyebrow{color:var(--brand-200)}
+.section-title{font:var(--type-h1);margin:0;letter-spacing:-.02em;text-wrap:balance}
+.container{max-width:1280px;margin:0 auto;padding:0 32px}
+[data-reveal]{opacity:0;transform:translateY(16px);transition:opacity 620ms var(--ease-standard),transform 620ms var(--ease-standard)}
+[data-reveal].in{opacity:1;transform:none}
+@media (prefers-reduced-motion: reduce){[data-reveal]{opacity:1;transform:none;transition:none}}
+</style>
+</head><body style="margin:0"><div id="root"></div>
+<script type="text/babel">
+const NS = window.BaydarDesignSystem_b7d248 || window.BedarDesignSystem_b7d248 || {};
+
+const Spiral = ({size=20,color="currentColor",style})=>(
+  <svg width={size} height={size*1.03} viewBox="0 0 66 104" fill="none" style={style}>
+    <path d="M38.85 103.92H26.81c-2.25 0-4.07-1.83-4.07-4.08 0-2.25 1.82-4.07 4.07-4.07h12.04c2.25 0 4.08 1.82 4.08 4.07 0 2.25-1.83 4.08-4.08 4.08z" fill={color}/>
+    <path d="M46.55 29.1C41.89 26.99 36.96 26.07 32.12 26.22c-6.46 2.93-11.3 13.06-11.3 13.06 12.03-6.93 21.78-1.47 21.78-1.47 11.57 5.26 16.71 18.96 11.45 30.53-1.27 2.79-3.09 5.32-5.35 7.4-2.19 2.01-4.77 3.6-7.56 4.64-1.76.66-3.6 1.14-5.48 1.33-1.76.17-3.53-.01-5.27-.32-2.72-.48-5.37-1.39-7.79-2.74-2.31-1.28-4.4-2.94-6.16-4.92-1.76-1.97-3.17-4.23-4.19-6.67-1.06-2.54-1.69-5.25-1.9-7.99a29 29 0 0 1-.02-4.13c1.24-19.81 18.99-35.6 36.03-42.47.35-.14.66-.32.96-.52 1.9-.79 3.81-1.49 5.7-2.08 2.73-.85 4.25-3.76 3.4-6.5C55.55.9 52.65-.62 49.92.24 43.63 2.2 37.53 5.02 31.95 8.46 25.24 12.42 19.14 17.32 14.21 22.81 5.67 32.34.78 43.32.08 54.56c-.97 15.45 6.73 28.18 19.56 33.76.08.04.17.07.25.11.03.01.06.02.09.03 3.52 1.56 7.31 2.49 11.15 2.75 3.51.23 7.05-.14 10.45-1.04 2.85-.76 5.6-1.9 8.14-3.4 2.57-1.5 4.92-3.36 6.98-5.52 2.12-2.22 3.92-4.74 5.33-7.47.25-.49.49-.99.72-1.5 7.44-16.37.18-35.74-16.2-43.18z" fill={color}/>
+  </svg>
+);
+
+function useReveal(){
+  React.useEffect(()=>{
+    const io = new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:0.12});
+    document.querySelectorAll('[data-reveal]').forEach(el=>io.observe(el));
+    return ()=>io.disconnect();
+  },[]);
+}
+
+function CountUp({to,duration=1400,suffix=''}){
+  const [n,setN] = React.useState(0);
+  const ref = React.useRef(null);
+  React.useEffect(()=>{
+    let raf, start=null;
+    const io = new IntersectionObserver(es=>es.forEach(e=>{
+      if(e.isIntersecting){
+        const step = t=>{ if(!start) start=t; const p=Math.min((t-start)/duration,1); const eased=1-Math.pow(1-p,3); setN(Math.round(eased*to)); if(p<1) raf=requestAnimationFrame(step); };
+        raf = requestAnimationFrame(step);
+        io.unobserve(e.target);
+      }
+    }),{threshold:0.4});
+    if(ref.current) io.observe(ref.current);
+    return ()=>{ io.disconnect(); if(raf) cancelAnimationFrame(raf); };
+  },[to,duration]);
+  return <span ref={ref}>{n.toLocaleString('en-US')}{suffix}</span>;
+}
+
+function App(){
+  useReveal();
+  const services = [
+    ['تطوير وإنضاج الأفكار والمشاريع','تحويل الأفكار الأولية إلى مشاريع قائمة عبر محتوى تدريبي مكثف ودعم فني ومشورة استراتيجية.','M12 3v3M12 18v3M5.64 5.64l2.12 2.12M16.24 16.24l2.12 2.12M3 12h3M18 12h3M5.64 18.36l2.12-2.12M16.24 7.76l2.12-2.12'],
+    ['تقييم خطط عمل ودراسات جدوى','مراجعة شاملة لخطط الأعمال ودراسات الجدوى، مع توصيات لتحسين فرص النجاح واستدامة المشاريع.','M4 20V8m5 12v-8m5 8V4m5 16v-6'],
+    ['تقديم التوجيه الإداري والتخطيط','إرشاد ريادي ونصائح في الإدارة والتخطيط الاستراتيجي لأصحاب المبادرات المجتمعية.','M12 3l9 4v6c0 5-4 9-9 10-5-1-9-5-9-10V7l9-4z'],
+    ['الحلول والاستشارات التخصصية','حلول مخصصة في التقنية والتسويق والمالية والإدارة، بتشبيك مع خبراء متخصصين لكل قطاع.','M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z'],
+    ['التدريب والتأهيل','برامج تتجاوز 40 ساعة تدريبية لتنمية الكفاءات في الأثر المجتمعي والإدارة والتخطيط المالي.','M22 10L12 5 2 10l10 5 10-5zM6 12v5c0 2 3 3 6 3s6-1 6-3v-5'],
+    ['التشبيك مع الخبراء والمؤسسات','بناء شبكات تواصل مع خبراء ومؤسسات وهيئات لتوسيع نطاق المشاريع الريادية.','M17 20h5v-2c0-2-2-4-4-4-1 0-2 .3-2.7.8M7 20H2v-2c0-2 2-4 4-4 1 0 2 .3 2.7.8M12 12a4 4 0 100-8 4 4 0 000 8zM6 10a3 3 0 100-6 3 3 0 000 6zM18 10a3 3 0 100-6 3 3 0 000 6z'],
+    ['التشبيك مع المستثمرين والمانحين','تسهيل الوصول إلى مستثمرين ومانحين مهتمين بدعم المشاريع الريادية المجتمعية.','M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6'],
+  ];
+
+  const stats = [
+    {n:40,suf:'+',lab:'ساعة تدريب متخصصة'},
+    {n:12,suf:'',lab:'برنامج ريادي نُفّذ'},
+    {n:500,suf:'+',lab:'ريادي مجتمعي'},
+    {n:7,suf:'',lab:'خدمات تخصصية',mint:true},
+  ];
+
+  const audiences = [
+    ['01','أصحاب الأفكار والمشاريع','الراغبون بالحصول على دعم لتطوير أفكارهم وتنفيذها كمشاريع ريادة أعمال اجتماعية.'],
+    ['02','المؤسسات والخبراء','المهتمون بتقديم إضافة نوعية تساهم في تطوير أفكار مبادرات مجتمعية وتمكين المشاريع الريادية.'],
+    ['03','رجال الأعمال والمستثمرون','الباحثون عن مشاريع ريادية قابلة للتطبيق ذات أثر مجتمعي وتصبّ في أهداف الريادة الاجتماعية.'],
+  ];
+
+  const programs = [
+    {tag:'البرامج السابقة',title:'هاكاثون أدوات الإعمار في غزة',desc:'مبادرة مجتمعية لتطوير حلول وأدوات مبتكرة للإسهام في إعادة بناء البنية التحتية وتحسين الحياة الاجتماعية والاقتصادية لسكان غزة.'},
+    {tag:'البرامج السابقة',title:'تحدي الحلول المجتمعية 2023',desc:'أُطلق استجابةً للزلزال المدمر الذي ضرب تركيا وسوريا، لتفعيل دور المجتمع في تقديم أفكار مبادرات قابلة للتطبيق.'},
+    {tag:'البرامج المكتملة',title:'برنامج بدار الريادي الثاني',desc:'انطلق في ديسمبر 2021 لاستقطاب أفكار مبادرات اجتماعية ومشاريع ريادية مستدامة تخدم المجتمعات الفلسطينية.'},
+  ];
+
+  const faqs = [
+    {q:'ما الفرق بين ريادة الأعمال والريادة المجتمعية؟',a:'الريادة المجتمعية تعتمد على تفكير غير تقليدي لخلق تحولات نوعية لمواجهة التحديات الاجتماعية من خلال مشاريع تقدم حلولاً مستدامة. تركّز على تحقيق قيمة اجتماعية ومنفعة تحويلية واسعة، بينما تتركز ريادة الأعمال التقليدية بشكل أكبر على الجوانب الاقتصادية وجني الأرباح.'},
+    {q:'هل منصة بدار حاضنة أعمال افتراضية أم واقعية؟',a:'منصة بدار تقدم خدماتها بشكل افتراضي (أونلاين) بما يتضمن تقديم الاستشارات والدعم للشركات الناشئة ومشاريع ريادة الأعمال الاجتماعية. في بعض البرامج قد يتم تقديم أحد هذه الخدمات بشكل وجاهي بحسب محددات البرنامج والشراكات المعنية.'},
+    {q:'لدي فكرة مشروع ريادي، كيف يمكنني المشاركة معكم؟',a:'عن طريق التقديم لبرامج منصة بدار التي يتم إطلاقها دورياً. يمكنكم دائماً التواصل معنا لأي استفسارات عبر البريد: info@bedar.org'},
+    {q:'ما هي معايير قبول أفكار المبادرات أو المشاريع في برامجكم؟',a:'الابتكارية، الأثر المجتمعي، كفاءة فريق العمل، وجدوى الفكرة أو المشروع.'},
+    {q:'هل تستثمرون في الأفكار والمشاريع وتقدمون دعماً مالياً لها؟',a:'نقوم عادةً بدعم المشاريع للحصول على تمويل، وتقديم مكافأة مالية من المنصة للفرق المتأهلة للمراحل النهائية. إمكانية الاستثمار مطروحة في بعض البرامج التي تستهدف مشاريع ريادة الأعمال الاجتماعية المتقدمة.'},
+  ];
+
+  const testimonials = [
+    {q:'من أفضل المنصات التي تعاملت معها، رقي التعامل مع المدربين والدقة في اختيار المشاركين ودرجة التميز في تقديم شيء متخصص لكل برنامج ولكل مشارك.',name:'نوال فايز حسن',role:'خبيرة ريادة الأعمال والمستشارة المالية',i:'ن'},
+    {q:'لا أتردد في القبول كلما أتيح لي العمل مع "بدار" لسببين: مستوى التنظيم الذي يريح الريادي والمرشد، ونوعية المشاريع التي يرشحونها وتركيزها على حاجات المجتمعات.',name:'طارق حسان',role:'صانع محتوى ومرشد مهني',i:'ط'},
+    {q:'منصة مثالية لأصحاب أفكار المشاريع الصغيرة، فيها معلومات علمية ثرية وفرصة لتعزيز التواصل مع الخبراء والمتخصصين في مجال ريادة الأعمال.',name:'الحارث بن سفر العمري',role:'الرئيس التنفيذي لشركة وادي المبدعون',i:'ح'},
+    {q:'يسعدني دائماً التعاون مع منصة بدار — فهي تسمح لي بمساندة رياديي الأعمال المجتمعيين في مناطق يصعب علي الوصول إليها.',name:'د. منى عيتاني',role:'أستاذة جامعية، الجامعة الأمريكية في بيروت',i:'م'},
+  ];
+
+  return <div dir="rtl" style={{background:'var(--bg-app)',color:'var(--text-primary)',minHeight:'100vh',fontFamily:'var(--font-body)'}}>
+    {/* HERO — dark glow */}
+    <div className="hero-shell">
+      <nav className="nav-dark" style={{padding:'22px 32px'}}>
+        <div className="container" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:24,padding:0}}>
+          <img src="../../assets/bedar-logo.svg" alt="Bedar" style={{height:32,filter:'brightness(0) invert(1)'}}/>
+          <div style={{display:'flex',gap:28,font:'var(--type-body-sm)'}}>
+            <a href="#" className="active">الرئيسية</a>
+            <a href="#">من نحن</a>
+            <a href="#">البرامج</a>
+            <a href="#">الخدمات</a>
+            <a href="#">المدونة</a>
+            <a href="#">تواصل معنا</a>
+          </div>
+          <div style={{display:'flex',gap:10}}>
+            <button className="btn-dark-ghost">EN</button>
+            <button className="btn-dark-primary">قدّم فكرتك<span style={{fontSize:16,display:'inline-block',transform:'scaleX(-1)'}}>→</span></button>
+          </div>
+        </div>
+      </nav>
+
+      <section style={{padding:'80px 32px 96px',textAlign:'center'}}>
+        <div className="container" data-reveal>
+          <span className="section-eyebrow">منصة بدار للريادة المجتمعية</span>
+          <h1 className="tab-headline" style={{font:'var(--type-display-1)',fontWeight:700,margin:'18px auto 24px',maxWidth:1000,lineHeight:1.15}}>
+            اجعل من فكرتك <span className="hl">مبادرة مجتمعية</span><br/>ذات أثر وقيمة اجتماعية واسعة
+          </h1>
+          <p style={{font:'var(--type-body-lg)',color:'var(--dark-fg-mute)',margin:'0 auto 40px',maxWidth:720,lineHeight:1.75}}>
+            المنصة الأبرز لإطلاق وتطوير مشاريع ريادة الأعمال الاجتماعية، وابتكار أفكار مبادرات مجتمعية ناجحة تُمكّن المجتمعات المحلية وتصنع التغيير المستدام.
+          </p>
+          <div style={{display:'inline-flex',gap:14,flexWrap:'wrap',justifyContent:'center'}}>
+            <button className="btn-dark-primary">تعرّف على خدماتنا<span style={{transform:'scaleX(-1)'}}>→</span></button>
+            <button className="btn-dark-ghost">شاهد أحدث البرامج</button>
+          </div>
+        </div>
+
+        {/* Impact stats grid — ref-02 style */}
+        <div className="container" style={{marginTop:80}} data-reveal>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:16,textAlign:'right'}}>
+            {stats.map((s,i)=>
+              <div key={i} className={'stat-card '+(s.mint?'mint':'')}>
+                <div className="stat-num"><CountUp to={s.n} suffix={s.suf}/></div>
+                <div className="stat-label">{s.lab}</div>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+    </div>
+
+    {/* Services — light */}
+    <section style={{padding:'96px 32px',background:'var(--bg-app)'}}>
+      <div className="container">
+        <div className="spiral-divider" data-reveal><div className="line"/><Spiral size={22} color="var(--brand-500)"/><div className="line"/></div>
+        <div style={{textAlign:'center',margin:'32px auto 56px',maxWidth:820}} data-reveal>
+          <span className="section-eyebrow">الخدمات</span>
+          <h2 className="section-title">تعرّف على خدمات الريادة الاجتماعية</h2>
+          <p style={{font:'var(--type-body-lg)',color:'var(--text-secondary)',margin:'16px auto 0',maxWidth:640,lineHeight:1.75}}>تنتهج منصة بدار استراتيجية عمليّة في تطوير حلول مجتمعية مدروسة من خلال خدمات تخصصية متكاملة.</p>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:20}}>
+          {services.map(([t,d,path])=>
+            <div key={t} className="svc-card" data-reveal>
+              <div className="svc-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d={path} stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
+              <h3 style={{font:'var(--type-h4)',margin:0}}>{t}</h3>
+              <p style={{font:'var(--type-body-sm)',color:'var(--text-secondary)',margin:0,lineHeight:1.75}}>{d}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+
+    {/* Programs — dark section */}
+    <section className="hero-shell" style={{padding:'96px 32px'}}>
+      <div className="container">
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-end',marginBottom:48,gap:24,flexWrap:'wrap'}} data-reveal>
+          <div>
+            <span className="section-eyebrow">أحدث البرامج</span>
+            <h2 className="tab-headline" style={{font:'var(--type-h1)',margin:'8px 0 0',color:'var(--dark-fg)',maxWidth:640}}>نُحدث التغيير ببرامج <span className="hl">مجتمعية مبتكرة</span></h2>
+          </div>
+          <button className="btn-dark-ghost">عرض كل البرامج</button>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:20}}>
+          {programs.map(p=>
+            <a key={p.title} href="#" data-reveal style={{background:'#0F2A2D',border:'1px solid var(--dark-border)',borderRadius:'var(--radius-lg)',padding:28,color:'inherit',textDecoration:'none',display:'flex',flexDirection:'column',gap:14,transition:'border-color var(--dur-fast) var(--ease-standard),transform var(--dur-fast) var(--ease-standard)'}} onMouseEnter={e=>{e.currentTarget.style.borderColor='rgba(169,225,211,0.32)';e.currentTarget.style.transform='translateY(-2px)'}} onMouseLeave={e=>{e.currentTarget.style.borderColor='var(--dark-border)';e.currentTarget.style.transform='none'}}>
+              <div style={{display:'flex',alignItems:'center',gap:12,color:'var(--brand-200)'}}><Spiral size={18} color="var(--brand-200)"/><span style={{font:'var(--type-overline)',letterSpacing:'.08em'}}>{p.tag}</span></div>
+              <h3 style={{font:'var(--type-h4)',color:'var(--dark-fg)',margin:0}}>{p.title}</h3>
+              <p style={{font:'var(--type-body-sm)',color:'var(--dark-fg-mute)',margin:0,lineHeight:1.75,flex:1}}>{p.desc}</p>
+              <div style={{color:'var(--brand-200)',font:'var(--type-body-sm)',fontWeight:600,display:'flex',alignItems:'center',gap:8}}>اقرأ المزيد <span style={{display:'inline-block',transform:'scaleX(-1)'}}>→</span></div>
+            </a>
+          )}
+        </div>
+      </div>
+    </section>
+
+    {/* About */}
+    <section style={{padding:'96px 32px'}}>
+      <div className="container" style={{display:'grid',gridTemplateColumns:'1fr 1.2fr',gap:64,alignItems:'center'}}>
+        <div data-reveal>
+          <span className="section-eyebrow">من نحن</span>
+          <h2 className="section-title" style={{marginTop:8}}>المنصة الأبرز لاستقطاب أفكار المبادرات المجتمعية ومشاريع ريادة الأعمال الاجتماعية</h2>
+        </div>
+        <div data-reveal>
+          <p style={{font:'var(--type-body-lg)',color:'var(--text-secondary)',margin:0,lineHeight:1.85}}>
+            بدار، إحدى المنصات التابعة لمؤسسة منار للمشاركة المجتمعية، متخصصة في استقطاب أصحاب الأفكار والمشاريع التي تقدّم حلولًا مجتمعية ومبادرات ناجحة تخدم شرائح محلية في مجتمعاتنا.
+          </p>
+          <p style={{font:'var(--type-body-lg)',color:'var(--text-secondary)',margin:'16px 0 32px',lineHeight:1.85}}>
+            تعمل بدار معهم لتطوير أفكارهم وتعزيز قدراتهم في ابتكار نماذج مبادرات مجتمعية ومشاريع ريادة الأعمال الاجتماعية، عبر شبكة واسعة من الخبراء والمؤسسات، وربطهم بمصادر تمويل لدعم المبادرات وتحويلها إلى مشاريع قابلة للتطبيق.
+          </p>
+          <a href="#" style={{color:'var(--brand-600)',fontWeight:600,display:'inline-flex',alignItems:'center',gap:8,textDecoration:'none'}}>عن منصة بدار <span style={{display:'inline-block',transform:'scaleX(-1)'}}>→</span></a>
+        </div>
+      </div>
+    </section>
+
+    {/* Audiences */}
+    <section style={{padding:'0 32px 96px'}}>
+      <div className="container">
+        <div style={{textAlign:'center',marginBottom:48,maxWidth:820,margin:'0 auto 48px'}} data-reveal>
+          <span className="section-eyebrow">الشرائح المستهدفة</span>
+          <h2 className="section-title" style={{marginTop:8}}>رؤية متكاملة مع جمهورنا: كفاءات، خبرات، وإمكانات</h2>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:20}}>
+          {audiences.map(([i,t,d])=>
+            <div key={i} className="audience-card" data-reveal>
+              <div className="idx">{i} / 03</div>
+              <h3 style={{font:'var(--type-h4)',margin:0,lineHeight:1.4}}>{t}</h3>
+              <p style={{font:'var(--type-body),color:var(--text-secondary)',margin:0,color:'var(--text-secondary)',lineHeight:1.75}}>{d}</p>
+              <div style={{position:'absolute',left:-30,bottom:-30,opacity:.06,color:'var(--brand-500)'}}><Spiral size={140} color="var(--brand-500)"/></div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+
+    {/* Testimonials */}
+    <section style={{padding:'96px 32px',background:'var(--brand-25)'}}>
+      <div className="container">
+        <div className="spiral-divider" data-reveal><div className="line"/><Spiral size={22} color="var(--brand-500)"/><div className="line"/></div>
+        <div style={{textAlign:'center',margin:'32px auto 56px',maxWidth:720}} data-reveal>
+          <span className="section-eyebrow">آراء الخبراء</span>
+          <h2 className="section-title">ماذا قالوا عن منصة بدار؟</h2>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:20}}>
+          {testimonials.map(t=>
+            <div key={t.name} className="testimonial-card" data-reveal>
+              <Spiral size={26} color="var(--brand-300)"/>
+              <p className="q">"{t.q}"</p>
+              <div className="who">
+                <div className="avatar">{t.i}</div>
+                <div>
+                  <div style={{font:'var(--type-h6)',color:'var(--text-primary)'}}>{t.name}</div>
+                  <div style={{font:'var(--type-caption)',color:'var(--text-muted)',marginTop:2}}>{t.role}</div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+
+    {/* FAQ */}
+    <section style={{padding:'96px 32px'}}>
+      <div className="container" style={{maxWidth:920}}>
+        <div style={{textAlign:'center',marginBottom:48}} data-reveal>
+          <span className="section-eyebrow">أهم الأسئلة</span>
+          <h2 className="section-title">الأسئلة المكررة</h2>
+        </div>
+        <div className="faq" data-reveal>
+          {faqs.map((f,i)=>
+            <details key={i} open={i===0}>
+              <summary><span>{f.q}</span><span className="plus">+</span></summary>
+              <p>{f.a}</p>
+            </details>
+          )}
+        </div>
+      </div>
+    </section>
+
+    {/* CTA banner */}
+    <section style={{padding:'0 32px 96px'}}>
+      <div className="container">
+        <div className="hero-shell" style={{borderRadius:'var(--radius-2xl)',padding:'64px 48px',textAlign:'center'}}>
+          <span className="section-eyebrow">قدّم فكرتك اليوم</span>
+          <h2 className="tab-headline" style={{font:'var(--type-h1)',color:'var(--dark-fg)',margin:'12px auto 20px',maxWidth:800}}>
+            حوّل فكرتك إلى <span className="hl">مبادرة مجتمعية</span> تصنع الفارق
+          </h2>
+          <p style={{color:'var(--dark-fg-mute)',font:'var(--type-body-lg)',margin:'0 auto 32px',maxWidth:640,lineHeight:1.75}}>انضم إلى مئات الرياديين الذين يبنون مستقبلاً أفضل لمجتمعاتنا.</p>
+          <div style={{display:'inline-flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
+            <button className="btn-dark-primary">قدّم فكرتك<span style={{transform:'scaleX(-1)'}}>→</span></button>
+            <button className="btn-dark-ghost">تواصل معنا</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* Footer */}
+    <footer style={{background:'var(--brand-950)',color:'rgba(238,246,243,0.7)',padding:'64px 32px 32px'}}>
+      <div className="container" style={{display:'grid',gridTemplateColumns:'1.6fr 1fr 1fr 1fr',gap:48}}>
+        <div>
+          <img src="../../assets/bedar-logo.svg" style={{height:28,filter:'brightness(0) invert(1)'}} alt="Bedar"/>
+          <p style={{margin:'20px 0 0',lineHeight:1.8,font:'var(--type-body-sm)',maxWidth:340}}>بدار، إحدى منصات مؤسسة منار للمشاركة المجتمعية.</p>
+          <div style={{display:'flex',gap:12,marginTop:24}}>
+            {['facebook','instagram','linkedin','x'].map(s=>
+              <a key={s} href="#" style={{width:36,height:36,borderRadius:'50%',border:'1px solid rgba(169,225,211,0.2)',color:'var(--brand-200)',display:'inline-flex',alignItems:'center',justifyContent:'center',textDecoration:'none',font:'var(--type-caption)',textTransform:'uppercase'}}>{s[0]}</a>
+            )}
+          </div>
+        </div>
+        {[
+          ['القائمة الرئيسية',['من نحن','بدار والريادة المجتمعية','البرامج','الخدمات','الأخبار','تواصل معنا']],
+          ['أحدث المقالات',['مراحل توليد الفكرة','الفكرة تساوي الأرباح','تنقية الأفكار']],
+          ['تواصل',['info@bedar.org','www.bedar.org']],
+        ].map(([h,items])=>
+          <div key={h}>
+            <div style={{font:'var(--type-label)',color:'var(--dark-fg)',marginBottom:16}}>{h}</div>
+            <ul style={{listStyle:'none',padding:0,margin:0,display:'flex',flexDirection:'column',gap:12}}>{items.map(i=><li key={i}><a href="#" style={{color:'inherit',font:'var(--type-body-sm)',textDecoration:'none'}}>{i}</a></li>)}</ul>
+          </div>
+        )}
+      </div>
+      <div className="container" style={{marginTop:48,paddingTop:24,borderTop:'1px solid rgba(169,225,211,0.14)',display:'flex',justifyContent:'space-between',flexWrap:'wrap',gap:12,font:'var(--type-caption)',color:'rgba(238,246,243,0.5)'}}>
+        <div>كافة الحقوق محفوظة © منصة بدار للريادة المجتمعية 2026</div>
+        <div>بدار إحدى منصات مؤسسة منار للمشاركة المجتمعية</div>
+      </div>
+    </footer>
+  </div>;
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script></body></html>

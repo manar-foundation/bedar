@@ -1,0 +1,42 @@
+/* ================================================================
+   BAYDAR SPACING — strict 8px grid.
+   Baseline unit = 4px for hair-line inner spacing only; every
+   layout spacing token is a multiple of 8.
+   ================================================================ */
+:root{
+  --space-0:   0;
+  --space-1:   4px;   /* hairline / icon-to-text */
+  --space-2:   8px;   /* base unit */
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-7:  32px;
+  --space-8:  40px;
+  --space-9:  48px;
+  --space-10: 64px;
+  --space-11: 80px;
+  --space-12: 96px;
+  --space-13:120px;
+  --space-14:160px;
+
+  /* Layout maxima */
+  --container-sm:  640px;
+  --container-md:  768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl:1440px;
+
+  /* Breakpoints (for JS/reference; usage via @media) */
+  --bp-xs: 360px; /* @kind other */
+  --bp-sm: 640px; /* @kind other */
+  --bp-md: 768px; /* @kind other */
+  --bp-lg: 1024px; /* @kind other */
+  --bp-xl: 1280px; /* @kind other */
+  --bp-2xl:1440px; /* @kind other */
+
+  /* Grid */
+  --grid-cols: 12; /* @kind other */
+  --grid-gutter: 24px; /* @kind spacing */
+  --grid-gutter-md: 16px; /* @kind spacing */
+}

@@ -1,0 +1,235 @@
+/* ================================================================
+   BEDAR ADMIN — surface treatments for the dashboard shell.
+
+   WHY A STYLESHEET AND NOT UTILITIES
+   ----------------------------------------------------------------
+   Every rule here is a layered gradient, a pseudo-element glow, or a
+   state that Tailwind would only express as a wall of arbitrary
+   values repeated across three files. The tokens are the same ones
+   the marketing site uses, so the dashboard reads as the same
+   product rather than as a tool bolted onto it.
+
+   THE DARK RAIL
+   ----------------------------------------------------------------
+   The navigation rail reuses the hero / footer treatment
+   (`--hero-bg` plus a mint glow). CLAUDE.md reserves `.surface-dark`
+   for the marketing bands, and the rule that reservation protects is
+   that long-form Arabic body copy never sits on a dark or glowing
+   surface. A rail of nav labels is chrome, not body copy — and the
+   deep teal is the single strongest thing carrying the brand into
+   the dashboard. `--hero-bg` also flips under `data-theme="dark"`,
+   so the rail follows the theme instead of pinning one hex.
+
+   DIRECTION
+   ----------------------------------------------------------------
+   Everything positional here is logical (`inset-inline-*`,
+   `padding-inline-*`, `border-inline-*`), so the whole shell mirrors
+   with the document and needs no `rtl:` variant.
+   ================================================================ */
+
+@layer components {
+  /* ── Canvas ──────────────────────────────────────────────────
+        The dashboard's own ambient wash. Same idea as the public
+        layout's fixed glow layer, dialled well down: this surface
+        is read for hours at a time, not scrolled past once. */
+  .admin-canvas {
+    position: relative;
+    isolation: isolate;
+  }
+  .admin-canvas::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(46rem 32rem at 88% -6%, var(--section-glow-c), transparent 62%),
+      radial-gradient(38rem 30rem at 4% 104%, var(--section-glow-b), transparent 60%);
+  }
+
+  /* ── Navigation rail ─────────────────────────────────────── */
+  .admin-rail {
+    position: relative;
+    isolation: isolate;
+    background: var(--hero-bg);
+    color: #fff;
+  }
+  .admin-rail::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(26rem 20rem at 50% -12%, rgba(169, 225, 211, 0.24), transparent 66%),
+      radial-gradient(22rem 22rem at 110% 104%, rgba(30, 158, 147, 0.2), transparent 62%);
+  }
+  /* A hairline of mint on the edge that faces the content, so the
+     rail ends on a brand line instead of a hard cut. */
+  .admin-rail::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      rgba(169, 225, 211, 0.28) 22%,
+      rgba(169, 225, 211, 0.28) 78%,
+      transparent
+    );
+  }
+
+  /* Symmetric on purpose: `linear-gradient()` has no logical
+     direction keyword, and a rule that fades from both ends needs
+     none — it looks the same in either writing mode. */
+  .admin-rail-divider {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(169, 225, 211, 0.18), transparent);
+  }
+
+  /* ── Rail navigation items ───────────────────────────────── */
+  .admin-nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-radius: var(--radius-md);
+    padding-block: 0.5625rem;
+    padding-inline: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: var(--fw-medium, 500);
+    line-height: 1.4;
+    color: rgba(232, 241, 240, 0.72);
+    text-decoration: none;
+    transition:
+      background-color var(--dur-fast) var(--ease-standard),
+      color var(--dur-fast) var(--ease-standard);
+  }
+  .admin-nav-item:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+  }
+  .admin-nav-item[aria-current='page'] {
+    background: rgba(169, 225, 211, 0.14);
+    color: var(--brand-200);
+    font-weight: var(--fw-semibold, 600);
+  }
+  /* The active marker rides the rail's outer edge. `-0.75rem` is the
+     nav list's own inline padding, so the bar lands exactly on the
+     edge rather than floating inside the pill. */
+  .admin-nav-item[aria-current='page']::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: -0.75rem;
+    top: 50%;
+    translate: 0 -50%;
+    width: 3px;
+    height: 1.375rem;
+    border-radius: 999px;
+    background: var(--brand-200);
+    box-shadow: 0 0 12px rgba(169, 225, 211, 0.75);
+  }
+  .admin-nav-item .admin-nav-count {
+    margin-inline-start: auto;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    padding-inline: 0.4375rem;
+    padding-block: 0.0625rem;
+    font-size: 11px;
+    font-weight: var(--fw-semibold, 600);
+    direction: ltr;
+  }
+  .admin-nav-item[aria-current='page'] .admin-nav-count {
+    background: rgba(169, 225, 211, 0.22);
+  }
+
+  /* ── Rail scrollbar — the default one is a grey gash on teal ── */
+  .admin-rail-scroll {
+    scrollbar-color: rgba(169, 225, 211, 0.28) transparent;
+  }
+  .admin-rail-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+  .admin-rail-scroll::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(169, 225, 211, 0.24);
+  }
+
+  /* ── Welcome band on the landing screen ──────────────────── */
+  .admin-band {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border-radius: var(--radius-xl);
+    background: var(--hero-bg);
+    color: #fff;
+  }
+  .admin-band::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(32rem 22rem at 88% -30%, rgba(169, 225, 211, 0.3), transparent 64%),
+      radial-gradient(26rem 22rem at 6% 130%, rgba(30, 158, 147, 0.28), transparent 62%);
+  }
+
+  /* ── Metric tiles ────────────────────────────────────────────
+        The lift is `.lift`'s two pixels; what is added here is the
+        mint edge that appears on hover, which is what makes a grid
+        of four tiles feel like one instrument panel rather than
+        four unrelated boxes. */
+  .admin-tile {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    transition:
+      transform var(--dur-base) var(--ease-standard),
+      box-shadow var(--dur-base) var(--ease-standard),
+      border-color var(--dur-base) var(--ease-standard);
+  }
+  .admin-tile::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset-inline-end: -3.5rem;
+    top: -3.5rem;
+    width: 9rem;
+    height: 9rem;
+    border-radius: 999px;
+    background: var(--state-selected-tint);
+    opacity: 0;
+    transition: opacity var(--dur-base) var(--ease-standard);
+  }
+  .admin-tile:hover {
+    transform: translateY(-2px);
+    border-color: var(--brand-300);
+    box-shadow: var(--shadow-e3);
+  }
+  .admin-tile:hover::after {
+    opacity: 1;
+  }
+
+  /* ── Panel — the dashboard's sectioned card ──────────────── */
+  .admin-panel-head {
+    border-bottom: 1px solid var(--border-subtle);
+    background: linear-gradient(180deg, var(--bg-sunken), transparent);
+  }
+
+  /* ── Page-header rule. Solid at the inline start, faded out at
+        the far end. `linear-gradient()` takes no logical keyword, so
+        the direction is stated per writing mode rather than guessed
+        — in RTL the start edge is the right one. */
+  .admin-rule {
+    height: 1px;
+    border: 0;
+    background: linear-gradient(to right, var(--border-default), transparent 72%);
+  }
+  [dir='rtl'] .admin-rule {
+    background: linear-gradient(to left, var(--border-default), transparent 72%);
+  }
+}

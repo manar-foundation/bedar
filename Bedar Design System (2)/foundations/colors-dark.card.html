@@ -1,0 +1,19 @@
+<!-- @dsCard group="Colors" viewport="900x260" name="Dark surfaces" subtitle="Hero-glow treatment: brand-950 base + mint radial glow, used sparingly" -->
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>html,body{background:var(--bg-app);overflow:hidden;margin:0}body{padding:20px}
+.stage{position:relative;height:200px;border-radius:var(--radius-lg);overflow:hidden;background:var(--brand-950);color:#fff;padding:24px;display:flex;flex-direction:column;justify-content:flex-end;gap:6px}
+.stage::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%, rgba(169,225,211,0.28), transparent 60%);pointer-events:none}
+.stage *{position:relative;z-index:1}
+.eyebrow{font:var(--type-overline);color:var(--brand-200);text-transform:uppercase;letter-spacing:.08em}
+h3{font:var(--type-h3);margin:0}
+.spec{color:rgba(255,255,255,0.7);font:var(--type-body-sm);margin:0}
+.codes{position:absolute;top:16px;right:16px;display:flex;gap:6px;z-index:2}
+.codes code{background:rgba(255,255,255,0.08);border:1px solid rgba(169,225,211,0.25);color:var(--brand-200);padding:4px 8px;border-radius:var(--radius-sm);font:var(--type-caption)}
+</style></head><body>
+<div class="stage">
+  <div class="codes"><code>bg: --brand-950</code><code>glow: --hero-glow</code><code>highlight: --brand-200</code></div>
+  <div class="eyebrow">Dark hero treatment</div>
+  <h3>Deep teal with a soft mint pool of light — used sparingly</h3>
+  <p class="spec">Anchor for hero sections, impact-stats bands, and footer. Long-form Arabic body never sits on this surface.</p>
+</div>
+</body></html>

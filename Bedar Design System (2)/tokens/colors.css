@@ -1,0 +1,164 @@
+/* ================================================================
+   BEDAR COLORS — Teal-family only, plus one warm CTA accent.
+   Anchors: #407479 primary, #a9e1d3 mint, #022124 near-black teal.
+   All primary/text pairings meet WCAG AA at body sizes.
+   ================================================================ */
+:root{
+  /* Brand — Teal (primary identity) */
+  --brand-25: #F1F8F7;
+  --brand-50: #E4F1EE;
+  --brand-100:#C8E2DD;
+  --brand-200:#A9E1D3;   /* mint highlight */
+  --brand-300:#7CC0B4;
+  --brand-400:#569892;
+  --brand-500:#407479;   /* primary */
+  --brand-600:#325C61;
+  --brand-700:#26474C;
+  --brand-800:#153337;
+  --brand-900:#0A2427;
+  --brand-950:#022124;   /* deep dark teal (dark sections) */
+
+  /* Accent — Muted warm bronze, reserved for CTAs only */
+  --accent-100:#F1E4D6;
+  --accent-300:#CFA98A;
+  --accent-500:#B08968;   /* CTA */
+  --accent-600:#8F6D50;
+  --accent-700:#6C513B;
+
+  /* Mint — companion pale accent (from brand-200), used for highlights */
+  --mint-100:#EAF7F2;
+  --mint-200:#CBEDE0;
+  --mint-300:#A9E1D3;
+  --mint-500:#7CC0B4;
+
+  /* Neutrals — cool-tinted teal-slate (align undertones with brand) */
+  --neutral-0:  #FFFFFF;
+  --neutral-25: #F8FAFA;
+  --neutral-50: #F1F4F4;
+  --neutral-100:#E5EAEA;
+  --neutral-200:#D0D8D8;
+  --neutral-300:#AAB6B6;
+  --neutral-400:#7A8687;
+  --neutral-500:#586263;
+  --neutral-600:#3D4547;
+  --neutral-700:#282F30;
+  --neutral-800:#181D1E;
+  --neutral-900:#0C1112;
+  --neutral-1000:#050809;
+
+  /* Semantic base — muted to sit inside the teal palette */
+  --success-500:#3B8F6A;
+  --success-100:#D9EDE2;
+  --success-700:#1F5A41;
+
+  --warning-500:#B87A2E;
+  --warning-100:#F6E4CB;
+  --warning-700:#6E4718;
+
+  --error-500:#B14545;
+  --error-100:#F1D6D6;
+  --error-700:#70262A;
+
+  --info-500:#3C6E86;
+  --info-100:#D6E2EA;
+  --info-700:#1E3F52;
+}
+
+/* --------- LIGHT MODE (default) --------- */
+:root, [data-theme="light"]{
+  --bg-app:var(--neutral-25);
+  --bg-surface:var(--neutral-0);
+  --bg-raised:var(--neutral-0);
+  --bg-sunken:var(--neutral-50);
+  --bg-inverse:var(--brand-950);
+  --bg-overlay:rgba(2,33,36,0.60);
+
+  --text-primary:var(--brand-950);
+  --text-secondary:var(--neutral-600);
+  --text-muted:var(--neutral-500);
+  --text-disabled:var(--neutral-400);
+  --text-inverse:var(--neutral-0);
+  --text-link:var(--brand-600);
+  --text-link-hover:var(--brand-800);
+
+  --border-subtle:var(--neutral-100);
+  --border-default:var(--neutral-200);
+  --border-strong:var(--neutral-300);
+  --border-focus:var(--brand-500);
+
+  --action-primary:var(--brand-500);
+  --action-primary-hover:var(--brand-600);
+  --action-primary-active:var(--brand-700);
+  --action-primary-on:var(--neutral-0);
+
+  --action-accent:var(--accent-500);
+  --action-accent-hover:var(--accent-600);
+  --action-accent-on:var(--neutral-0);
+
+  --action-danger:var(--error-500);
+  --action-danger-hover:var(--error-700);
+
+  --field-bg:var(--neutral-0);
+  --field-bg-disabled:var(--neutral-50);
+  --field-border:var(--neutral-300);
+
+  --state-hover-tint:rgba(64,116,121,0.06);
+  --state-selected-tint:rgba(64,116,121,0.12);
+
+  --glass-bg:rgba(255,255,255,0.72);
+  --glass-border:rgba(255,255,255,0.6);
+
+  /* Hero glow (dark-section treatment) */
+  --hero-bg:var(--brand-950);
+  --hero-glow:radial-gradient(ellipse 60% 50% at 50% 0%, rgba(169,225,211,0.28), transparent 60%); /* @kind other */
+  --hero-highlight:var(--brand-200);
+}
+
+/* --------- DARK MODE --------- */
+[data-theme="dark"]{
+  --bg-app:#08181A;
+  --bg-surface:#0F2325;
+  --bg-raised:#132A2D;
+  --bg-sunken:#061416;
+  --bg-inverse:var(--neutral-25);
+  --bg-overlay:rgba(0,0,0,0.66);
+
+  --text-primary:#E8F1F0;
+  --text-secondary:#A6B4B5;
+  --text-muted:#7B8A8B;
+  --text-disabled:#4F5B5C;
+  --text-inverse:var(--brand-950);
+  --text-link:var(--brand-200);
+  --text-link-hover:var(--mint-300);
+
+  --border-subtle:#1B2E31;
+  --border-default:#26393C;
+  --border-strong:#334A4D;
+  --border-focus:var(--brand-300);
+
+  --action-primary:var(--brand-300);
+  --action-primary-hover:var(--brand-200);
+  --action-primary-active:var(--mint-300);
+  --action-primary-on:#04120E;
+
+  --action-accent:var(--accent-300);
+  --action-accent-hover:var(--accent-500);
+  --action-accent-on:#1E1408;
+
+  --action-danger:#D46E6E;
+  --action-danger-hover:#E48F8F;
+
+  --field-bg:#0F2325;
+  --field-bg-disabled:#0A1B1D;
+  --field-border:#2A3D40;
+
+  --state-hover-tint:rgba(169,225,211,0.08);
+  --state-selected-tint:rgba(169,225,211,0.16);
+
+  --glass-bg:rgba(15,35,37,0.66);
+  --glass-border:rgba(255,255,255,0.06);
+
+  --hero-bg:#020F11;
+  --hero-glow:radial-gradient(ellipse 60% 50% at 50% 0%, rgba(169,225,211,0.22), transparent 60%); /* @kind other */
+  --hero-highlight:var(--brand-200);
+}

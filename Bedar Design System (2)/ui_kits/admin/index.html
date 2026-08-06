@@ -1,0 +1,969 @@
+<!-- @dsCard group="Admin Dashboard" viewport="1440x900" name="Admin Dashboard" subtitle="Bedar CMS — content-editing admin per v1 specification" -->
+<!-- @startingPoint section="Screens" subtitle="Bedar admin — content management dashboard" viewport="1440x900" -->
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" fill="#0f172a"/><text x="100" y="112" font-size="64" text-anchor="middle" fill="#fff" font-family="sans-serif">B</text></svg></template>
+<!DOCTYPE html>
+<html lang="en" dir="ltr"><head>
+<meta charset="utf-8"><title>Bedar Admin</title>
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+.tbl{width:100%;border-collapse:separate;border-spacing:0;font:var(--type-body-sm)}
+.tbl th{text-align:left;font:var(--type-overline);color:var(--text-muted);padding:10px 14px;border-bottom:1px solid var(--border-subtle);background:var(--bg-sunken);position:sticky;top:0}
+.tbl td{padding:14px;border-bottom:1px solid var(--border-subtle);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr.row:hover td{background:var(--bg-sunken)}
+.tbl tr.row{cursor:pointer}
+.field-row{display:grid;grid-template-columns:220px 1fr;gap:24px;padding:20px 0;border-bottom:1px solid var(--border-subtle)}
+.field-row:last-child{border-bottom:none}
+.field-row .lbl{font:var(--type-body-sm);font-weight:600;color:var(--text-primary)}
+.field-row .hint{font:var(--type-caption);color:var(--text-muted);margin-top:4px;max-width:280px}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:999px;font:var(--type-caption);font-weight:600;background:var(--bg-sunken);color:var(--text-secondary);border:1px solid var(--border-subtle)}
+.chip.blue{background:#EEF4FA;color:#2A5C87;border-color:#D5E4F0}
+.chip.amber{background:#FBF0DC;color:#8A5A15;border-color:#F1DEB4}
+.mono{font:12px/1.5 var(--font-mono);color:var(--text-secondary)}
+kbd{font:11px var(--font-mono);background:var(--bg-sunken);border:1px solid var(--border-default);border-bottom-width:2px;border-radius:4px;padding:1px 6px;color:var(--text-secondary)}
+</style>
+</head><body style="margin:0"><div id="root"></div>
+<script type="text/babel">
+const NS = window.BaydarDesignSystem_b7d248;
+const { Sidebar, Button, Badge, Input, Textarea, Select, Checkbox, Switch, Tabs, Breadcrumbs, Card, IconButton, FileUpload, Tag, Radio } = NS;
+
+const I = ({d,size=18}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d={d} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+const ICONS = {
+  home:"M3 12l9-9 9 9M5 10v10h14V10",
+  pages:"M6 3h9l5 5v13a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z",
+  blog:"M4 4h16v16H4z M4 8h16 M8 4v16",
+  news:"M4 5h16v14H4z M8 9h8M8 13h8M8 17h5",
+  quote:"M7 8h6M7 12h4M5 4h14v13l-4 4H5V4z",
+  faq:"M9 9a3 3 0 116 0c0 2-3 2-3 5M12 19v.01",
+  media:"M3 7h18v13H3z M8 3h8l2 4H6z",
+  nav:"M4 6h16M4 12h10M4 18h16",
+  forms:"M9 3h6l1 3H8zM4 8h16v13H4z M9 12h6M9 16h6",
+  redirect:"M4 12h13M12 6l6 6-6 6",
+  seo:"M11 4a7 7 0 105 12l4 4-1 1-4-4A7 7 0 0011 4z",
+  schema:"M12 3l9 5-9 5-9-5 9-5z M3 13l9 5 9-5 M3 18l9 5 9-5",
+  plug:"M7 3v6M17 3v6M5 9h14v4a6 6 0 01-12 0V9z M12 19v3",
+  cookie:"M12 3a9 9 0 109 9c-3 0-5-2-5-5s-2-5-4-4z M8 12v.01M14 15v.01M11 9v.01",
+  users:"M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8z",
+  lock:"M6 10V8a6 6 0 1112 0v2 M4 10h16v11H4z M12 15v3",
+  add:"M12 5v14M5 12h14",
+  search:"M11 4a7 7 0 105 12l4 4-1 1-4-4A7 7 0 0011 4z",
+  chev:"M9 6l6 6-6 6",
+  down:"M6 9l6 6 6-6",
+  menu:"M12 5v.01M12 12v.01M12 19v.01",
+  eye:"M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12z M12 15a3 3 0 100-6 3 3 0 000 6z",
+  trash:"M4 7h16 M9 7V4h6v3 M6 7l1 13h10l1-13",
+  edit:"M4 20h4l10-10-4-4L4 16z",
+  save:"M5 3h11l3 3v15H5V3z M8 3v6h8V3 M8 21v-8h8v8",
+  down2:"M12 3v14M6 11l6 6 6-6",
+  copy:"M8 4h11v14H8z M4 8h11v14H4z",
+  ext:"M14 4h6v6 M10 14L20 4 M20 14v6H4V4h6",
+  filter:"M4 5h16l-6 8v5l-4 2v-7z",
+  check:"M4 12l5 5 11-11",
+  clock:"M12 3a9 9 0 100 18 9 9 0 000-18z M12 7v6l4 2",
+  info:"M12 3a9 9 0 100 18 9 9 0 000-18z M12 11v6 M12 8v.01",
+};
+
+const PageContext = React.createContext(null);
+const useCtx = () => React.useContext(PageContext);
+
+/* ============================================================
+   Page-level scaffolding
+============================================================ */
+function ViewHeader({title, sub, actions, crumbs}){
+  return <div style={{padding:'20px 32px',borderBottom:'1px solid var(--border-subtle)',background:'var(--bg-surface)'}}>
+    {crumbs && <div style={{marginBottom:8}}><Breadcrumbs items={crumbs}/></div>}
+    <div style={{display:'flex',alignItems:'flex-end',gap:16}}>
+      <div style={{flex:1}}>
+        <h1 style={{font:'var(--type-h3)',margin:0,letterSpacing:'-0.01em'}}>{title}</h1>
+        {sub && <div style={{font:'var(--type-body-sm)',color:'var(--text-muted)',marginTop:4}}>{sub}</div>}
+      </div>
+      {actions && <div style={{display:'flex',gap:8,alignItems:'center'}}>{actions}</div>}
+    </div>
+  </div>;
+}
+function Section({title, sub, right, children, tight}){
+  return <section style={{background:'var(--bg-surface)',border:'1px solid var(--border-subtle)',borderRadius:'var(--radius-lg)',boxShadow:'var(--shadow-e1)',marginBottom:20}}>
+    <header style={{padding:'16px 22px',borderBottom:'1px solid var(--border-subtle)',display:'flex',alignItems:'center',gap:16}}>
+      <div style={{flex:1}}>
+        <div style={{font:'var(--type-h6)',fontWeight:600}}>{title}</div>
+        {sub && <div style={{font:'var(--type-caption)',color:'var(--text-muted)',marginTop:2}}>{sub}</div>}
+      </div>
+      {right}
+    </header>
+    <div style={{padding:tight?'8px 22px':'22px'}}>{children}</div>
+  </section>;
+}
+function Row({label, hint, children}){
+  return <div className="field-row">
+    <div><div className="lbl">{label}</div>{hint && <div className="hint">{hint}</div>}</div>
+    <div>{children}</div>
+  </div>;
+}
+function StatusPill({state}){
+  const map={Published:{tone:'success',dot:true},Draft:{tone:'warning',dot:true},Unpublished:{tone:'neutral',dot:true},Scheduled:{tone:'info',dot:true}};
+  const c=map[state]||map.Draft;
+  return <Badge tone={c.tone} size="sm" dot={c.dot}>{state}</Badge>;
+}
+
+/* ============================================================
+   VIEW: Pages list (spec §2)
+============================================================ */
+const PAGES = [
+  {id:'home', name:'الصفحة الرئيسية', slug:'/', parent:'—', type:'WebPage', status:'Published', updated:'قبل يومين', by:'Nawal F.'},
+  {id:'about', name:'من نحن', slug:'/about', parent:'—', type:'WebPage', status:'Published', updated:'قبل 5 أيام', by:'Faisal A.'},
+  {id:'progs', name:'برامجنا', slug:'/programs', parent:'—', type:'WebPage', status:'Published', updated:'قبل أسبوع', by:'Nawal F.'},
+  {id:'prog-startup', name:'برنامج ريادة الأعمال الاجتماعية', slug:'/programs/social-startup', parent:'برامجنا', type:'BreadcrumbList', status:'Published', updated:'قبل 3 أيام', by:'Faisal A.'},
+  {id:'prog-women', name:'برنامج ريادة المرأة', slug:'/programs/women', parent:'برامجنا', type:'BreadcrumbList', status:'Draft', updated:'اليوم', by:'Nawal F.'},
+  {id:'faq', name:'الأسئلة الشائعة', slug:'/faq', parent:'—', type:'FAQPage', status:'Published', updated:'الأسبوع الماضي', by:'Nawal F.'},
+  {id:'blog', name:'المدونة', slug:'/blog', parent:'—', type:'WebPage', status:'Published', updated:'قبل 3 أسابيع', by:'System'},
+  {id:'contact', name:'تواصل معنا', slug:'/contact', parent:'—', type:'WebPage', status:'Published', updated:'قبل شهر', by:'Faisal A.'},
+  {id:'privacy', name:'سياسة الخصوصية', slug:'/privacy', parent:'—', type:'WebPage', status:'Unpublished', updated:'قبل شهرين', by:'Faisal A.'},
+];
+
+function PagesList(){
+  const {go} = useCtx();
+  const [q,setQ] = React.useState('');
+  const filtered = PAGES.filter(p => (p.name+p.slug).includes(q));
+  return <>
+    <ViewHeader title="Pages" sub="Each page is developed in code; content is editable here — layout is not."
+      actions={<>
+        <Button variant="ghost" size="sm" leadingIcon={<I d={ICONS.filter} size={14}/>}>Filter</Button>
+        <Button size="sm" leadingIcon={<I d={ICONS.add} size={14}/>}>New page</Button>
+      </>}/>
+    <div style={{padding:'20px 32px'}}>
+      <Section title="All pages" sub={`${PAGES.length} pages · 2 drafts · 1 unpublished`}
+        right={<div style={{width:280}}><Input size="sm" placeholder="Search by name or slug…" value={q} onChange={e=>setQ(e.target.value)}/></div>} tight>
+        <div style={{maxHeight:520,overflow:'auto',margin:'0 -22px'}}>
+        <table className="tbl">
+          <thead><tr>
+            <th style={{width:'32%'}}>Page</th><th>Slug</th><th>Parent</th><th>Schema type</th><th>Status</th><th>Updated</th><th></th>
+          </tr></thead>
+          <tbody>
+            {filtered.map(p => <tr key={p.id} className="row" onClick={()=>go('page', p.id)}>
+              <td>
+                <div style={{display:'flex',gap:12,alignItems:'center'}}>
+                  <div style={{width:32,height:32,borderRadius:6,background:'var(--brand-50)',color:'var(--brand-700)',display:'inline-flex',alignItems:'center',justifyContent:'center'}}><I d={ICONS.pages} size={16}/></div>
+                  <div><div style={{fontWeight:600,color:'var(--text-primary)'}}>{p.name}</div><div style={{font:'var(--type-caption)',color:'var(--text-muted)'}}>By {p.by}</div></div>
+                </div>
+              </td>
+              <td className="mono">{p.slug}</td>
+              <td style={{color:'var(--text-secondary)'}}>{p.parent}</td>
+              <td><span className="chip">{p.type}</span></td>
+              <td><StatusPill state={p.status}/></td>
+              <td style={{color:'var(--text-muted)'}}>{p.updated}</td>
+              <td><IconButton variant="ghost" size="sm" aria-label="Edit"><I d={ICONS.chev} size={16}/></IconButton></td>
+            </tr>)}
+          </tbody>
+        </table>
+        </div>
+      </Section>
+    </div>
+  </>;
+}
+
+/* ============================================================
+   VIEW: Page editor (spec §2 — all fields)
+============================================================ */
+function PageEditor({id}){
+  const p = PAGES.find(x=>x.id===id) || PAGES[0];
+  const [tab,setTab] = React.useState('content');
+  const [noindex,setNoindex] = React.useState(false);
+  const [state,setState] = React.useState(p.status);
+  const {go} = useCtx();
+  return <>
+    <ViewHeader
+      crumbs={[{label:'Pages', onClick:()=>go('pages')},{label:p.name}]}
+      title={p.name}
+      sub={<>Slug <span className="mono">{p.slug}</span> · Schema <span className="chip">{p.type}</span> · Version 14 · Auto-saved 2m ago</>}
+      actions={<>
+        <StatusPill state={state}/>
+        <Button variant="ghost" size="sm" leadingIcon={<I d={ICONS.eye} size={14}/>}>Preview</Button>
+        <Button variant="secondary" size="sm" leadingIcon={<I d={ICONS.save} size={14}/>}>Save draft</Button>
+        <Button size="sm" onClick={()=>setState('Published')}>Publish</Button>
+      </>}/>
+    <div style={{padding:'12px 32px 20px',background:'var(--bg-surface)',borderBottom:'1px solid var(--border-subtle)'}}>
+      <Tabs value={tab} onChange={setTab} tabs={[
+        {value:'content',label:'Content fields'},
+        {value:'seo',label:'SEO & metadata'},
+        {value:'schema',label:'Schema markup'},
+        {value:'settings',label:'Page settings'},
+        {value:'history',label:'Version history'},
+      ]}/>
+    </div>
+    <div style={{padding:'24px 32px',background:'var(--bg-sunken)',minHeight:'calc(100vh - 220px)'}}>
+      {tab==='content' && <>
+        <Section title="Page identity">
+          <Row label="Page name" hint="Displayed in the dashboard and in browser tabs by default."><Input defaultValue={p.name} dir="rtl"/></Row>
+          <Row label="URL slug" hint="Changing the slug creates an automatic redirect (see §8)."><Input defaultValue={p.slug} className="mono"/></Row>
+          <Row label="Parent folder" hint="Groups this page under a section (e.g. Programs → this)."><Select defaultValue={p.parent} options={['—','برامجنا','المدونة','About']}/></Row>
+        </Section>
+
+        <Section title="Content fields" sub="Defined by the developer per page — text, headings, images with alt text, CTAs.">
+          <Row label="Hero eyebrow"><Input defaultValue="منصة بدار للريادة المجتمعية" dir="rtl"/></Row>
+          <Row label="Hero title"><Input defaultValue="اجعل من فكرتك مبادرة مجتمعية" dir="rtl"/></Row>
+          <Row label="Hero body"><Textarea rows={3} dir="rtl" defaultValue="نستقطب أصحاب الأفكار ونطوّر مشاريع ريادة الأعمال الاجتماعية بإشراف نخبة من الخبراء."/></Row>
+          <Row label="Hero image" hint="Alt text is required for every image.">
+            <div style={{display:'grid',gridTemplateColumns:'2fr 1fr',gap:12}}>
+              <FileUpload label="" hint="1600×1000 · JPG/PNG · ≤2MB" leadingIcon={<I d={ICONS.media}/>}/>
+              <Input label="Alt text" placeholder="وصف الصورة للقراء والصور الآلية"/>
+            </div>
+          </Row>
+          <Row label="Primary CTA" hint="Separate fields for button text and destination URL.">
+            <div className="kv"><Input label="Button text" defaultValue="تعرّف على خدماتنا" dir="rtl"/><Input label="Link / URL" defaultValue="/services" className="mono"/></div>
+          </Row>
+          <Row label="Secondary CTA">
+            <div className="kv"><Input label="Button text" defaultValue="عن منصة بدار" dir="rtl"/><Input label="Link / URL" defaultValue="/about" className="mono"/></div>
+          </Row>
+          <Row label="Section: services">
+            <Textarea rows={4} dir="rtl" defaultValue={"• تطوير الأفكار\n• دراسات الجدوى\n• التوجيه الإداري\n• التشبيك مع المستثمرين"}/>
+          </Row>
+        </Section>
+      </>}
+
+      {tab==='seo' && <>
+        <Section title="Page SEO" sub="Applies to this page only. Organization-level metadata sits in Settings → Schema.">
+          <Row label="Meta title" hint="55–60 characters recommended."><Input defaultValue="الصفحة الرئيسية · بدار — ريادة الأعمال الاجتماعية" dir="rtl"/></Row>
+          <Row label="Meta description" hint="150–160 characters recommended."><Textarea rows={3} dir="rtl" defaultValue="منصة بدار تستقطب الأفكار الرائدة وتطوّرها إلى مشاريع مجتمعية قابلة للنمو، بإشراف خبراء وشركاء التمويل."/></Row>
+          <Row label="Canonical URL" hint="Leave as-is unless this page duplicates another canonical."><Input defaultValue="https://bedar.org/" className="mono"/></Row>
+          <Row label="Open Graph image" hint="1200×630 · used when the page is shared on social.">
+            <div style={{display:'grid',gridTemplateColumns:'2fr 1fr',gap:12,alignItems:'start'}}>
+              <FileUpload label="" hint="JPG/PNG · ≤1MB"/>
+              <div style={{aspectRatio:'1200/630',background:'var(--bg-sunken)',border:'1px dashed var(--border-default)',borderRadius:'var(--radius-md)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--text-muted)',font:'var(--type-caption)'}}>OG preview</div>
+            </div>
+          </Row>
+        </Section>
+        <Section title="Indexing" sub="Single toggle. Adds noindex tag and removes the page from sitemap.xml simultaneously.">
+          <Row label="Exclude from sitemap / noindex">
+            <Switch checked={noindex} onChange={setNoindex} label={noindex?'Excluded from sitemap and marked noindex':'Included in sitemap and indexable'}/>
+          </Row>
+        </Section>
+      </>}
+
+      {tab==='schema' && <Section title="Auto-generated schema" sub="Per-page schema is auto-generated based on content type. Organization schema is set once site-wide.">
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
+          <div>
+            <div style={{font:'var(--type-label)',marginBottom:8}}>Detected schema type</div>
+            <div style={{padding:16,border:'1px solid var(--border-subtle)',borderRadius:'var(--radius-md)',background:'var(--bg-sunken)'}}>
+              <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}><Badge tone="brand" size="sm">{p.type}</Badge><span style={{font:'var(--type-caption)',color:'var(--text-muted)'}}>chosen automatically</span></div>
+              <div style={{font:'var(--type-body-sm)',color:'var(--text-secondary)'}}>Based on page type: pages under a folder → BreadcrumbList · FAQ collection → FAQPage · Blog & News → Article · everything else → WebPage.</div>
+            </div>
+          </div>
+          <div>
+            <div style={{font:'var(--type-label)',marginBottom:8}}>Preview (read-only)</div>
+            <pre className="mono" style={{margin:0,padding:16,background:'var(--brand-950)',color:'#A9E1D3',borderRadius:'var(--radius-md)',overflow:'auto',fontSize:11.5,lineHeight:1.55}}>{`{
+  "@context": "https://schema.org",
+  "@type": "${p.type}",
+  "name": "${p.name}",
+  "url": "https://bedar.org${p.slug}",
+  "inLanguage": "ar",
+  "isPartOf": { "@id": "https://bedar.org/#organization" }
+}`}</pre>
+          </div>
+        </div>
+      </Section>}
+
+      {tab==='settings' && <>
+        <Section title="Publish state">
+          <Row label="State" hint="Draft is saved but not visible. Unpublished hides a previously live page.">
+            <div style={{display:'flex',gap:8}}>
+              {['Draft','Published','Unpublished'].map(s => <Button key={s} size="sm" variant={state===s?'primary':'outline'} onClick={()=>setState(s)}>{s}</Button>)}
+            </div>
+          </Row>
+          <Row label="Show in main navigation"><Switch defaultChecked={true}/></Row>
+        </Section>
+      </>}
+
+      {tab==='history' && <Section title="Version history" sub="Content edits only — separate from Git code history.">
+        <div style={{display:'flex',flexDirection:'column'}}>
+          {[
+            {v:14,who:'Nawal F.',when:'2m ago — auto-saved',change:'Updated hero title and CTA link',current:true},
+            {v:13,who:'Nawal F.',when:'Today · 10:22',change:'Added services section'},
+            {v:12,who:'Faisal A.',when:'Yesterday · 16:48',change:'Replaced hero image, added alt text'},
+            {v:11,who:'Nawal F.',when:'3 days ago',change:'Published (from Draft)'},
+            {v:10,who:'Faisal A.',when:'5 days ago',change:'Meta description rewrite'},
+          ].map(v => <div key={v.v} style={{display:'grid',gridTemplateColumns:'80px 1fr auto',gap:16,padding:'14px 0',borderBottom:'1px solid var(--border-subtle)',alignItems:'center'}}>
+            <div style={{font:'var(--type-label)',color:'var(--text-muted)'}}>v{v.v}</div>
+            <div>
+              <div style={{font:'var(--type-body-sm)',fontWeight:600}}>{v.change}</div>
+              <div style={{font:'var(--type-caption)',color:'var(--text-muted)'}}>{v.who} · {v.when}</div>
+            </div>
+            <div style={{display:'flex',gap:8,alignItems:'center'}}>
+              {v.current && <Badge tone="success" size="sm">Current</Badge>}
+              {!v.current && <><Button size="sm" variant="ghost">View diff</Button><Button size="sm" variant="outline">Restore</Button></>}
+            </div>
+          </div>)}
+        </div>
+      </Section>}
+    </div>
+  </>;
+}
+
+/* ============================================================
+   VIEW: Collections — Blog / News / Testimonials / FAQ (spec §3.2)
+============================================================ */
+const COLLECTIONS = {
+  blog: {
+    title:'Blog & Articles',
+    sub:'Title, body, cover + alt text, author, publish date, category. One "featured" article at a time — marking a new one auto-unmarks the previous.',
+    cols:['Article','Author','Category','Published','Featured','Status'],
+    rows:[
+      {t:'كيف تحوّل فكرتك إلى مشروع اجتماعي مستدام', a:'د. سارة القحطاني', c:'دليل', d:'12 يناير', f:true, s:'Published'},
+      {t:'خمس دروس من رواد الأعمال الاجتماعية', a:'محمد الحربي', c:'مقالة رأي', d:'3 يناير', f:false, s:'Published'},
+      {t:'دراسة حالة: مبادرة "سنابل"', a:'نوال فيصل', c:'دراسة حالة', d:'22 ديسمبر', f:false, s:'Published'},
+      {t:'قياس الأثر الاجتماعي في مشاريعك', a:'د. سارة القحطاني', c:'دليل', d:'—', f:false, s:'Draft'},
+    ]
+  },
+  news: {
+    title:'News',
+    sub:'Same structure as Articles, kept as a distinct collection.',
+    cols:['Headline','Author','Category','Published','Featured','Status'],
+    rows:[
+      {t:'إطلاق الدفعة الرابعة من برنامج ريادة المرأة', a:'فريق بدار', c:'إعلان', d:'20 يناير', f:true, s:'Published'},
+      {t:'شراكة استراتيجية مع صندوق التنمية', a:'فريق بدار', c:'شراكات', d:'10 يناير', f:false, s:'Published'},
+      {t:'حفل تخريج دفعة 2025', a:'فريق بدار', c:'فعاليات', d:'—', f:false, s:'Scheduled'},
+    ]
+  }
+};
+
+function CollectionList({key_}){
+  const c = COLLECTIONS[key_];
+  return <>
+    <ViewHeader title={c.title} sub={c.sub}
+      actions={<>
+        <Button variant="ghost" size="sm" leadingIcon={<I d={ICONS.filter} size={14}/>}>Filter</Button>
+        <Button size="sm" leadingIcon={<I d={ICONS.add} size={14}/>}>New entry</Button>
+      </>}/>
+    <div style={{padding:'20px 32px'}}>
+      <Section title={c.title} tight>
+        <div style={{margin:'0 -22px'}}>
+        <table className="tbl">
+          <thead><tr>{c.cols.map(h=><th key={h}>{h}</th>)}<th></th></tr></thead>
+          <tbody>
+            {c.rows.map((r,i)=><tr key={i} className="row">
+              <td>
+                <div style={{display:'flex',gap:12,alignItems:'center'}}>
+                  <div style={{width:48,height:32,borderRadius:6,background:'var(--brand-100)',flex:'0 0 auto'}}/>
+                  <div style={{fontWeight:600,color:'var(--text-primary)'}}>{r.t}</div>
+                </div>
+              </td>
+              <td style={{color:'var(--text-secondary)'}}>{r.a}</td>
+              <td><span className="chip">{r.c}</span></td>
+              <td style={{color:'var(--text-muted)'}}>{r.d}</td>
+              <td>{r.f ? <Badge tone="warning" size="sm">★ Featured</Badge> : <span style={{color:'var(--text-disabled)'}}>—</span>}</td>
+              <td><StatusPill state={r.s}/></td>
+              <td><IconButton variant="ghost" size="sm" aria-label="Edit"><I d={ICONS.chev} size={16}/></IconButton></td>
+            </tr>)}
+          </tbody>
+        </table>
+        </div>
+      </Section>
+      {key_==='blog' && <Section title="Featured rule" sub="Only one article can be featured at a time. Marking a new one auto-unmarks the previous.">
+        <div style={{display:'flex',alignItems:'center',gap:16,padding:16,background:'var(--brand-25)',border:'1px solid var(--brand-100)',borderRadius:'var(--radius-md)'}}>
+          <div style={{width:40,height:40,borderRadius:'50%',background:'var(--brand-100)',color:'var(--brand-700)',display:'inline-flex',alignItems:'center',justifyContent:'center'}}>★</div>
+          <div style={{flex:1}}>
+            <div style={{font:'var(--type-body-sm)',fontWeight:600}}>Currently featured: “كيف تحوّل فكرتك إلى مشروع اجتماعي مستدام”</div>
+            <div style={{font:'var(--type-caption)',color:'var(--text-muted)'}}>Featured since 12 January · Marking any other article as featured will demote this one automatically.</div>
+          </div>
+        </div>
+      </Section>}
+    </div>
+  </>;
+}
+
+function TestimonialsList(){
+  const rows=[
+    {q:'ساعدتني منصة بدار على تحويل فكرتي إلى مشروع حقيقي بأدوات عملية.', n:'سارة العنزي', o:'مؤسِّسة، مبادرة سنابل'},
+    {q:'التوجيه الفردي كان نقطة التحول في مشروعنا.', n:'محمد الحربي', o:'الرئيس التنفيذي، رفد'},
+    {q:'شبكة العلاقات وحدها تستحق المشاركة.', n:'ريم القحطاني', o:'مؤسِّسة، تمكين'},
+  ];
+  return <>
+    <ViewHeader title="Testimonials" sub="Quote, name, title/organization, photo."
+      actions={<Button size="sm" leadingIcon={<I d={ICONS.add} size={14}/>}>New testimonial</Button>}/>
+    <div style={{padding:'20px 32px'}}>
+      <Section title="All testimonials" tight>
+        <div style={{margin:'0 -22px'}}>
+        <table className="tbl">
+          <thead><tr><th style={{width:'50%'}}>Quote</th><th>Name</th><th>Organization</th><th>Photo</th><th></th></tr></thead>
+          <tbody>
+            {rows.map((r,i)=><tr key={i} className="row">
+              <td style={{color:'var(--text-primary)'}} dir="rtl">“{r.q}”</td>
+              <td style={{fontWeight:600}} dir="rtl">{r.n}</td>
+              <td style={{color:'var(--text-secondary)'}} dir="rtl">{r.o}</td>
+              <td><div style={{width:32,height:32,borderRadius:'50%',background:'var(--brand-100)'}}/></td>
+              <td><IconButton variant="ghost" size="sm" aria-label="Edit"><I d={ICONS.edit} size={14}/></IconButton></td>
+            </tr>)}
+          </tbody>
+        </table>
+        </div>
+      </Section>
+    </div>
+  </>;
+}
+
+function FAQList(){
+  const rows=[
+    {q:'من يستطيع التقديم على برامج بدار؟', a:'يمكن لأصحاب الأفكار من جميع الفئات العمرية والخبرات المختلفة التقديم، شرط ملاءمة الفكرة لمعايير الأثر الاجتماعي.'},
+    {q:'ما مدة برنامج ريادة الأعمال الاجتماعية؟', a:'يمتد البرنامج على 12 أسبوعاً، يتخللها ورش أسبوعية وجلسات إرشاد فردية.'},
+    {q:'هل هناك رسوم للاشتراك؟', a:'التقديم على البرامج الأساسية مجاني بالكامل بفضل دعم مؤسسة منار.'},
+    {q:'كيف يتم اختيار المشاريع المموّلة؟', a:'وفق معايير معلنة تشمل جدوى المشروع، الأثر المتوقع، وقدرة الفريق على التنفيذ.'},
+  ];
+  return <>
+    <ViewHeader title="FAQ" sub="Question/answer pairs · reorderable · feeds the auto-generated FAQPage schema."
+      actions={<Button size="sm" leadingIcon={<I d={ICONS.add} size={14}/>}>New question</Button>}/>
+    <div style={{padding:'20px 32px'}}>
+      <Section title="Questions & answers" sub="Drag to reorder. Order is reflected on the site and in schema output.">
+        <div style={{display:'flex',flexDirection:'column',gap:10}}>
+          {rows.map((r,i) => <div key={i} style={{display:'flex',gap:12,padding:16,border:'1px solid var(--border-subtle)',borderRadius:'var(--radius-md)',background:'var(--bg-surface)'}}>
+            <div style={{color:'var(--text-muted)',cursor:'grab',padding:'0 6px'}}>⋮⋮</div>
+            <div style={{flex:1}} dir="rtl">
+              <div style={{font:'var(--type-body-sm)',fontWeight:600,marginBottom:4}}>{r.q}</div>
+              <div style={{font:'var(--type-body-sm)',color:'var(--text-secondary)'}}>{r.a}</div>
+            </div>
+            <div style={{display:'flex',gap:6}}>
+              <IconButton variant="ghost" size="sm" aria-label="Edit"><I d={ICONS.edit} size={14}/></IconButton>
+              <IconButton variant="ghost" size="sm" aria-label="Delete"><I d={ICONS.trash} size={14}/></IconButton>
+            </div>
+          </div>)}
+        </div>
+      </Section>
+    </div>
+  </>;
+}
+
+/* ============================================================
+   VIEW: Navbar & Footer (spec §3.1)
+============================================================ */
+function NavFooter(){
+  const nav=[
+    {label:'الرئيسية', href:'/'},
+    {label:'من نحن', href:'/about'},
+    {label:'بدار والريادة المجتمعية', href:'/social-entrepreneurship'},
+    {label:'البرامج', href:'/programs'},
+    {label:'الخدمات', href:'/services'},
+    {label:'المدونة', href:'/blog'},
+    {label:'الأخبار', href:'/news'},
+    {label:'تواصل معنا', href:'/contact-us'},
+  ];
+  const footerCols=[
+    {title:'القائمة الرئيسية', items:['من نحن','بدار والريادة المجتمعية','البرامج','الخدمات','الأخبار','تواصل معنا']},
+    {title:'أحدث المقالات', items:['مراحل توليد الفكرة','الفكرة تساوي الأرباح','تنقية الأفكار']},
+    {title:'تواصل معنا', items:['info@bedar.org','Facebook — bedar.org','Instagram — bedarplatform','LinkedIn — bedar-platform','X — bedarplatform']},
+  ];
+  return <>
+    <ViewHeader title="Navbar & Footer" sub="Global — changes apply across the entire site immediately on save."
+      actions={<><Button variant="ghost" size="sm">Cancel</Button><Button size="sm">Save changes</Button></>}/>
+    <div style={{padding:'20px 32px'}}>
+      <Section title="Navbar" sub="Reorder or edit navigation links. Applies to every page.">
+        <div style={{display:'flex',flexDirection:'column',gap:10}}>
+          {nav.map((n,i) => <div key={i} style={{display:'grid',gridTemplateColumns:'auto 1fr 1fr auto',gap:12,padding:12,border:'1px solid var(--border-subtle)',borderRadius:'var(--radius-md)',alignItems:'center'}}>
+            <div style={{color:'var(--text-muted)',padding:'0 4px',cursor:'grab'}}>⋮⋮</div>
+            <Input size="sm" defaultValue={n.label} dir="rtl"/>
+            <Input size="sm" defaultValue={n.href} className="mono"/>
+            <IconButton size="sm" variant="ghost" aria-label="Remove"><I d={ICONS.trash} size={14}/></IconButton>
+          </div>)}
+          <Button variant="outline" size="sm" leadingIcon={<I d={ICONS.add} size={14}/>} style={{alignSelf:'flex-start'}}>Add navigation link</Button>
+        </div>
+      </Section>
+
+      <Section title="Footer" sub="Columns, links and contact block visible at the bottom of every page.">
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3, 1fr)',gap:16}}>
+          {footerCols.map((c,i)=><div key={i} style={{padding:16,border:'1px solid var(--border-subtle)',borderRadius:'var(--radius-md)'}}>
+            <Input size="sm" label="Column title" defaultValue={c.title} dir="rtl"/>
+            <div style={{display:'flex',flexDirection:'column',gap:6,marginTop:10}}>
+              {c.items.map((it,j)=><Input key={j} size="sm" defaultValue={it} dir="rtl"/>)}
+              <Button size="sm" variant="ghost" leadingIcon={<I d={ICONS.add} size={12}/>}>Add link</Button>
+            </div>
+          </div>)}
+        </div>
+        <div style={{marginTop:16}}>
+          <Row label="Copyright line"><Input defaultValue="كافة الحقوق محفوظة © منصة بدار للريادة المجتمعية 2026" dir="rtl"/></Row>
+          <Row label="Credit line"><Input defaultValue="تصميم وتطوير شركة Threems" dir="rtl"/></Row>
+          <Row label="Parent org note" hint="Displayed above the social links in the footer."><Input defaultValue="بدار إحدى منصات مؤسسة منار للمشاركة المجتمعية" dir="rtl"/></Row>
+          <Row label="Newsletter heading"><Input defaultValue="النشرة البريدية" dir="rtl"/></Row>
+          <Row label="Social profile URLs" hint="Also used in the site-wide Organization schema.">
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+              <Input label="Twitter / X" placeholder="https://x.com/bedar" className="mono"/>
+              <Input label="LinkedIn" placeholder="https://linkedin.com/company/bedar" className="mono"/>
+              <Input label="Instagram" placeholder="https://instagram.com/bedar" className="mono"/>
+              <Input label="YouTube" placeholder="https://youtube.com/@bedar" className="mono"/>
+            </div>
+          </Row>
+        </div>
+      </Section>
+    </div>
+  </>;
+}
+
+/* ============================================================
+   VIEW: Media Library (spec §7)
+============================================================ */
+function MediaLibrary(){
+  const items = Array.from({length:14}, (_,i)=>({
+    id:i, name:['hero-home.jpg','team-workshop.jpg','logo-bedar.svg','partners-manar.png','graduation-2025.jpg','program-cover.jpg','testimonial-sara.jpg','faq-illustration.svg','cover-blog-01.jpg','og-default.jpg','icon-mentor.svg','banner-apply.jpg','photo-lab.jpg','photo-mentors.jpg'][i],
+    size:['420 KB','1.2 MB','12 KB','96 KB','1.8 MB','780 KB','540 KB','32 KB','1.1 MB','220 KB','8 KB','960 KB','1.4 MB','1.6 MB'][i],
+    alt:i%3===0
+  }));
+  return <>
+    <ViewHeader title="Media Library" sub="Upload once, reuse everywhere. Every image requires alt text."
+      actions={<>
+        <Button variant="ghost" size="sm" leadingIcon={<I d={ICONS.filter} size={14}/>}>Filter</Button>
+        <Button size="sm" leadingIcon={<I d={ICONS.add} size={14}/>}>Upload files</Button>
+      </>}/>
+    <div style={{padding:'20px 32px'}}>
+      <Section title="All media" sub="14 items · 8.9 MB used" right={<div style={{width:280}}><Input size="sm" placeholder="Search files…"/></div>}>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(6, 1fr)',gap:14}}>
+          {items.map(it => <div key={it.id} style={{border:'1px solid var(--border-subtle)',borderRadius:'var(--radius-md)',overflow:'hidden',background:'var(--bg-surface)'}}>
+            <div style={{aspectRatio:'4/3',background:'linear-gradient(135deg,var(--brand-100),var(--brand-50))',position:'relative'}}>
+              {!it.alt && <div style={{position:'absolute',top:8,right:8}}><Badge tone="warning" size="sm">Alt missing</Badge></div>}
+            </div>
+            <div style={{padding:'10px 12px'}}>
+              <div style={{font:'var(--type-body-sm)',fontWeight:600,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{it.name}</div>
+              <div style={{font:'var(--type-caption)',color:'var(--text-muted)'}}>{it.size}</div>
+            </div>
+          </div>)}
+        </div>
+      </Section>
+      <Section title="Alt text is required" sub="Uploads without alt text are flagged and blocked from publishing.">
+        <div style={{padding:12,background:'var(--bg-sunken)',borderRadius:'var(--radius-md)',display:'flex',alignItems:'center',gap:12}}>
+          <div style={{width:36,height:36,borderRadius:'50%',background:'#FBF0DC',color:'#8A5A15',display:'inline-flex',alignItems:'center',justifyContent:'center'}}><I d={ICONS.info}/></div>
+          <div style={{flex:1,font:'var(--type-body-sm)',color:'var(--text-secondary)'}}>5 images are missing alt text. They will be flagged on the pages that use them.</div>
+          <Button size="sm" variant="outline">Review 5</Button>
+        </div>
+      </Section>
+    </div>
+  </>;
+}
+
+/* ============================================================
+   VIEW: Forms & Submissions (spec §4)
+============================================================ */
+function FormsView(){
+  return <>
+    <ViewHeader title="Forms & Submissions" sub="Contact and Newsletter route to GoHighLevel — no duplicate storage in this dashboard."/>
+    <div style={{padding:'20px 32px'}}>
+      <Section title="Site forms">
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+          {[
+            {n:'Contact form', d:'Submits directly to GoHighLevel.', ev:'form_submission', st:'Connected'},
+            {n:'Newsletter signup', d:'Also integrated with GoHighLevel.', ev:'newsletter_submission', st:'Connected'},
+          ].map(f => <div key={f.n} style={{padding:18,border:'1px solid var(--border-subtle)',borderRadius:'var(--radius-md)',background:'var(--bg-surface)'}}>
+            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
+              <div style={{width:36,height:36,borderRadius:'var(--radius-sm)',background:'var(--brand-50)',color:'var(--brand-700)',display:'inline-flex',alignItems:'center',justifyContent:'center'}}><I d={ICONS.forms}/></div>
+              <div style={{flex:1}}><div style={{font:'var(--type-body)',fontWeight:600}}>{f.n}</div><div style={{font:'var(--type-caption)',color:'var(--text-muted)'}}>{f.d}</div></div>
+              <Badge tone="success" dot>{f.st}</Badge>
+            </div>
+            <div style={{padding:10,background:'var(--bg-sunken)',borderRadius:6,marginTop:10}}>
+              <div style={{font:'var(--type-overline)',color:'var(--text-muted)',marginBottom:4}}>Success dataLayer event</div>
+              <span className="mono">{f.ev}</span>
+            </div>
+          </div>)}
+        </div>
+      </Section>
+
+      <Section title="Program application forms" sub="Embedded per-page as GoHighLevel embed code. Placed directly by the developer on the relevant program page(s) — not managed here.">
+        <div style={{padding:14,background:'var(--bg-sunken)',border:'1px dashed var(--border-default)',borderRadius:'var(--radius-md)',display:'flex',alignItems:'center',gap:12}}>
+          <div style={{width:36,height:36,borderRadius:'50%',background:'#EEF4FA',color:'#2A5C87',display:'inline-flex',alignItems:'center',justifyContent:'center'}}><I d={ICONS.info}/></div>
+          <div style={{flex:1,font:'var(--type-body-sm)',color:'var(--text-secondary)'}}>Program application embeds live on each program page — not through the global Head/Footer code fields (see Integrations).</div>
+        </div>
+      </Section>
+
+      <Section title="Spam protection (captcha)" sub="Provider-agnostic. Switch providers later without touching code — keys live here.">
+        <Row label="Provider"><Select defaultValue="Cloudflare Turnstile" options={['Google reCAPTCHA','hCaptcha','Cloudflare Turnstile']}/></Row>
+        <Row label="Site key"><Input defaultValue="0x4AAAAAAAB..." className="mono"/></Row>
+        <Row label="Secret key" hint="Encrypted at rest."><Input defaultValue="0x4AAAAAAAB••••••••••••••••" type="password" className="mono"/></Row>
+      </Section>
+
+      <Section title="Successful-submission tracking" sub="Events fire only on confirmed success — not on click/attempt — so reporting reflects real submissions.">
+        <table className="tbl">
+          <thead><tr><th>Form</th><th>Event name</th><th>Fires when</th><th>Destination</th></tr></thead>
+          <tbody>
+            <tr><td style={{fontWeight:600}}>Contact form</td><td className="mono">form_submission</td><td style={{color:'var(--text-secondary)'}}>Submission confirmed by GoHighLevel</td><td>dataLayer → GTM → GA4 (custom event)</td></tr>
+            <tr><td style={{fontWeight:600}}>Newsletter signup</td><td className="mono">newsletter_submission</td><td style={{color:'var(--text-secondary)'}}>Submission confirmed by GoHighLevel</td><td>dataLayer → GTM → GA4 (custom event)</td></tr>
+          </tbody>
+        </table>
+        <div style={{marginTop:10,font:'var(--type-caption)',color:'var(--text-muted)'}}>GA4 access to view these events is configured outside this dashboard.</div>
+      </Section>
+    </div>
+  </>;
+}
+
+/* ============================================================
+   VIEW: Redirects (spec §8)
+============================================================ */
+function RedirectsView(){
+  const rows=[
+    {o:'/old-home', n:'/', c:'301', src:'Slug change'},
+    {o:'/programs/entrepreneurship', n:'/programs/social-startup', c:'301', src:'Slug change'},
+    {o:'/team', n:'/about#team', c:'302', src:'Temporary'},
+    {o:'/webflow-legacy/*', n:'/*', c:'301', src:'bedar.webflow.io → bedar.org'},
+  ];
+  return <>
+    <ViewHeader title="Redirects" sub="Independent of any single page edit — used for slug changes, retired pages, and the Webflow → bedar.org migration."
+      actions={<Button size="sm" leadingIcon={<I d={ICONS.add} size={14}/>}>New redirect</Button>}/>
+    <div style={{padding:'20px 32px'}}>
+      <Section title="All redirects" tight>
+        <div style={{margin:'0 -22px'}}>
+        <table className="tbl">
+          <thead><tr><th>Old path</th><th>New path</th><th>Status code</th><th>Source</th><th></th></tr></thead>
+          <tbody>
+            {rows.map((r,i)=><tr key={i} className="row">
+              <td className="mono">{r.o}</td>
+              <td className="mono"><span style={{color:'var(--brand-600)'}}>→</span> {r.n}</td>
+              <td><Badge tone={r.c==='301'?'success':'info'} size="sm">{r.c} {r.c==='301'?'Permanent':'Temporary'}</Badge></td>
+              <td style={{color:'var(--text-secondary)'}}>{r.src}</td>
+              <td><div style={{display:'flex',gap:4,justifyContent:'flex-end'}}>
+                <IconButton variant="ghost" size="sm" aria-label="Edit"><I d={ICONS.edit} size={14}/></IconButton>
+                <IconButton variant="ghost" size="sm" aria-label="Delete"><I d={ICONS.trash} size={14}/></IconButton>
+              </div></td>
+            </tr>)}
+          </tbody>
+        </table>
+        </div>
+      </Section>
+      <Section title="Default status code" sub="Applied when creating a new redirect. Not hardcoded — change it any time.">
+        <Row label="Default"><Radio name="default_code" options={[{value:'301',label:'301 Permanent'},{value:'302',label:'302 Temporary'}]} defaultValue="301"/></Row>
+      </Section>
+    </div>
+  </>;
+}
+
+/* ============================================================
+   VIEW: SEO & Sitemap (spec §5)
+============================================================ */
+function SeoView(){
+  return <>
+    <ViewHeader title="SEO & Sitemap" sub="Per-page SEO fields sit on each page. This view covers site-wide SEO plumbing."/>
+    <div style={{padding:'20px 32px'}}>
+      <Section title="Sitemap.xml">
+        <div style={{display:'flex',alignItems:'center',gap:14,padding:16,background:'var(--bg-sunken)',borderRadius:'var(--radius-md)'}}>
+          <Badge tone="success" dot>Up to date</Badge>
+          <div style={{flex:1}}><div style={{font:'var(--type-body-sm)',fontWeight:600}}>https://bedar.org/sitemap.xml</div><div style={{font:'var(--type-caption)',color:'var(--text-muted)'}}>Regenerated automatically on publish · 42 URLs · last built 4m ago</div></div>
+          <Button variant="outline" size="sm" leadingIcon={<I d={ICONS.ext} size={14}/>}>Open</Button>
+        </div>
+      </Section>
+      <Section title="robots.txt" sub="Kept in sync automatically. No manual step needed for Search Console.">
+        <pre className="mono" style={{margin:0,padding:16,background:'var(--brand-950)',color:'#A9E1D3',borderRadius:'var(--radius-md)',fontSize:12}}>{`User-agent: *
+Allow: /
+Sitemap: https://bedar.org/sitemap.xml`}</pre>
+      </Section>
+      <Section title="Language & direction" sub="Single language site — site-wide, one-time global setting. Not a per-page field.">
+        <Row label="lang"><Input value="ar" readOnly className="mono" style={{maxWidth:180}}/></Row>
+        <Row label="dir"><Input value="rtl" readOnly className="mono" style={{maxWidth:180}}/></Row>
+        <Row label="hreflang"><Badge tone="neutral">Not applicable — Arabic-only</Badge></Row>
+      </Section>
+    </div>
+  </>;
+}
+
+/* ============================================================
+   VIEW: Organization schema (spec §6)
+============================================================ */
+function SchemaView(){
+  return <>
+    <ViewHeader title="Organization Schema" sub="Entered once. Applied site-wide. Never duplicated per page."/>
+    <div style={{padding:'20px 32px'}}>
+      <Section title="Organization identity">
+        <Row label="Legal name"><Input defaultValue="مؤسسة منار" dir="rtl"/></Row>
+        <Row label="Website name"><Input defaultValue="منصة بدار" dir="rtl"/></Row>
+        <Row label="Logo URL"><Input defaultValue="https://bedar.org/assets/logo.svg" className="mono"/></Row>
+        <Row label="Address"><Textarea rows={2} dir="rtl" defaultValue="الرياض، المملكة العربية السعودية"/></Row>
+        <Row label="Contact email"><Input defaultValue="info@bedar.org" className="mono"/></Row>
+        <Row label="Contact phone"><Input defaultValue="+966 11 000 0000" className="mono"/></Row>
+        <Row label="Social profile URLs" hint="Same set used in the Footer.">
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+            <Input placeholder="https://x.com/bedar" className="mono"/>
+            <Input placeholder="https://linkedin.com/company/bedar" className="mono"/>
+            <Input placeholder="https://instagram.com/bedar" className="mono"/>
+            <Input placeholder="https://youtube.com/@bedar" className="mono"/>
+          </div>
+        </Row>
+      </Section>
+      <Section title="Auto-generated per-page schema" sub="Matched by content type — no manual writing.">
+        <table className="tbl">
+          <thead><tr><th>Page / content type</th><th>Schema type</th><th>Fields</th></tr></thead>
+          <tbody>
+            <tr><td>Blog / News article</td><td><Badge tone="brand">Article / BlogPosting</Badge></td><td style={{color:'var(--text-secondary)'}}>headline, image, datePublished, author</td></tr>
+            <tr><td>FAQ page</td><td><Badge tone="brand">FAQPage</Badge></td><td style={{color:'var(--text-secondary)'}}>generated from FAQ collection entries</td></tr>
+            <tr><td>Subpages under a folder (e.g. program)</td><td><Badge tone="brand">BreadcrumbList</Badge></td><td style={{color:'var(--text-secondary)'}}>reflects folder path</td></tr>
+            <tr><td>All other pages</td><td><Badge tone="brand">WebPage</Badge></td><td style={{color:'var(--text-secondary)'}}>default</td></tr>
+          </tbody>
+        </table>
+      </Section>
+    </div>
+  </>;
+}
+
+/* ============================================================
+   VIEW: Integrations (spec §11)
+============================================================ */
+function IntegrationsView(){
+  return <>
+    <ViewHeader title="Integrations & Custom Code"/>
+    <div style={{padding:'20px 32px'}}>
+      <Section title="Google Tag Manager">
+        <Row label="Container ID" hint="Injected on every page. Forwards form_submission and newsletter_submission events to GA4."><Input defaultValue="GTM-BEDAR42" className="mono"/></Row>
+      </Section>
+      <Section title="Google Search Console">
+        <Row label="Verification method"><Select defaultValue="Meta tag" options={['Meta tag','DNS TXT record','HTML file upload']}/></Row>
+        <Row label="Verification content"><Input defaultValue="google-site-verification=8sJ9pXk2M..." className="mono"/></Row>
+        <Row label="Sitemap submitted"><div style={{display:'flex',alignItems:'center',gap:10}}><Badge tone="success" dot>Verified</Badge><span className="mono" style={{color:'var(--text-muted)'}}>https://bedar.org/sitemap.xml</span></div></Row>
+      </Section>
+      <Section title="Custom code" sub="Site-wide script injection. Program application (GoHighLevel) embeds are page-specific — placed directly on the relevant page, not here.">
+        <Row label="Head code" hint="Injected in every page's <head>."><Textarea rows={5} className="mono" defaultValue={"<!-- Analytics, verification, meta -->\n<script>window.dataLayer=window.dataLayer||[];<\/script>"}/></Row>
+        <Row label="Footer code" hint="Injected before </body> on every page."><Textarea rows={4} className="mono" defaultValue={`<!-- Third-party widgets -->`}/></Row>
+      </Section>
+    </div>
+  </>;
+}
+
+/* ============================================================
+   VIEW: Cookies / consent (spec §12)
+============================================================ */
+function CookiesView(){
+  const [on,setOn] = React.useState(true);
+  return <>
+    <ViewHeader title="Cookie & Privacy Consent" sub="Manar is a Netherlands-registered NGO — GDPR applies regardless of visitor location."/>
+    <div style={{padding:'20px 32px'}}>
+      <Section title="Consent banner">
+        <Row label="Enabled"><Switch checked={on} onChange={setOn} label={on?'Shown to new visitors':'Hidden'}/></Row>
+        <Row label="Banner text (Arabic)"><Textarea rows={3} dir="rtl" defaultValue="نستخدم ملفات تعريف الارتباط لتحسين تجربتك ولأغراض القياس. يمكنك اختيار قبولها أو رفضها."/></Row>
+        <Row label="Categories">
+          <div style={{display:'flex',flexDirection:'column',gap:8}}>
+            <Checkbox defaultChecked disabled label="Strictly necessary" description="Always on — required for the site to function."/>
+            <Checkbox defaultChecked label="Analytics" description="GA4 via GTM. Loaded only after consent."/>
+            <Checkbox label="Marketing" description="Not currently used."/>
+          </div>
+        </Row>
+        <Row label="Linked policies" hint="Ordinary pages, created and edited alongside the developer.">
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+            <Input label="Privacy policy URL" defaultValue="/privacy" className="mono"/>
+            <Input label="Cookie policy URL" defaultValue="/cookies" className="mono"/>
+          </div>
+        </Row>
+      </Section>
+    </div>
+  </>;
+}
+
+/* ============================================================
+   VIEW: Users & Roles (spec §9)
+============================================================ */
+function UsersView(){
+  const users=[
+    {n:'Nawal Faisal',e:'nawal@manar.org',r:'Admin',last:'Just now'},
+    {n:'Faisal Al-Amri',e:'faisal@threems.sa',r:'Admin',last:'Today · 10:22'},
+    {n:'Sara Al-Qahtani',e:'sara@threems.sa',r:'Editor',last:'Yesterday'},
+    {n:'Reem Al-Otaibi',e:'reem@manar.org',r:'Editor',last:'3 days ago'},
+  ];
+  return <>
+    <ViewHeader title="Team & Permissions" sub="Role-based access so dashboard access can be shared safely across ThreeMS / Manar."
+      actions={<Button size="sm" leadingIcon={<I d={ICONS.add} size={14}/>}>Invite user</Button>}/>
+    <div style={{padding:'20px 32px'}}>
+      <Section title="Members" tight>
+        <div style={{margin:'0 -22px'}}>
+        <table className="tbl">
+          <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>2FA</th><th>Last active</th><th></th></tr></thead>
+          <tbody>
+            {users.map((u,i)=><tr key={i} className="row">
+              <td><div style={{display:'flex',gap:10,alignItems:'center'}}>
+                <div style={{width:32,height:32,borderRadius:'50%',background:'var(--brand-500)',color:'#fff',display:'inline-flex',alignItems:'center',justifyContent:'center',fontWeight:700}}>{u.n[0]}</div>
+                <div style={{fontWeight:600}}>{u.n}</div>
+              </div></td>
+              <td className="mono" style={{color:'var(--text-secondary)'}}>{u.e}</td>
+              <td><Badge tone={u.r==='Admin'?'brand':'neutral'} size="sm">{u.r}</Badge></td>
+              <td><Badge tone="success" size="sm" dot>On</Badge></td>
+              <td style={{color:'var(--text-muted)'}}>{u.last}</td>
+              <td><IconButton variant="ghost" size="sm" aria-label="Edit"><I d={ICONS.edit} size={14}/></IconButton></td>
+            </tr>)}
+          </tbody>
+        </table>
+        </div>
+      </Section>
+      <Section title="Roles">
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+          {[
+            {r:'Admin',c:['All content','Redirects, Integrations, Users','Site-wide settings, Security']},
+            {r:'Editor',c:['Pages, Collections, Media','No access to Integrations, Users, Security']},
+          ].map(x => <div key={x.r} style={{padding:16,border:'1px solid var(--border-subtle)',borderRadius:'var(--radius-md)'}}>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}><div style={{font:'var(--type-body)',fontWeight:600}}>{x.r}</div><Badge tone="neutral" size="sm">{x.r==='Admin'?'2 users':'2 users'}</Badge></div>
+            <ul style={{margin:0,paddingInlineStart:18,color:'var(--text-secondary)',font:'var(--type-body-sm)'}}>{x.c.map(l => <li key={l}>{l}</li>)}</ul>
+          </div>)}
+        </div>
+      </Section>
+    </div>
+  </>;
+}
+
+/* ============================================================
+   VIEW: Security (spec §13)
+============================================================ */
+function SecurityView(){
+  return <>
+    <ViewHeader title="Security"/>
+    <div style={{padding:'20px 32px'}}>
+      <Section title="Two-factor authentication (2FA)" sub="Required for all dashboard access.">
+        <Row label="Enforce 2FA for all users"><Switch defaultChecked label="On — required at every login"/></Row>
+        <Row label="Method"><Radio name="tfa" options={[{value:'app',label:'Authenticator app (TOTP)'},{value:'sms',label:'SMS code'}]} defaultValue="app"/></Row>
+        <Row label="Coverage">
+          <div style={{padding:12,background:'var(--bg-sunken)',borderRadius:'var(--radius-md)',display:'flex',gap:14,alignItems:'center'}}>
+            <div style={{width:36,height:36,borderRadius:'50%',background:'var(--brand-50)',color:'var(--brand-700)',display:'inline-flex',alignItems:'center',justifyContent:'center'}}><I d={ICONS.check}/></div>
+            <div style={{flex:1,font:'var(--type-body-sm)'}}>All 4 team members have 2FA active.</div>
+          </div>
+        </Row>
+      </Section>
+      <Section title="Session policy">
+        <Row label="Idle timeout"><Select defaultValue="60 minutes" options={['30 minutes','60 minutes','2 hours','8 hours']}/></Row>
+        <Row label="Sign out other sessions"><Button size="sm" variant="outline">Sign out all sessions</Button></Row>
+      </Section>
+      <Section title="Recent sign-ins">
+        <table className="tbl">
+          <thead><tr><th>User</th><th>When</th><th>IP</th><th>Device</th></tr></thead>
+          <tbody>
+            <tr><td>Nawal Faisal</td><td style={{color:'var(--text-muted)'}}>Just now</td><td className="mono">213.55.•••</td><td>MacBook · Chrome 126</td></tr>
+            <tr><td>Faisal Al-Amri</td><td style={{color:'var(--text-muted)'}}>Today · 10:22</td><td className="mono">86.51.•••</td><td>Windows · Edge</td></tr>
+            <tr><td>Sara Al-Qahtani</td><td style={{color:'var(--text-muted)'}}>Yesterday</td><td className="mono">94.203.•••</td><td>iPhone · Safari</td></tr>
+          </tbody>
+        </table>
+      </Section>
+    </div>
+  </>;
+}
+
+/* ============================================================
+   VIEW: Dashboard home
+============================================================ */
+function Home(){
+  const {go} = useCtx();
+  const kpis=[
+    {l:'Published pages',v:'42',s:'2 drafts · 1 unpublished'},
+    {l:'Articles',v:'18',s:'1 featured'},
+    {l:'News items',v:'11',s:'1 scheduled'},
+    {l:'Media assets',v:'126',s:'5 missing alt text'},
+  ];
+  const recent=[
+    {who:'Nawal F.',what:'Updated hero on “الصفحة الرئيسية”',when:'2m ago'},
+    {who:'Faisal A.',what:'Added redirect /programs/entrepreneurship → /programs/social-startup',when:'1h ago'},
+    {who:'Sara Q.',what:'Uploaded 3 images to Media Library',when:'Today · 09:14'},
+    {who:'Nawal F.',what:'Published article “قياس الأثر الاجتماعي”',when:'Yesterday'},
+  ];
+  return <>
+    <ViewHeader title="Dashboard" sub="Bedar CMS — v1 content administration for bedar.org"/>
+    <div style={{padding:'20px 32px'}}>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:14,marginBottom:20}}>
+        {kpis.map(k => <div key={k.l} style={{padding:18,background:'var(--bg-surface)',border:'1px solid var(--border-subtle)',borderRadius:'var(--radius-lg)',boxShadow:'var(--shadow-e1)'}}>
+          <div style={{font:'var(--type-caption)',color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'0.06em'}}>{k.l}</div>
+          <div style={{font:'var(--type-h2)',margin:'6px 0 2px',letterSpacing:'-0.02em'}}>{k.v}</div>
+          <div style={{font:'var(--type-caption)',color:'var(--text-secondary)'}}>{k.s}</div>
+        </div>)}
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'1.4fr 1fr',gap:16}}>
+        <Section title="Recent activity" sub="Content edits only — separate from Git history.">
+          <div style={{display:'flex',flexDirection:'column'}}>
+            {recent.map((r,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 0',borderBottom:i<recent.length-1?'1px solid var(--border-subtle)':'none'}}>
+              <div style={{width:32,height:32,borderRadius:'50%',background:'var(--brand-100)',color:'var(--brand-700)',display:'inline-flex',alignItems:'center',justifyContent:'center',fontWeight:700}}>{r.who[0]}</div>
+              <div style={{flex:1}}><div style={{font:'var(--type-body-sm)'}}>{r.what}</div><div style={{font:'var(--type-caption)',color:'var(--text-muted)'}}>{r.who} · {r.when}</div></div>
+            </div>)}
+          </div>
+        </Section>
+        <Section title="Jump in">
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+            {[
+              {t:'Edit a page',i:ICONS.pages,go:'pages'},
+              {t:'Write an article',i:ICONS.blog,go:'blog'},
+              {t:'Upload media',i:ICONS.media,go:'media'},
+              {t:'Add a redirect',i:ICONS.redirect,go:'redirects'},
+              {t:'Update FAQ',i:ICONS.faq,go:'faq'},
+              {t:'Global settings',i:ICONS.plug,go:'integrations'},
+            ].map(a => <button key={a.t} onClick={()=>go(a.go)} style={{textAlign:'left',padding:12,border:'1px solid var(--border-subtle)',borderRadius:'var(--radius-md)',background:'var(--bg-surface)',cursor:'pointer',display:'flex',gap:10,alignItems:'center'}}>
+              <div style={{width:32,height:32,borderRadius:'var(--radius-sm)',background:'var(--brand-50)',color:'var(--brand-700)',display:'inline-flex',alignItems:'center',justifyContent:'center'}}><I d={a.i} size={16}/></div>
+              <div style={{font:'var(--type-body-sm)',fontWeight:600}}>{a.t}</div>
+            </button>)}
+          </div>
+        </Section>
+      </div>
+    </div>
+  </>;
+}
+
+/* ============================================================
+   Shell
+============================================================ */
+function App(){
+  const [view,setView] = React.useState('home');
+  const [param,setParam] = React.useState(null);
+  const go = (v, p=null) => { setView(v); setParam(p); };
+
+  const items = [
+    {section:'Overview'},
+    {id:'home',label:'Dashboard',icon:<I d={ICONS.home}/>},
+    {section:'Content'},
+    {id:'pages',label:'Pages',icon:<I d={ICONS.pages}/>,badge:<Badge size="sm" tone="neutral">9</Badge>},
+    {id:'blog',label:'Blog & Articles',icon:<I d={ICONS.blog}/>,badge:<Badge size="sm" tone="warning">1★</Badge>},
+    {id:'news',label:'News',icon:<I d={ICONS.news}/>},
+    {id:'testimonials',label:'Testimonials',icon:<I d={ICONS.quote}/>},
+    {id:'faq',label:'FAQ',icon:<I d={ICONS.faq}/>},
+    {id:'media',label:'Media Library',icon:<I d={ICONS.media}/>,badge:<Badge size="sm" tone="warning">5</Badge>},
+    {section:'Global'},
+    {id:'nav',label:'Navbar & Footer',icon:<I d={ICONS.nav}/>},
+    {section:'Marketing'},
+    {id:'forms',label:'Forms & Submissions',icon:<I d={ICONS.forms}/>},
+    {id:'redirects',label:'Redirects',icon:<I d={ICONS.redirect}/>,badge:<Badge size="sm" tone="neutral">4</Badge>},
+    {section:'Settings'},
+    {id:'seo',label:'SEO & Sitemap',icon:<I d={ICONS.seo}/>},
+    {id:'schema',label:'Organization Schema',icon:<I d={ICONS.schema}/>},
+    {id:'integrations',label:'Integrations & Code',icon:<I d={ICONS.plug}/>},
+    {id:'cookies',label:'Cookie Consent',icon:<I d={ICONS.cookie}/>},
+    {id:'users',label:'Team & Permissions',icon:<I d={ICONS.users}/>},
+    {id:'security',label:'Security',icon:<I d={ICONS.lock}/>},
+  ];
+
+  const activeId = view==='page' ? 'pages' : view;
+
+  let body;
+  switch(view){
+    case 'home': body=<Home/>; break;
+    case 'pages': body=<PagesList/>; break;
+    case 'page': body=<PageEditor id={param}/>; break;
+    case 'blog': body=<CollectionList key_="blog"/>; break;
+    case 'news': body=<CollectionList key_="news"/>; break;
+    case 'testimonials': body=<TestimonialsList/>; break;
+    case 'faq': body=<FAQList/>; break;
+    case 'media': body=<MediaLibrary/>; break;
+    case 'nav': body=<NavFooter/>; break;
+    case 'forms': body=<FormsView/>; break;
+    case 'redirects': body=<RedirectsView/>; break;
+    case 'seo': body=<SeoView/>; break;
+    case 'schema': body=<SchemaView/>; break;
+    case 'integrations': body=<IntegrationsView/>; break;
+    case 'cookies': body=<CookiesView/>; break;
+    case 'users': body=<UsersView/>; break;
+    case 'security': body=<SecurityView/>; break;
+    default: body=<Home/>;
+  }
+
+  return <PageContext.Provider value={{go}}>
+    <div style={{display:'flex',height:'100vh',background:'var(--bg-sunken)',color:'var(--text-primary)',fontFamily:'var(--font-body)'}}>
+      <Sidebar
+        items={items}
+        activeId={activeId}
+        onSelect={id=>go(id)}
+        logo={<div style={{display:'flex',alignItems:'center',gap:10}}>
+          <div style={{width:28,height:28,borderRadius:8,background:'var(--brand-500)',color:'#fff',display:'inline-flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontFamily:'var(--font-display)'}}>ب</div>
+          <div><div style={{font:'var(--type-body-sm)',fontWeight:700,lineHeight:1}}>Bedar CMS</div><div style={{font:'var(--type-caption)',color:'var(--text-muted)'}}>bedar.org</div></div>
+        </div>}
+        footer={<div style={{display:'flex',gap:10,alignItems:'center',padding:'8px 12px'}}>
+          <div style={{width:32,height:32,borderRadius:'50%',background:'var(--brand-500)',color:'#fff',display:'inline-flex',alignItems:'center',justifyContent:'center',fontWeight:700}}>N</div>
+          <div style={{flex:1,minWidth:0}}><div style={{font:'var(--type-body-sm)',fontWeight:600}}>Nawal F.</div><div style={{font:'var(--type-caption)',color:'var(--text-muted)'}}>Admin · 2FA on</div></div>
+          <IconButton aria-label="Menu" size="sm" variant="ghost"><I d={ICONS.menu} size={16}/></IconButton>
+        </div>}/>
+      <main style={{flex:1,overflow:'auto',background:'var(--bg-sunken)'}}>{body}</main>
+    </div>
+  </PageContext.Provider>;
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script></body></html>

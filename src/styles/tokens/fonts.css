@@ -1,0 +1,15 @@
+/* ================================================================
+   BEDAR FONTS — Readex Pro is the sole typeface (Arabic + Latin).
+
+   NOTE — deliberate deviation from the design-system source file:
+   Upstream `tokens/fonts.css` does
+     @import url('https://fonts.googleapis.com/css2?family=Readex+Pro…');
+   A remote CSS @import creates a render-blocking waterfall
+   (app CSS → font CSS → font files). We load Readex Pro from
+   `index.html` instead, with `<link rel="preconnect">`, which is a
+   flat, faster request. This file is intentionally a no-op so the
+   font is requested exactly once.
+
+   If this project is ever detached from index.html, restore the
+   @import line above.
+   ================================================================ */

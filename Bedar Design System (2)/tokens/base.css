@@ -1,0 +1,20 @@
+/* Bedar base reset — imported after tokens. Readex Pro globally. */
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;font-feature-settings:"tnum" off,"lnum" 1}
+body{
+  background:var(--bg-app);
+  color:var(--text-primary);
+  font: var(--type-body);
+  font-feature-settings:"lnum" 1;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+a{color:var(--text-link);text-decoration:none;transition:color var(--dur-fast) var(--ease-standard)}
+a:hover{color:var(--text-link-hover);text-decoration:underline}
+button{font-family:inherit}
+img,svg{display:block;max-width:100%}
+:focus-visible{outline:none;box-shadow:var(--shadow-focus);border-radius:var(--radius-sm)}
+::selection{background:var(--brand-200);color:var(--brand-950)}
+/* Force Western digits inside Arabic surfaces — matches Bedar identity */
+[dir="rtl"], :lang(ar){font-feature-settings:"lnum" 1}

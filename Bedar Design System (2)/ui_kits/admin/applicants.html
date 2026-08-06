@@ -1,0 +1,75 @@
+<!-- @dsCard group="Admin Dashboard" viewport="1440x900" name="Applicants" subtitle="Table view with filters, tags, and status badges" -->
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8"><title>Bedar Admin · Applicants</title>
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+</head><body style="margin:0"><div id="root"></div>
+<script type="text/babel">
+const NS = window.BaydarDesignSystem_b7d248;
+const { Sidebar, Button, Badge, Input, Select, Tag, Table, Breadcrumbs, Tabs, IconButton, Checkbox } = NS;
+const Icon = ({d,size=18}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d={d} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+
+function App(){
+  const [tab,setTab] = React.useState('all');
+  const columns=[
+    {key:'sel',header:<Checkbox/>,render:()=><Checkbox/>},
+    {key:'applicant',header:'Applicant',render:r=><div style={{display:'flex',gap:10,alignItems:'center'}}><div style={{width:32,height:32,borderRadius:'50%',background:r.color,color:'#fff',display:'inline-flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:12}}>{r.name.split(' ').map(s=>s[0]).slice(0,2).join('')}</div><div><div style={{fontWeight:600}}>{r.name}</div><div style={{font:'var(--type-caption)',color:'var(--text-muted)'}}>{r.email}</div></div></div>},
+    {key:'program',header:'Program'},
+    {key:'stage',header:'Stage',render:r=><Badge tone={r.stage==='Accepted'?'success':r.stage==='Under review'?'warning':r.stage==='Rejected'?'error':'neutral'} dot>{r.stage}</Badge>},
+    {key:'tags',header:'Focus',render:r=><div style={{display:'flex',gap:4,flexWrap:'wrap'}}>{r.tags.map(t=><Tag key={t}>{t}</Tag>)}</div>},
+    {key:'date',header:'Submitted'},
+    {key:'actions',header:'',render:()=><IconButton aria-label="More"><Icon d="M12 5v.01M12 12v.01M12 19v.01" size={16}/></IconButton>}
+  ];
+  const rows=[
+    {name:'Nawal Fayez',email:'nawal@example.org',program:'Hackathon Gaza',stage:'Accepted',tags:['Rebuild','Tech'],date:'Feb 4',color:'#0E7C66'},
+    {name:'طارق حسان',email:'tariq@example.org',program:'Community Solutions',stage:'Under review',tags:['Media','Youth'],date:'Feb 6',color:'#C88739'},
+    {name:'الحارث العمري',email:'harith@example.org',program:'Second Program',stage:'Draft',tags:['Design'],date:'Feb 7',color:'#6E3D66'},
+    {name:'Dr. Mona Aitani',email:'mona@example.org',program:'Hackathon Gaza',stage:'Accepted',tags:['Research'],date:'Feb 8',color:'#2563C7'},
+    {name:'Mohamed Kahlani',email:'m.k@example.org',program:'Community Solutions',stage:'Rejected',tags:['Finance'],date:'Feb 9',color:'#82191F'},
+    {name:'Amira Saleh',email:'amira@example.org',program:'Second Program',stage:'Under review',tags:['Education','Rural'],date:'Feb 11',color:'#1E8E5A'},
+  ];
+
+  const sideItems=[
+    {section:'Workspace'},
+    {id:'home',label:'Dashboard',icon:<Icon d="M3 12l9-9 9 9M5 10v10h14V10"/>},
+    {id:'apps',label:'Applications',icon:<Icon d="M4 6h16M4 12h16M4 18h10"/>,badge:<Badge tone="brand" size="sm">24</Badge>},
+    {id:'progs',label:'Programs',icon:<Icon d="M12 2l3 7h7l-6 4 2 8-6-4-6 4 2-8-6-4h7z"/>},
+    {section:'Content'},
+    {id:'pages',label:'Pages',icon:<Icon d="M6 3h9l5 5v13a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z"/>},
+    {id:'blog',label:'Blog posts',icon:<Icon d="M4 4h16v16H4z"/>},
+    {id:'media',label:'Media library',icon:<Icon d="M3 7h18v13H3z"/>}
+  ];
+
+  return <div style={{display:'flex',height:'100vh'}}>
+    <Sidebar items={sideItems} activeId="apps" logo={<img src="../../assets/bedar-logo.svg" style={{height:22,color:'var(--brand-700)'}}/>}/>
+    <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden'}}>
+      <div style={{padding:'20px 32px',borderBottom:'1px solid var(--border-subtle)',background:'var(--bg-surface)'}}>
+        <Breadcrumbs items={[{label:'Home',href:'#'},{label:'Applications'}]}/>
+        <div style={{display:'flex',alignItems:'center',gap:12,marginTop:8}}>
+          <h1 style={{font:'var(--type-h2)',margin:0}}>Applications</h1>
+          <Badge tone="brand">24 open</Badge>
+          <div style={{marginLeft:'auto',display:'flex',gap:8}}>
+            <Button variant="ghost">Export CSV</Button>
+            <Button>New application</Button>
+          </div>
+        </div>
+      </div>
+      <div style={{padding:'0 32px',background:'var(--bg-surface)',borderBottom:'1px solid var(--border-subtle)'}}>
+        <Tabs value={tab} onChange={setTab} tabs={[{value:'all',label:'All (24)'},{value:'review',label:'Under review (9)'},{value:'accepted',label:'Accepted (6)'},{value:'draft',label:'Draft (5)'},{value:'rejected',label:'Rejected (4)'}]}/>
+      </div>
+      <div style={{padding:24,background:'var(--bg-sunken)',display:'flex',gap:12,alignItems:'center',borderBottom:'1px solid var(--border-subtle)'}}>
+        <div style={{flex:1,maxWidth:360}}><Input placeholder="Search applicants…" icon={<Icon d="M11 19a8 8 0 100-16 8 8 0 000 16zM21 21l-4.3-4.3" size={16}/>}/></div>
+        <div style={{width:200}}><Select options={['All programs','Hackathon Gaza','Community Solutions','Second Program']} defaultValue="All programs"/></div>
+        <div style={{width:180}}><Select options={['All stages','Draft','Under review','Accepted','Rejected']} defaultValue="All stages"/></div>
+      </div>
+      <div style={{flex:1,overflow:'auto',padding:24,background:'var(--bg-sunken)'}}>
+        <Table columns={columns} rows={rows} striped/>
+      </div>
+    </div>
+  </div>;
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script></body></html>

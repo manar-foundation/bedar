@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head>
+<meta charset="utf-8"><title>Bedar Design System · معاينة</title>
+<link rel="icon" href="assets/bedar-favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56"><rect width="56" height="56" fill="#022124"/><text x="28" y="34" font-family="sans-serif" font-size="20" fill="#A9E1D3" text-anchor="middle">بد</text></svg></template>
+<style>
+body{padding:56px 32px;max-width:1200px;margin:0 auto}
+.hero{position:relative;background:var(--brand-950);color:#fff;padding:56px 48px;border-radius:var(--radius-2xl);margin-bottom:40px;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:-20% -10% 10%;background:radial-gradient(ellipse 55% 55% at 50% 0%,rgba(169,225,211,0.28),transparent 60%);pointer-events:none}
+.hero>*{position:relative;z-index:1}
+.hero img{height:44px;filter:brightness(0) invert(1);margin-bottom:24px}
+.hero h1{font:var(--type-h1);margin:0 0 10px;letter-spacing:-.02em}
+.hero p{font:var(--type-body-lg);margin:0;color:rgba(255,255,255,0.72);max-width:640px;line-height:1.7}
+.hero .eyebrow{font:var(--type-overline);color:var(--brand-200);letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px;display:inline-block}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:40px}
+.card{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-card);padding:24px;text-decoration:none;color:inherit;transition:all var(--dur-fast) var(--ease-standard);display:flex;flex-direction:column;gap:10px}
+.card:hover{transform:translateY(-2px);box-shadow:var(--shadow-e2);text-decoration:none;border-color:var(--brand-200)}
+.card .tag{font:var(--type-overline);color:var(--brand-500);text-transform:uppercase;letter-spacing:.08em}
+.card h3{font:var(--type-h5);margin:0;color:var(--text-primary)}
+.card p{font:var(--type-body-sm);color:var(--text-secondary);margin:0;line-height:1.65}
+.card .arrow{margin-top:auto;color:var(--brand-600);font-weight:600;font-size:14px}
+h2{font:var(--type-h3);margin:40px 0 20px;display:flex;align-items:center;gap:12px}
+h2::before{content:"";width:6px;height:22px;background:var(--brand-500);border-radius:3px;display:inline-block}
+</style></head>
+<body>
+<div class="hero">
+  <div class="eyebrow">Bedar Design System</div>
+  <img src="assets/bedar-logo.svg" alt="Bedar">
+  <h1>نظام تصميم بدار</h1>
+  <p>نظام تصميم متكامل لمنصة بدار — الرموز اللونية والطباعية، المكونات، والقوالب الجاهزة للاستخدام في المشاريع الاستهلاكية.</p>
+</div>
+
+<h2>القوالب والواجهات</h2>
+<div class="grid">
+  <a class="card" href="ui_kits/marketing/index.html"><span class="tag">Marketing · RTL</span><h3>الصفحة الرئيسية</h3><p>هيرو داكن مع توهج، إحصاءات الأثر، الخدمات، البرامج، آراء الخبراء، والأسئلة الشائعة.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="ui_kits/admin/index.html"><span class="tag">Admin · Page Builder</span><h3>لوحة تحكم الإدارة</h3><p>محرر صفحات ثلاثي الأعمدة مع معاينة حية وحقول مخطط JSON.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="ui_kits/admin/applicants.html"><span class="tag">Admin · Table</span><h3>المتقدمون</h3><p>جدول قابل للفلترة مع علامات وحالات وإجراءات جماعية.</p><span class="arrow">افتح ←</span></a>
+</div>
+
+<h2>الأسس</h2>
+<div class="grid">
+  <a class="card" href="foundations/colors-brand.card.html"><span class="tag">Colors</span><h3>الألوان — Teal</h3><p>سلم الألوان الأساسي من 25 إلى 950، مع #407479 كلون أساسي و#022124 كلون داكن عميق.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="foundations/colors-accent.card.html"><span class="tag">Colors</span><h3>الأكسنت الدافئ</h3><p>لون واحد دافئ (Bronze) مخصّص للأزرار الرئيسية فقط.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="foundations/colors-dark.card.html"><span class="tag">Colors</span><h3>الأسطح الداكنة</h3><p>معالجة الهيرو: خلفية brand-950 مع توهج أخضر نعناعي — تُستخدم بحرص.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="foundations/colors-neutrals.card.html"><span class="tag">Colors</span><h3>المحايدة</h3><p>سلم رمادي مع ميلان طفيف نحو التيل ليتناغم مع الهوية.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="foundations/colors-semantic.card.html"><span class="tag">Colors</span><h3>الدلالية</h3><p>نجاح · تحذير · خطأ · معلومات.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="foundations/type-display.card.html"><span class="tag">Type</span><h3>Readex Pro</h3><p>الخط الوحيد في النظام — يغطي العربية واللاتينية معاً.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="foundations/type-scale.card.html"><span class="tag">Type</span><h3>سلم الأحجام</h3><p>Modular 1.200 من 11 إلى 76 بكسل.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="foundations/type-mono.card.html"><span class="tag">Type</span><h3>الأرقام الغربية</h3><p>أرقام Western (0-9) فقط، حتى داخل النصوص العربية.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="foundations/spacing-scale.card.html"><span class="tag">Spacing</span><h3>شبكة 8 بكسل</h3><p>سلم المسافات الكامل.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="foundations/shadows.card.html"><span class="tag">Elevation</span><h3>الظلال</h3><p>أربعة مستويات ارتفاع بظلال متمازجة مع التيل الداكن.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="foundations/brand-logo.card.html"><span class="tag">Brand</span><h3>الشعار</h3><p>شعار بدار على خلفية داكنة متوهجة وخلفية فاتحة.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="foundations/brand-voice.card.html"><span class="tag">Brand</span><h3>الصوت واللهجة</h3><p>دافئ، جدير بالثقة، بضمير الجمع، بلا مبالغات.</p><span class="arrow">افتح ←</span></a>
+</div>
+
+<h2>المكونات</h2>
+<div class="grid">
+  <a class="card" href="components/core/buttons.card.html"><span class="tag">Core</span><h3>Buttons</h3><p>خمس صيغ، ثلاثة أحجام، جميع الحالات.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="components/core/badges.card.html"><span class="tag">Core</span><h3>Badges & Tags</h3><p>شارات دلالية ووسوم قابلة للإزالة.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="components/forms/forms.card.html"><span class="tag">Forms</span><h3>عناصر النموذج</h3><p>Input · Select · Checkbox · Radio · Switch.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="components/forms/upload.card.html"><span class="tag">Forms</span><h3>رفع الملفات</h3><p>سحب وإفلات مع معاينة.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="components/surfaces/cards.card.html"><span class="tag">Surfaces</span><h3>البطاقات</h3><p>مستويات ارتفاع 1 إلى 4.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="components/surfaces/modal.card.html"><span class="tag">Surfaces</span><h3>Modal</h3><p>حوار مع خلفية ضبابية.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="components/navigation/navbar.card.html"><span class="tag">Navigation</span><h3>Navbar</h3><p>شريط علوي تسويقي.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="components/navigation/sidebar.card.html"><span class="tag">Navigation</span><h3>Sidebar</h3><p>شريط جانبي للإدارة.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="components/data/table.card.html"><span class="tag">Data</span><h3>Table</h3><p>جدول بيانات مرن.</p><span class="arrow">افتح ←</span></a>
+</div>
+
+<h2>الوثائق</h2>
+<div class="grid">
+  <a class="card" href="readme.md"><span class="tag">Docs</span><h3>readme.md</h3><p>الدليل الكامل، الأسس، والتفاصيل التقنية.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="design-tokens.json"><span class="tag">Tokens</span><h3>design-tokens.json</h3><p>تصدير قابل للقراءة الآلية لكل الرموز.</p><span class="arrow">افتح ←</span></a>
+  <a class="card" href="styles.css"><span class="tag">CSS</span><h3>styles.css</h3><p>نقطة الدخول الوحيدة للنظام.</p><span class="arrow">افتح ←</span></a>
+</div>
+
+</body></html>

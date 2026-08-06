@@ -1,0 +1,86 @@
+/* ================================================================
+   RTL — Bedar is Arabic-first. `dir="rtl"` is the default on <html>,
+   not a variant bolted on afterwards.
+
+   RULES FOR THIS CODEBASE
+   ----------------------------------------------------------------
+   Use Tailwind's LOGICAL utilities everywhere. They already flip:
+     ps-*  pe-*      instead of  pl-*  pr-*
+     ms-*  me-*      instead of  ml-*  mr-*
+     start-* end-*   instead of  left-* right-*
+     border-s-*      instead of  border-l-*
+     rounded-s-*     instead of  rounded-l-*
+     text-start/end  instead of  text-left/right
+   Physical utilities (pl-, mr-, left-, text-left) are reserved for
+   things that must NOT flip — e.g. Latin code blocks, LTR numbers,
+   embedded charts.
+
+   For the rare component that genuinely differs per direction,
+   Tailwind v4 ships `rtl:` and `ltr:` variants — use those rather
+   than writing a mirrored stylesheet.
+   ================================================================ */
+
+@layer base {
+  /* Latin / numeric runs inside Arabic prose keep LTR ordering
+     without breaking the paragraph flow. Apply with .ltr-run */
+  .ltr-run {
+    direction: ltr;
+    unicode-bidi: isolate;
+    display: inline-block;
+  }
+
+  /* Bidi-safe isolation for user-generated fragments of unknown
+     direction (article titles, imported names, URLs). */
+  .bidi-auto {
+    unicode-bidi: isolate;
+    direction: auto;
+  }
+
+  /* Flip an icon horizontally in RTL.
+     ----------------------------------------------------------------
+     Use this ONLY for icons drawn for LTR whose meaning is directional
+     but whose name is not — LogOut, Reply, Redo, Share, TrendingUp.
+     In RTL those must point the other way.
+
+     Do NOT use it on named arrows. `ArrowLeft` is literally a
+     left-pointing glyph, and in RTL "forward / next" IS leftward — so
+     a next-CTA uses <ArrowLeft> plain, and a back-CTA uses
+     <ArrowRight> plain. Adding .mirror-rtl to either one reverses the
+     meaning.
+
+     Never use it on logos, spirals, avatars, play buttons, or
+     photographs. */
+  [dir='rtl'] .mirror-rtl {
+    transform: scaleX(-1);
+  }
+}
+
+@layer components {
+  /* The Bedar page container: 1280px max, 8px-grid gutters. */
+  .container-page {
+    width: 100%;
+    max-width: var(--layout-xl);
+    margin-inline: auto;
+    padding-inline: var(--space-4);
+  }
+  @media (min-width: 768px) {
+    .container-page {
+      padding-inline: var(--space-7);
+    }
+  }
+  @media (min-width: 1280px) {
+    .container-page {
+      padding-inline: var(--space-9);
+    }
+  }
+
+  /* Standard vertical rhythm for a marketing section: 80–96px. */
+  .section-y {
+    padding-block: var(--space-11);
+  }
+  @media (min-width: 1024px) {
+    .section-y {
+      padding-block: var(--space-12);
+    }
+  }
+}

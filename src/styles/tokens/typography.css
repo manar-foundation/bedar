@@ -1,0 +1,77 @@
+/* ================================================================
+   BEDAR TYPOGRAPHY — Readex Pro only, Arabic-first.
+   Readex Pro is a variable typeface covering Arabic + Latin natively,
+   used across headings, body, UI, and numerics. Numerals: Western (0-9) only.
+   Scale is a modular 1.200 (minor third) anchored at 16px.
+   ================================================================ */
+:root {
+  /* Family — single typeface, Latin fallbacks only for missing glyphs */
+  --font-display: 'Readex Pro', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Readex Pro', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Readex Pro', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Numerals — Western digits ONLY (no Arabic-Indic), tabular for stats */
+  --num-features: tnum; /* @kind other */
+  --num-features-prop: pnum; /* @kind other */
+
+  /* Weights */
+  --fw-light: 300; /* @kind font */
+  --fw-regular: 400; /* @kind font */
+  --fw-medium: 500; /* @kind font */
+  --fw-semibold: 600; /* @kind font */
+  --fw-bold: 700; /* @kind font */
+
+  /* Size scale — modular 1.200, base 16 */
+  --fs-2xs: 11px;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-md: 14px;
+  --fs-base: 16px;
+  --fs-lg: 18px;
+  --fs-xl: 20px;
+  --fs-2xl: 24px;
+  --fs-3xl: 30px;
+  --fs-4xl: 36px;
+  --fs-5xl: 48px;
+  --fs-6xl: 60px;
+  --fs-7xl: 76px;
+
+  /* Line heights — Readex Pro is compact, Arabic body reads well at 1.75 */
+  --lh-tight: 1.15; /* @kind font */
+  --lh-snug: 1.3; /* @kind font */
+  --lh-normal: 1.55; /* @kind font */
+  --lh-relaxed: 1.8; /* @kind font */
+
+  /* Tracking */
+  --ls-tight: -0.02em; /* @kind font */
+  --ls-normal: 0em; /* @kind font */
+  --ls-wide: 0.02em; /* @kind font */
+  --ls-caps: 0.06em; /* @kind font */
+
+  /* Semantic roles (responsive via clamp) */
+  --type-display-1: var(--fw-bold) clamp(48px, 6vw, 76px)/var(--lh-tight) var(--font-display);
+  --type-display-2: var(--fw-bold) clamp(36px, 4.5vw, 60px)/var(--lh-tight) var(--font-display);
+  --type-h1: var(--fw-bold) clamp(30px, 3.4vw, 48px)/var(--lh-snug) var(--font-display);
+  --type-h2: var(--fw-bold) clamp(24px, 2.6vw, 36px)/var(--lh-snug) var(--font-display);
+  --type-h3: var(--fw-semibold) clamp(20px, 2vw, 24px)/var(--lh-snug) var(--font-display);
+  --type-h4: var(--fw-semibold) 20px/var(--lh-snug) var(--font-display);
+  --type-h5: var(--fw-semibold) 18px/var(--lh-snug) var(--font-display);
+  --type-h6: var(--fw-semibold) 16px/var(--lh-snug) var(--font-display);
+
+  --type-body-lg: var(--fw-regular) 18px/var(--lh-relaxed) var(--font-body);
+  --type-body: var(--fw-regular) 16px/var(--lh-normal) var(--font-body);
+  --type-body-sm: var(--fw-regular) 14px/var(--lh-normal) var(--font-body);
+  --type-caption: var(--fw-medium) 12px/var(--lh-normal) var(--font-body);
+  --type-label: var(--fw-semibold) 13px/1.2 var(--font-body);
+  --type-button: var(--fw-semibold) 14px/1 var(--font-display);
+  --type-overline: var(--fw-semibold) 11px/1.2 var(--font-display);
+
+  /* Stat number role — large, bold, tabular Western digits */
+  --type-stat: var(--fw-bold) clamp(48px, 5vw, 72px)/1 var(--font-display);
+}
+
+/* Arabic-aware body — same font, slightly looser leading */
+:root:lang(ar),
+[dir='rtl'] {
+  --lh-normal: 1.7; /* @kind font */
+}
