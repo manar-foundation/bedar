@@ -10,41 +10,106 @@ import { cn } from '@utils/cn.js';
  * marketing pages, so it is one component fed by page data rather
  * than four near-identical copies.
  *
- * Uses the dark treatment — allowed here because it carries a
- * heading and a button, not long-form body copy.
+ * AN INSET PANEL, NOT A FULL-BLEED STRIP
+ * ----------------------------------------------------------------
+ * This used to be a centred stack on a full-width dark band. On a
+ * site that is already one continuous dark surface, a full-bleed
+ * dark band is invisible — it ends the page with no edge at all.
+ * Both reference layouts close on a PANEL (Embrace Center's
+ * `cta-1-type-wrapper`, 50px of padding inside a rounded card), and
+ * that panel edge is what makes the last thing on the page read as
+ * a deliberate destination rather than as more page.
+ *
+ * `align="split"` (the default) puts the copy on the inline-start and
+ * the buttons opposite it, which is the shape when there are two
+ * actions. `align="center"` keeps the old centred stack for a band
+ * that carries a single action.
  */
-export function CtaBand({ eyebrow, title, cta, className }) {
+export function CtaBand({ eyebrow, title, lede, cta, secondaryCta, align = 'split', className }) {
+  const centered = align === 'center';
+
   return (
-    <section className={cn('surface-dark relative overflow-hidden', className)}>
-      <div className="container-page py-16 lg:py-20">
-        <div className="mx-auto flex max-w-2xl flex-col items-center gap-5 text-center">
-          <Reveal>
-            <Spiral className="size-9 text-brand-200" />
-          </Reveal>
+    <section className={cn('relative', className)}>
+      <div className="container-page section-y">
+        <div
+          className={cn(
+            'panel-inset px-7 py-12 sm:px-10 sm:py-14 lg:px-16 lg:py-20',
+            centered && 'text-center',
+          )}
+        >
+          {/* The mark as a watermark bled off the inline-end corner,
+              the same treatment BrandCard uses — it ties the closing
+              panel to the cards the reader has just scrolled past. */}
+          <Spiral
+            aria-hidden="true"
+            className="pointer-events-none absolute -top-8 size-44 text-brand-200/[0.07] end-6"
+          />
 
-          {eyebrow ? (
-            <Reveal as="p" delay={1} className="text-xs font-semibold tracking-wide text-brand-200">
-              {eyebrow}
-            </Reveal>
-          ) : null}
+          <div
+            className={cn(
+              'relative flex flex-col gap-8',
+              !centered && 'lg:flex-row lg:items-end lg:justify-between lg:gap-16',
+            )}
+          >
+            <div
+              className={cn(
+                'flex flex-col gap-4',
+                centered ? 'mx-auto max-w-2xl items-center' : 'max-w-xl',
+              )}
+            >
+              <Reveal>
+                <Spiral className="size-8 text-brand-200" />
+              </Reveal>
 
-          <Reveal delay={2}>
-            <h2 className="text-2xl font-bold text-white md:text-3xl">{title}</h2>
-          </Reveal>
+              {eyebrow ? (
+                <Reveal
+                  as="p"
+                  delay={1}
+                  className="text-xs font-semibold tracking-wide text-brand-200"
+                >
+                  {eyebrow}
+                </Reveal>
+              ) : null}
 
-          {cta ? (
-            <Reveal delay={3} className="mt-2">
-              {/* ArrowLeft unmirrored — in RTL "forward" is leftward. */}
-              <Button
-                variant="accent"
-                size="lg"
-                to={cta.href}
-                iconEnd={<ArrowLeft className="size-4" aria-hidden="true" />}
+              <Reveal delay={2}>
+                <h2 className="text-2xl font-bold leading-snug text-white md:text-3xl lg:text-4xl">
+                  {title}
+                </h2>
+              </Reveal>
+
+              {lede ? (
+                <Reveal as="p" delay={3} className="text-base leading-relaxed text-brand-100/80">
+                  {lede}
+                </Reveal>
+              ) : null}
+            </div>
+
+            {cta ? (
+              <Reveal
+                delay={4}
+                className={cn(
+                  'flex shrink-0 flex-col gap-3 sm:flex-row',
+                  centered ? 'items-center justify-center' : 'items-start lg:items-center',
+                )}
               >
-                {cta.label}
-              </Button>
-            </Reveal>
-          ) : null}
+                {/* ArrowLeft unmirrored — in RTL "forward" is leftward. */}
+                <Button
+                  variant="accent"
+                  size="lg"
+                  to={cta.href}
+                  iconEnd={<ArrowLeft className="size-4" aria-hidden="true" />}
+                >
+                  {cta.label}
+                </Button>
+
+                {secondaryCta ? (
+                  <Button variant="inverse" size="lg" to={secondaryCta.href}>
+                    {secondaryCta.label}
+                  </Button>
+                ) : null}
+              </Reveal>
+            ) : null}
+          </div>
         </div>
       </div>
     </section>

@@ -61,7 +61,9 @@ export function FeatureGrid({
               ) : null}
               <h3 className="text-xl font-semibold text-ink">{feature.title}</h3>
               {feature.description ? (
-                <p className="text-sm leading-relaxed text-ink-secondary">{feature.description}</p>
+                <p className="text-base leading-relaxed text-ink-secondary">
+                  {feature.description}
+                </p>
               ) : null}
             </Card>
           </Reveal>

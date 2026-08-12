@@ -42,6 +42,10 @@ export default function Login() {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  // The recovery note is collapsed by default: it is three sentences
+  // that only the locked-out reader needs, and the code step should
+  // stay a single field for everyone else.
+  const [showRecovery, setShowRecovery] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -145,6 +149,39 @@ export default function Login() {
               <p className="text-xs leading-relaxed text-ink-muted">
                 افتح تطبيق المصادقة على هاتفك وأدخل الرمز المكوّن من 6 أرقام.
               </p>
+
+              {/* A real <button aria-expanded> rather than
+                  <details>/<summary>, for the same reason `Accordion`
+                  avoids them: the marker is inconsistent to style
+                  across engines, and it sits at the inline-start edge
+                  where RTL makes it read as a bullet. */}
+              <button
+                type="button"
+                onClick={() => setShowRecovery((current) => !current)}
+                aria-expanded={showRecovery}
+                aria-controls="mfa-recovery"
+                className="self-start text-xs font-semibold text-ink-secondary underline-offset-4 hover:text-ink hover:underline"
+              >
+                فقدت تطبيق المصادقة؟
+              </button>
+
+              {showRecovery ? (
+                <div
+                  id="mfa-recovery"
+                  className="flex flex-col gap-2 rounded-md border border-subtle bg-sunken px-4 py-3 text-xs leading-relaxed text-ink-secondary"
+                >
+                  <p>
+                    الرمز يولّده تطبيق المصادقة على هاتفك، ولا يصلك عبر البريد أو رسالة نصية.
+                    التسجيل محفوظ في الهاتف لا في الكمبيوتر، لذلك تدخل من أي جهاز بالتطبيق نفسه دون
+                    مسح رمز جديد.
+                  </p>
+                  <p>
+                    رمز الاستجابة السريعة يُعرض مرة واحدة فقط عند تسجيل التطبيق، ولا يمكن عرضه هنا
+                    مرة أخرى. إن فقدت الهاتف أو حذفت التطبيق، اطلب من أحد المديرين إزالة تطبيق
+                    المصادقة من حسابك، وسنطلب منك تسجيل تطبيق جديد عند أول دخول.
+                  </p>
+                </div>
+              ) : null}
             </div>
 
             {error ? (

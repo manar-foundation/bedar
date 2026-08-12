@@ -12,6 +12,16 @@
 [build.environment]
   NODE_VERSION = "22"
 
+# ── Canonical program path ──────────────────────────────────────
+# The detail path is unified on the plural /programs/:slug. The
+# legacy singular /program/:slug 301s to it so crawlers see one
+# canonical URL (the app also redirects client-side — see routes.jsx).
+# Must come BEFORE the SPA fallback to win over it.
+[[redirects]]
+  from = "/program/*"
+  to = "/programs/:splat"
+  status = 301
+
 # ── SPA fallback ────────────────────────────────────────────────
 # React Router owns every path. Without this, a hard refresh on
 # /programs asks Netlify for a file that does not exist and returns

@@ -54,10 +54,10 @@ export async function loadBody(slug) {
 }
 
 /* ── Programs ─────────────────────────────────────────────────
-   `status` drives the filter tabs on /programs. `href` keeps the
-   live path shape: the first uses /programs/:slug and the other two
-   /program/:slug. Both are routed (see routes.jsx) so no inbound
-   link 404s during the migration. ──────────────────────────── */
+   `status` drives the filter tabs on /programs. Every program links
+   under the canonical /programs/:slug — the path shape is unified
+   (the live site's inconsistent /program/:slug is kept only as a 301
+   alias in routes.jsx so old inbound links don't 404). ────────── */
 const rawPrograms = [
   {
     id: 'hackathon',
@@ -74,7 +74,7 @@ const rawPrograms = [
   {
     id: 'community-solutions-challenge',
     slug: 'community-solutions-challenge',
-    href: '/program/community-solutions-challenge',
+    href: '/programs/community-solutions-challenge',
     title: 'تحدي الحلول المجتمعية لمواجهة الكوارث والأزمات 2023',
     category: 'البرامج السابقة',
     status: 'past',
@@ -86,7 +86,7 @@ const rawPrograms = [
   {
     id: 'bedar-second-entrepreneurial-program',
     slug: 'bedar-second-entrepreneurial-program',
-    href: '/program/bedar-second-entrepreneurial-program',
+    href: '/programs/bedar-second-entrepreneurial-program',
     title: 'برنامج بدار الريادي الثاني 2021 - 2022',
     category: 'البرامج السابقة',
     status: 'past',

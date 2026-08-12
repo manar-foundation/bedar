@@ -21,8 +21,12 @@ import { cn } from '@utils/cn.js';
    deliberate act.
    ================================================================ */
 
+/* `btn-press` is the reference template's button hover — it scales
+   DOWN rather than lifting. The rule lives in layout.css scoped to
+   `.public-site`, so this class is inert inside the dashboard and the
+   admin buttons keep the behaviour they have. */
 const base =
-  'relative inline-flex shrink-0 select-none items-center justify-center gap-2 whitespace-nowrap ' +
+  'btn-press relative inline-flex shrink-0 select-none items-center justify-center gap-2 whitespace-nowrap ' +
   'rounded-md font-semibold no-underline align-middle ' +
   'transition-[background-color,border-color,color,box-shadow,transform] ' +
   'duration-(--dur-fast) ease-(--ease-standard) ' +

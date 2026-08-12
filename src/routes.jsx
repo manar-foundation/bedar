@@ -1,8 +1,17 @@
 import { lazy } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 
 import PublicLayout from '@layouts/PublicLayout.jsx';
 import ScrollToTop from '@components/layout/ScrollToTop.jsx';
+
+/* Canonical redirect for the legacy singular path. A client-side
+   `replace` navigation keeps the old link working while landing the
+   visitor on /programs/:slug; the Netlify layer issues the real 301
+   for crawlers (Phase 6). */
+function ProgramRedirect() {
+  const { slug } = useParams();
+  return <Navigate to={`/programs/${slug}`} replace />;
+}
 
 /* ── Public pages — eager for the home route, lazy for the rest.
       Home is the overwhelming majority of traffic; making it lazy
@@ -54,10 +63,12 @@ export default function AppRoutes() {
           <Route path="social-entrepreneurship" element={<SocialEntrepreneurship />} />
           <Route path="programs" element={<Programs />} />
           <Route path="programs/:slug" element={<ProgramDetail />} />
-          {/* The live site uses both /programs/… and /program/… for
-              detail pages. Keep the singular as an alias so no inbound
-              link 404s; the Redirects manager (Phase 5) can retire it. */}
-          <Route path="program/:slug" element={<ProgramDetail />} />
+          {/* The live site linked some detail pages under the singular
+              /program/:slug. The path is now unified on the plural
+              /programs/:slug, so the singular 301-redirects to it —
+              old inbound links resolve to the canonical URL rather than
+              silently rendering a second path for the same page. */}
+          <Route path="program/:slug" element={<ProgramRedirect />} />
           <Route path="services" element={<Services />} />
           <Route path="blog" element={<Blog />} />
           <Route path="blog/:slug" element={<ArticleDetail />} />

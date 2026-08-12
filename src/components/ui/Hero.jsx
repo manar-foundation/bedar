@@ -49,6 +49,13 @@ export function Hero({
   title,
   subtitle,
   actions,
+  /** A short proof line under the actions — the reference layout's
+      `.info-clients-home-1-wrapper` ("5,000+ families / empowered
+      through donations"). One figure and its caption, no more: it is
+      the thing a visitor scans for before they read anything else,
+      and the full set of numbers still gets its own band further
+      down. Pass `{ value, label }`. */
+  proof,
   /** Artwork for the second column — e.g. <HeroEmblem />. */
   visual,
   /** Kept for the older call sites that pass a framed image. */
@@ -92,7 +99,7 @@ export function Hero({
         aria-hidden="true"
         className="container-page pointer-events-none absolute inset-x-0 top-(--nav-h) z-10"
       >
-        <SpiralDivider className={dark ? 'text-white/20' : 'text-brand-300/50'} />
+        <SpiralDivider className={dark ? 'text-brand-200/45' : 'text-brand-300/50'} />
       </div>
 
       <div
@@ -104,7 +111,12 @@ export function Hero({
               // centred, so it reads as a proper landing band rather than
               // a short strip. Mobile keeps simple top/bottom padding.
               'pt-[calc(var(--nav-h)+2rem)] pb-16 lg:flex lg:min-h-[88vh] lg:items-center lg:pt-[calc(var(--nav-h)+3rem)] lg:pb-20'
-            : 'pt-[calc(var(--nav-h)+2.5rem)] pb-20 lg:pt-[calc(var(--nav-h)+4rem)] lg:pb-28',
+            : // The centred title band every INTERIOR page uses. The
+              // brief called its top/bottom spacing too tight, so it is
+              // widened here — one place, so every interior hero gets the
+              // same generous, identical clearance (homepage uses the
+              // split branch above and is unaffected).
+              'pt-[calc(var(--nav-h)+4rem)] pb-24 lg:pt-[calc(var(--nav-h)+7rem)] lg:pb-36',
         )}
       >
         <div
@@ -142,7 +154,13 @@ export function Hero({
             <RevealOnMount delay={2}>
               <h1
                 className={cn(
-                  'text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl',
+                  'font-bold tracking-tight',
+                  // The reference sets its h1 at 74px on a 0.9 leading.
+                  // The size ports; the leading does not — Arabic at 0.9
+                  // collides line to line. 1.18 is the floor that holds.
+                  split
+                    ? 'text-[2.5rem] leading-[1.18] sm:text-6xl lg:text-[4.25rem]'
+                    : 'text-4xl leading-[1.2] sm:text-5xl lg:text-6xl',
                   dark ? 'text-white' : 'text-ink',
                 )}
               >
@@ -173,6 +191,27 @@ export function Hero({
                 )}
               >
                 {actions}
+              </RevealOnMount>
+            ) : null}
+
+            {/* The proof line, separated from the actions by a
+                hairline rather than by more space — the reference
+                divides them the same way, and on a dark surface a
+                rule is the only separator that reads at all. */}
+            {proof ? (
+              <RevealOnMount
+                delay={5}
+                className={cn(
+                  'mt-10 flex items-center gap-4 border-t border-subtle pt-6',
+                  centered && 'justify-center',
+                )}
+              >
+                <span className="text-3xl font-bold tabular-nums text-brand-200">
+                  <span className="ltr-run">{proof.value}</span>
+                </span>
+                <span className="max-w-[16rem] text-sm leading-relaxed text-ink-secondary">
+                  {proof.label}
+                </span>
               </RevealOnMount>
             ) : null}
           </div>

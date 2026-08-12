@@ -74,13 +74,16 @@
     }
   }
 
-  /* Standard vertical rhythm for a marketing section: 80–96px. */
+  /* Standard vertical rhythm for a marketing section: 96–120px.
+     Every marketing section uses this one class, so the spacing is
+     identical section-to-section — the brief asked for consistent,
+     roomier bands (the previous 80–96px read as crowded). */
   .section-y {
-    padding-block: var(--space-11);
+    padding-block: var(--space-12);
   }
   @media (min-width: 1024px) {
     .section-y {
-      padding-block: var(--space-12);
+      padding-block: var(--space-13);
     }
   }
 }

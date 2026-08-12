@@ -1,13 +1,25 @@
 import { Mail, Phone } from 'lucide-react';
 
-import { Card, Hero, SectionHeading } from '@components/ui';
+import { Hero, Section, SectionHeading } from '@components/ui';
 import { ContactForm } from '@components/layout/ContactForm.jsx';
 import { Reveal } from '@components/motion/Reveal.jsx';
 import { useContent } from '@context/ContentContext.jsx';
 import { useSeo } from '@hooks/useSeo.js';
 import { contact } from '@content/pages.js';
 
-/** تواصل معنا — the contact form plus the direct channels. */
+/**
+ * تواصل معنا — the contact form plus the direct channels.
+ *
+ * LAYOUT
+ * ----------------------------------------------------------------
+ * On Consult's contact section, adapted: an information column
+ * separated by hairline dividers on one side, the form held in a
+ * panel on the other. The channels used to be two bordered cards
+ * stacked in a column, which put three competing card edges (channel,
+ * channel, form) in one band. Dividers give the column its structure
+ * without adding another box, so the form panel is the only framed
+ * element in the section — and therefore reads as the thing to do.
+ */
 export default function Contact() {
   const { settings } = useContent();
   useSeo(contact.seo);
@@ -16,59 +28,66 @@ export default function Contact() {
     <>
       <Hero title={contact.hero.title} subtitle={contact.hero.subtitle} showSpiral={false} />
 
-      <section className="container-page section-y">
-        <div className="grid items-start gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
+      <Section>
+        <div className="grid items-start gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           {/* ── Channels ────────────────────────────────────── */}
-          <div>
-            <SectionHeading title={contact.intro.title} align="start" />
+          {/* `.sticky-col` carries its own `lg` media query — it is a
+              no-op below that, where the two halves stack. */}
+          <div className="sticky-col">
+            <SectionHeading title={contact.intro.title} layout="aside" lede={contact.intro.body} />
 
-            <Reveal as="p" delay={1} className="mt-4 leading-relaxed text-ink-secondary">
-              {contact.intro.body}
-            </Reveal>
+            <Reveal className="rule-fade my-9 block w-full" />
 
-            <Reveal as="p" delay={2} className="mt-8 text-sm font-semibold text-ink">
+            <Reveal as="p" delay={1} className="text-sm font-semibold text-ink">
               {contact.intro.channelsLabel}
             </Reveal>
 
-            <div className="mt-5 flex flex-col gap-4">
-              <Reveal delay={3}>
-                <Card elevation={0} className="flex-row items-center gap-4 p-5">
-                  <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-md bg-brand-50 text-brand-600">
-                    <Mail className="size-5" aria-hidden="true" />
+            {/* Each channel is a row with an icon, not a card. The
+                form panel opposite is the only framed surface here. */}
+            <ul className="mt-6 flex flex-col gap-6">
+              {[
+                {
+                  id: 'email',
+                  icon: Mail,
+                  label: contact.channels.emailLabel,
+                  value: settings.email,
+                  href: `mailto:${settings.email}`,
+                },
+                {
+                  id: 'phone',
+                  icon: Phone,
+                  label: contact.channels.phoneLabel,
+                  value: contact.channels.phone,
+                  // tel: needs the number unspaced; the visible text
+                  // keeps the readable grouping.
+                  href: `tel:${contact.channels.phone.replace(/\s/g, '')}`,
+                },
+              ].map((channel, index) => (
+                <Reveal
+                  as="li"
+                  key={channel.id}
+                  delay={index + 2}
+                  className="flex items-center gap-4"
+                >
+                  <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl bg-tint-brand text-tint-brand-fg ring-1 ring-tint-brand-ring">
+                    <channel.icon className="size-5" aria-hidden="true" />
                   </span>
-                  <span className="flex flex-col">
-                    <span className="text-xs text-ink-muted">{contact.channels.emailLabel}</span>
+                  <span className="flex flex-col gap-0.5">
+                    <span className="text-xs text-ink-muted">{channel.label}</span>
                     <a
-                      href={`mailto:${settings.email}`}
-                      className="text-sm font-medium text-ink no-underline hover:text-brand-600"
+                      href={channel.href}
+                      className="text-base font-medium text-ink no-underline transition-colors duration-(--dur-fast) hover:text-brand-200"
                     >
-                      <span className="ltr-run">{settings.email}</span>
+                      <span className="ltr-run">{channel.value}</span>
                     </a>
                   </span>
-                </Card>
-              </Reveal>
+                </Reveal>
+              ))}
+            </ul>
 
-              <Reveal delay={4}>
-                <Card elevation={0} className="flex-row items-center gap-4 p-5">
-                  <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-md bg-brand-50 text-brand-600">
-                    <Phone className="size-5" aria-hidden="true" />
-                  </span>
-                  <span className="flex flex-col">
-                    <span className="text-xs text-ink-muted">{contact.channels.phoneLabel}</span>
-                    {/* tel: needs the number unspaced; the visible
-                        text keeps the readable grouping. */}
-                    <a
-                      href={`tel:${contact.channels.phone.replace(/\s/g, '')}`}
-                      className="text-sm font-medium text-ink no-underline hover:text-brand-600"
-                    >
-                      <span className="ltr-run">{contact.channels.phone}</span>
-                    </a>
-                  </span>
-                </Card>
-              </Reveal>
-            </div>
+            <Reveal className="rule-fade my-9 block w-full" />
 
-            <Reveal delay={5} className="mt-8">
+            <Reveal delay={4}>
               <p className="text-sm font-semibold text-ink">{contact.channels.socialLabel}</p>
               <ul className="mt-4 flex flex-wrap gap-2">
                 {settings.social.map((account) => (
@@ -77,7 +96,7 @@ export default function Contact() {
                       href={account.href}
                       target="_blank"
                       rel="noreferrer noopener"
-                      className="inline-flex rounded-full border border-default px-4 py-2 text-sm text-ink-secondary no-underline transition-colors duration-(--dur-fast) hover:border-brand-300 hover:text-brand-600"
+                      className="inline-flex rounded-full border border-default px-4 py-2 text-sm text-ink-secondary no-underline transition-colors duration-(--dur-fast) hover:border-brand-300 hover:text-brand-200"
                     >
                       {account.label}
                     </a>
@@ -89,12 +108,12 @@ export default function Contact() {
 
           {/* ── Form ────────────────────────────────────────── */}
           <Reveal>
-            <Card elevation={1} className="p-7 lg:p-9">
+            <div className="panel-quiet p-7 sm:p-9 lg:p-10">
               <ContactForm form={contact.form} />
-            </Card>
+            </div>
           </Reveal>
         </div>
-      </section>
+      </Section>
     </>
   );
 }

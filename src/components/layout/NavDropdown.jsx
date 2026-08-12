@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+import { ArrowLeft, ChevronDown } from 'lucide-react';
 
 import { cn } from '@utils/cn.js';
 
@@ -83,7 +83,9 @@ export function NavDropdown({ item, active, floating = false }) {
         aria-haspopup="menu"
         onClick={() => setOpen((value) => !value)}
         className={cn(
-          'inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium',
+          // Matches the plain nav links exactly — a group must not
+          // read as a different kind of item just because it opens.
+          'inline-flex items-center gap-1.5 rounded-md px-3.5 py-2 text-[0.9375rem] font-normal',
           'transition-colors duration-(--dur-fast) ease-(--ease-standard)',
           'focus-visible:outline-none focus-visible:shadow-focus',
           floating
@@ -91,8 +93,8 @@ export function NavDropdown({ item, active, floating = false }) {
               ? 'text-white'
               : 'text-white/80 hover:text-white'
             : active || open
-              ? 'text-brand-600'
-              : 'text-ink-secondary hover:text-brand-600',
+              ? 'text-brand-200'
+              : 'text-ink-secondary hover:text-brand-200',
         )}
       >
         {item.label}
@@ -116,8 +118,10 @@ export function NavDropdown({ item, active, floating = false }) {
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.16, ease: [0.2, 0, 0, 1] }}
             // `start-0` so the panel hangs from the reading-start edge
-            // of the trigger — the right edge in RTL.
-            className="absolute top-full start-0 z-50 mt-1 min-w-56 overflow-hidden rounded-lg border border-subtle bg-surface p-1.5 shadow-e3"
+            // of the trigger — the right edge in RTL. `mt-3` clears
+            // the header's hairline so the panel reads as hanging
+            // from the bar rather than growing out of the label.
+            className="absolute top-full start-0 z-50 mt-3 w-72 overflow-hidden rounded-xl border border-subtle bg-surface p-2 shadow-e4 backdrop-blur-xl"
           >
             {item.children.map((child) => (
               <li key={child.id} role="none">
@@ -126,15 +130,25 @@ export function NavDropdown({ item, active, floating = false }) {
                   role="menuitem"
                   className={({ isActive }) =>
                     cn(
-                      'block rounded-sm px-3 py-2.5 text-sm no-underline',
+                      // `group/item`, not `group` — the trigger row is
+                      // already inside one, and an unnamed nested group
+                      // makes `group-hover:` on the arrow fire for the
+                      // whole menu instead of for the row under the
+                      // pointer.
+                      'group/item flex items-center justify-between gap-3 rounded-lg px-3.5 py-3 text-sm no-underline',
                       'transition-colors duration-(--dur-fast) ease-(--ease-standard)',
                       isActive
-                        ? 'bg-[var(--state-selected-tint)] font-medium text-brand-600'
-                        : 'text-ink-secondary hover:bg-[var(--state-hover-tint)] hover:text-brand-600',
+                        ? 'bg-[var(--state-selected-tint)] font-medium text-brand-200'
+                        : 'text-ink-secondary hover:bg-[var(--state-hover-tint)] hover:text-brand-200',
                     )
                   }
                 >
-                  {child.label}
+                  <span>{child.label}</span>
+                  {/* Plain ArrowLeft: in RTL "go there" points left. */}
+                  <ArrowLeft
+                    aria-hidden="true"
+                    className="size-4 shrink-0 opacity-0 transition-[opacity,transform] duration-(--dur-base) ease-(--ease-standard) group-hover/item:-translate-x-0.5 group-hover/item:opacity-100"
+                  />
                 </NavLink>
               </li>
             ))}

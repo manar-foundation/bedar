@@ -1,0 +1,1023 @@
+/* ================================================================
+   BEDAR LAYOUT — the page-composition primitives.
+
+   `rtl.css` owns the two oldest ones (`.container-page`, `.section-y`)
+   because they were written alongside the RTL rules. Everything a
+   marketing SECTION needs to be shaped — its rhythm, its inset
+   panels, its tiles, its sticky and staggered columns — lives here,
+   so there is one file to read when a page's structure is wrong.
+
+   The whole public site is one continuous dark surface (see
+   PublicLayout): sections do not paint opaque blocks, so structure
+   has to come from EDGES and RHYTHM rather than from background
+   colour. That is why so much of this file is hairlines, translucent
+   fills and vertical spacing rather than fills.
+
+   Everything here is logical-property-only (`inset-inline-*`,
+   `padding-inline`, `border-inline-start`) so it flips with `dir`
+   without a single `rtl:` variant.
+   ================================================================ */
+
+@layer components {
+  /* ── Vertical rhythm ────────────────────────────────────────────
+        `.section-y` (rtl.css) is 96px → 120px and stays the default.
+        These two are the ends of the same scale, for the bands that
+        open or close a run of sections and need more or less air
+        than their neighbours. Both reference sites run a 120–130px
+        section on desktop; the Bedar scale already has those steps,
+        so no new numbers are introduced. */
+  .section-y-sm {
+    padding-block: var(--space-11); /* 80 */
+  }
+  @media (min-width: 1024px) {
+    .section-y-sm {
+      padding-block: var(--space-12); /* 96 */
+    }
+  }
+
+  .section-y-lg {
+    padding-block: var(--space-13); /* 120 */
+  }
+  @media (min-width: 1024px) {
+    .section-y-lg {
+      padding-block: var(--space-14); /* 160 */
+    }
+  }
+
+  /* ── Inset panel ────────────────────────────────────────────────
+        A section's content held inside a rounded, bordered surface
+        instead of running to the page gutters. Both references use
+        this for their closing CTA and their form card, and it is the
+        one device that gives a full-bleed dark page a sense of
+        composition — the panel edge is the only hard boundary on the
+        page, so it reads as deliberate.
+
+        The border is a hairline in the brand's mint at low alpha
+        rather than a neutral grey: on this surface a grey line goes
+        muddy, and the mint is what the rest of the site's edges use. */
+  .panel-inset {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border-radius: var(--radius-2xl);
+    border: 1px solid rgba(169, 225, 211, 0.12);
+    background: linear-gradient(150deg, rgba(12, 42, 45, 0.9) 0%, rgba(5, 25, 27, 0.86) 74%);
+  }
+  .panel-inset::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(34rem 22rem at 92% -18%, rgba(169, 225, 211, 0.16), transparent 62%),
+      radial-gradient(26rem 22rem at 4% 118%, rgba(30, 158, 147, 0.16), transparent 60%);
+  }
+
+  /* ── Footer band ────────────────────────────────────────────────
+        The footer runs FULL-BLEED — the band's background reaches
+        both viewport edges, and only its content is held to the page
+        container. It used to be `.panel-inset`: a rounded card with
+        the page showing around all four of its edges, ported from the
+        reference layout on the argument that a dark page needs a
+        panel edge to say "the page ends here".
+
+        The client asked for 100% width (edits doc, Aug 2026), so the
+        boundary is now drawn the other way: a hairline across the
+        full width plus a tonal step down into a darker base. That
+        reads as a floor rather than as a card, which is what a
+        full-bleed footer needs in order not to look like the page
+        simply ran out.
+
+        `100vw` is deliberately NOT used anywhere here — it includes
+        the scrollbar's width and would put horizontal scroll on every
+        page. The element is a block child of a full-width column, so
+        it is already exactly as wide as the viewport. */
+  .footer-band {
+    position: relative;
+    isolation: isolate;
+    border-top: 1px solid rgba(169, 225, 211, 0.14);
+    background: linear-gradient(
+      180deg,
+      rgba(9, 36, 39, 0.55) 0%,
+      rgba(5, 23, 25, 0.9) 55%,
+      rgba(3, 17, 19, 0.98) 100%
+    );
+  }
+  .footer-band::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(48rem 26rem at 88% -10%, rgba(169, 225, 211, 0.1), transparent 62%),
+      radial-gradient(38rem 24rem at 6% 112%, rgba(30, 158, 147, 0.12), transparent 60%);
+  }
+
+  /* ── Social row + chip ──────────────────────────────────────────
+        The footer's account list: a round mark, then the platform
+        name and handle as visible text. `.social-row` is the whole
+        anchor and `.social-chip` the mark inside it.
+
+        The chip is 44px so it clears the minimum touch target on a
+        phone — the previous one was 40px, under it. The ROW is the
+        link, though, so the real target is the full row height and a
+        mis-tap cannot land between two accounts.
+
+        The hover is driven from the row rather than from the chip:
+        with the chip as a plain <span> inside the anchor, a
+        `.social-chip:hover` alone would leave the mark dead while the
+        pointer sits on the handle right next to it. `:focus-visible`
+        likewise has to be read off the anchor — a <span> never takes
+        focus, so a keyboard user would have got no chip state at all.
+
+        Everything animated is `transform` and colour. */
+  .social-row .social-handle {
+    transition: color var(--dur-base) var(--ease-standard);
+  }
+  .social-row:hover .social-handle,
+  .social-row:focus-visible .social-handle {
+    color: var(--brand-200);
+  }
+
+  .social-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    flex-shrink: 0;
+    border-radius: 999px;
+    border: 1px solid rgba(169, 225, 211, 0.18);
+    background: rgba(169, 225, 211, 0.05);
+    color: rgba(214, 240, 233, 0.82);
+    transition:
+      transform var(--dur-base) var(--ease-standard),
+      background-color var(--dur-base) var(--ease-standard),
+      border-color var(--dur-base) var(--ease-standard),
+      color var(--dur-base) var(--ease-standard);
+  }
+  .social-row:hover .social-chip,
+  .social-row:focus-visible .social-chip,
+  .social-chip:hover {
+    transform: translateY(-3px);
+    border-color: rgba(169, 225, 211, 0.45);
+    background: rgba(169, 225, 211, 0.14);
+    color: var(--brand-100);
+  }
+
+  /* A quieter panel for content that is read rather than actioned —
+     the long-form asides, the contact form card. Less glow, so body
+     copy on top of it keeps its contrast. */
+  .panel-quiet {
+    position: relative;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-subtle);
+    background: color-mix(in srgb, var(--bg-surface) 82%, transparent);
+    backdrop-filter: blur(6px);
+  }
+
+  /* ── Quote panel ────────────────────────────────────────────────
+        The "آراء الخبراء" card.
+
+        The client pointed at the dashboard's own welcome band (the
+        screenshot of `.admin-band`) and asked for this card to match
+        it. So these are `.admin-band`'s EXACT values, not an
+        approximation: the near-black `--hero-bg` base (the same token
+        the dashboard uses, which is why the left side goes almost
+        black), a bright mint glow spilling from just above the top-end
+        corner (0.3), and a dimmer teal glow rising from below the
+        bottom-start corner (0.28). Keep them in step with `.admin-band`
+        (admin.css) if that band is ever retuned.
+
+        The Bedar wordmark that opens the card is a plain `<img>` in the
+        markup (TestimonialsCarousel), not a background layer here —
+        the client asked for the site logo in place of the old lucide
+        quotation glyph, one clean visible mark rather than a faint
+        watermark. `isolation: isolate` still scopes the corner glows to
+        this card. */
+  .quote-panel {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border-radius: var(--radius-2xl);
+    border: 1px solid rgba(169, 225, 211, 0.14);
+    background:
+      radial-gradient(32rem 22rem at 88% -30%, rgba(169, 225, 211, 0.3), transparent 64%),
+      radial-gradient(26rem 22rem at 6% 130%, rgba(30, 158, 147, 0.28), transparent 62%),
+      var(--hero-bg);
+    box-shadow: var(--shadow-e2);
+  }
+
+  /* The draggable slide. `grab`/`grabbing` is the whole affordance —
+     without it a drag-to-advance slider is a feature nobody
+     discovers. Only from a fine pointer: a touch device has no cursor
+     and the swipe is the native expectation there anyway. */
+  @media (hover: hover) and (pointer: fine) {
+    .quote-slide {
+      cursor: grab;
+    }
+    .quote-slide:active {
+      cursor: grabbing;
+    }
+  }
+
+  /* ── Stat tile ──────────────────────────────────────────────────
+        A number in a bordered tile rather than floating loose in a
+        row. Four bare numerals side by side read as a data dump; the
+        tile gives each one a frame and lets the grid carry the
+        rhythm. Translucent so the page's fixed background still
+        shows through and the band stays part of the one surface. */
+  .stat-tile {
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(169, 225, 211, 0.14);
+    background: rgba(169, 225, 211, 0.045);
+    transition:
+      border-color var(--dur-base) var(--ease-standard),
+      background-color var(--dur-base) var(--ease-standard),
+      transform var(--dur-base) var(--ease-standard);
+  }
+  .stat-tile:hover {
+    transform: translateY(-2px);
+    border-color: rgba(169, 225, 211, 0.28);
+    background: rgba(169, 225, 211, 0.075);
+  }
+
+  /* ── Sticky column ──────────────────────────────────────────────
+        The heading half of a split section stays pinned while the
+        content half scrolls past it (On Consult's `gird-sticky-halves`).
+        It is what turns a two-column block into an editorial spread
+        instead of two columns that happen to be adjacent.
+
+        `--nav-h` is in the offset because the navbar is FIXED — a
+        plain `top: 2rem` parks the pinned heading underneath it.
+        Only from `lg` up: on a phone the two halves are stacked and
+        a sticky heading would sit on top of its own body copy. */
+  @media (min-width: 1024px) {
+    .sticky-col {
+      position: sticky;
+      top: calc(var(--nav-h) + var(--space-9));
+      align-self: start;
+    }
+  }
+
+  /* ── Staggered grid ─────────────────────────────────────────────
+        Drops every second card down by a fixed amount so a two-column
+        run of cards reads as a composed spread rather than a table.
+        On Consult does it with a padded second column; done here on
+        the child instead, so the same class works whatever the source
+        order is and collapses to nothing below `lg`. */
+  @media (min-width: 1024px) {
+    .grid-stagger > *:nth-child(even) {
+      margin-block-start: var(--space-11); /* 80 */
+    }
+  }
+
+  /* ── Hairline rule ──────────────────────────────────────────────
+        The under-rule beneath a split section header. It fades out
+        toward the end edge instead of stopping dead, which keeps it
+        from reading as a table border. Gradient direction is logical
+        (`to left` in RTL is the inline-end direction). */
+  .rule-fade {
+    height: 1px;
+    background: linear-gradient(to var(--rule-dir, left), rgba(169, 225, 211, 0.24), transparent);
+  }
+  [dir='ltr'] .rule-fade {
+    --rule-dir: right;
+  }
+
+  /* ================================================================
+     THE REFERENCE-LAYOUT IDIOM (Embrace Center)
+     ----------------------------------------------------------------
+     Five primitives carry the whole restructure. They are here rather
+     than inlined per component because every page uses them and the
+     brief asks for ONE interaction language across the site:
+
+       .media-frame   a 10px-radius window that crops its image, which
+                      scales inside it on hover
+       .arrow-link    a label + arrow whose gap opens on hover
+       .stat-row      numbers separated by rules, not by tiles
+       .band-tile     the lift + soft shadow shift a card gets
+       .orbit-*       the ring of words behind the About band
+
+     The reference does its image zoom at scale(1.2). That is a fine
+     number for a 4:3 photograph and far too much for a 16:10 cover
+     crop, where it throws away a fifth of the frame; 1.06 reads as
+     the same gesture and keeps the subject in shot.
+     ================================================================ */
+
+  /* ── Media frame ────────────────────────────────────────────────
+        The window itself clips; the child scales. Doing it the other
+        way (scaling the frame) would scale its border radius too and
+        the corners would visibly swell. */
+  .media-frame {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    isolation: isolate;
+  }
+  .media-frame .media-zoom {
+    transition: transform var(--dur-slow) var(--ease-standard);
+    will-change: transform;
+  }
+  .group:hover .media-frame .media-zoom,
+  .media-frame:hover .media-zoom {
+    transform: scale(1.06);
+  }
+
+  /* ── Arrow link ─────────────────────────────────────────────────
+        Embrace's `.link-with-icon:hover { gap: 10px }`. The arrow
+        moves away from the label rather than the whole link sliding,
+        so nothing reflows around it. Gap is a logical property, so
+        the arrow travels leftward in RTL — which is forward. */
+  .arrow-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    transition:
+      gap var(--dur-base) var(--ease-standard),
+      color var(--dur-fast) var(--ease-standard);
+  }
+  .group:hover .arrow-link,
+  .arrow-link:hover {
+    gap: var(--space-3);
+  }
+
+  /* ── Stat row ───────────────────────────────────────────────────
+        Embrace's `.info-big`: four figures in one row, separated by
+        hairlines rather than boxed in tiles. The rule sits on the
+        item's inline-start edge and is suppressed on the first of
+        each row, which is why the selectors are per-breakpoint — a
+        2-up row on mobile needs the rule off every odd child, a 4-up
+        row needs it off every fourth. */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: var(--space-9);
+  }
+  .stat-row > * {
+    padding-inline: var(--space-4);
+    border-inline-start: 1px solid rgba(169, 225, 211, 0.16);
+  }
+  .stat-row > *:nth-child(2n + 1) {
+    border-inline-start: 0;
+    padding-inline-start: 0;
+  }
+  @media (min-width: 1024px) {
+    .stat-row {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .stat-row > * {
+      padding-inline: var(--space-8);
+    }
+    .stat-row > *:nth-child(2n + 1) {
+      border-inline-start: 1px solid rgba(169, 225, 211, 0.16);
+      padding-inline-start: var(--space-8);
+    }
+    .stat-row > *:first-child {
+      border-inline-start: 0;
+      padding-inline-start: 0;
+    }
+  }
+
+  /* ================================================================
+     THE REFERENCE'S TWO OTHER HOVER SIGNATURES
+     ----------------------------------------------------------------
+     Both read from the template's IX2 data and both scoped to
+     `.public-site`, because `Button` and the link styles are shared
+     with the dashboard and the brief puts the dashboard out of scope.
+
+     1. BUTTONS PRESS IN. `primary-big-button` hover is
+        TRANSFORM_SCALE 0.9 + text/background swap over 300ms — the
+        button gets SMALLER, which is the opposite of the lift most
+        templates use and is the single most recognisable thing about
+        this reference's feel.
+
+        0.96 here, not 0.9. The reference's CTA is a short English
+        word; Bedar's is `تعرّف على خدماتنا` at ~260px, and shrinking
+        that by a tenth moves its end 26px — the eye reads it as the
+        button flinching away from the cursor rather than accepting
+        the press. 0.96 lands the same gesture at this width.
+
+     2. LINKS SLIDE ALONG THE READING AXIS. `dropdown-nav-link` and
+        the footer links move TRANSFORM_MOVE x:0→20 on hover.
+        `margin-inline-start` is the logical equivalent, so the travel
+        runs leftward in RTL — into the line, the way the reference's
+        runs rightward into its own. 10px rather than 20: the
+        reference's links sit alone in a wide panel, these sit in
+        four-column footer stacks where a 20px shove crosses into the
+        neighbouring column's optical margin. */
+  /* ── Card content swap ──────────────────────────────────────────
+        The reference template's card hover, read from its own IX2
+        data (`.service-list-item`): the resting copy slides down and
+        fades while a second face rises into its place. Ported here so
+        the clamped summary can hand over to the full description
+        instead of hiding it.
+
+        The incoming face is absolutely positioned over the paragraph
+        box, so neither layer can change the card's height — a swap
+        that reflowed the grid on hover would be worse than the clamp
+        it replaces.
+
+        Durations are the reference's: ~500ms for the layer leaving,
+        ~260ms for the layer arriving. The asymmetry is the whole
+        trick — the new face lands well before the old one has
+        finished clearing, so the card never looks empty mid-swap.
+
+        `:focus-within` alongside `:hover`, so tabbing to a card
+        reveals exactly what pointing at it does. */
+  .swap-rest,
+  .swap-in {
+    transition:
+      opacity var(--dur-slow) var(--ease-standard),
+      transform var(--dur-slow) var(--ease-standard);
+  }
+  /* The incoming face covers the card's whole padding box and centres
+     itself in it, so the longest description has the full height to
+     use rather than whatever a title left over. */
+  .swap-in {
+    position: absolute;
+    inset: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.375rem;
+    opacity: 0;
+    transform: translateY(1.75rem);
+    pointer-events: none;
+  }
+  /* One line, always. The two longest service titles wrap to two
+     lines here, and those 24px are exactly what their descriptions
+     needed — the pair were the only cards left scrolling. Truncating
+     is safe on THIS face specifically: the resting face above it
+     shows the same title in full, and the reader was looking at it a
+     moment ago. */
+  .swap-in-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--brand-200);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* 13px on a 1.6 leading. The longest service description is 366
+     characters, which is ~11 lines at this size in a 280px column —
+     224px inside the 266px the card's padding box gives. At the
+     resting 15px it is 273px and the last two lines are clipped,
+     which is the whole reason this size is set here rather than
+     inherited. */
+  .swap-in-body {
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    /* The guarantee: if a future description is longer than any of
+       today's, it scrolls inside the card instead of being cut. */
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .band-tile {
+    position: relative;
+  }
+  .band-tile:hover .swap-rest,
+  .band-tile:focus-within .swap-rest {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+  .band-tile:hover .swap-in,
+  .band-tile:focus-within .swap-in {
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+      opacity var(--dur-base) var(--ease-standard),
+      transform var(--dur-base) var(--ease-standard);
+  }
+
+  /* ── Band tile ──────────────────────────────────────────────────
+        The hover the brief asks for on every card: a 3px lift and a
+        shadow that shifts rather than appears, plus a brighter edge.
+        Transform and box-shadow only — both composited, so a grid of
+        twelve of these costs nothing on hover. */
+  .band-tile {
+    transition:
+      transform var(--dur-base) var(--ease-standard),
+      border-color var(--dur-base) var(--ease-standard),
+      background-color var(--dur-base) var(--ease-standard),
+      box-shadow var(--dur-base) var(--ease-standard);
+  }
+  .band-tile:hover,
+  .group:hover > .band-tile {
+    transform: translateY(-3px);
+    border-color: rgba(169, 225, 211, 0.3);
+    box-shadow: var(--shadow-e3);
+  }
+
+  /* ── Word orbit ─────────────────────────────────────────────────
+        The About band's artwork: two concentric rings with the
+        brand's own value words parked around them. Positions are
+        percentages of the square, so the whole thing scales with its
+        container and needs no media query. `inset-inline-*` keeps it
+        correct in both directions — the ring is symmetric, so the
+        words simply mirror.
+
+        It is a square that never exceeds its column, which is what
+        stops it from pushing the page's scroll width out. */
+  .word-orbit {
+    position: relative;
+    width: 100%;
+    max-width: 30rem;
+    margin-inline: auto;
+    aspect-ratio: 1;
+    /* The depth the pointer tilt is read in. Long, because a short
+       perspective on an element this wide makes a 7° tilt look like
+       a 30° one and the ring stops reading as a circle. */
+    perspective: 1100px;
+    /* Written from the pointermove handler in WordOrbit.jsx. Declared
+       here so the resting value is 0 and the transition has something
+       to interpolate from on the very first move. */
+    --tilt-x: 0deg;
+    --tilt-y: 0deg;
+  }
+  /* The layer that actually rotates. Separate from `.word-orbit` so
+     the perspective lives on a parent that does NOT transform —
+     `perspective` and `transform` on the same element compose in the
+     wrong order and the tilt collapses to a flat skew. */
+  .word-orbit-stage {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+    transition: transform var(--dur-slow) var(--ease-standard);
+    will-change: transform;
+  }
+  /* ── The entrance, ported from the reference ────────────────────
+        `embrace-center-wcopilot`'s own IX2 "About Scroll Section":
+        the two rings converge from opposite sides over 500ms on a
+        100ms delay while the mark unwinds half a turn. See the note
+        in `WordOrbit.jsx` for the read-out numbers.
+
+        `.word-orbit-rings` is the clip. A ring sitting 190px off its
+        own box would otherwise extend the DOCUMENT's scroll width —
+        the same failure the section glows had to be re-engineered
+        around — and clipping here is safe where clipping a section is
+        not, because nothing inside this box is `position: sticky`.
+        The clip is also what sells the gesture: the rings arrive from
+        off-stage rather than fading up in place.
+
+        It carries the opacity for all three of its children, so the
+        centre glow arrives with the rings it belongs to instead of
+        sitting alone in an empty frame for half a second. */
+  .word-orbit-rings {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    opacity: 1;
+    transition: opacity var(--dur-entrance) var(--ease-standard) var(--dur-entrance-delay);
+  }
+  .word-orbit:not(.is-in) .word-orbit-rings {
+    opacity: 0;
+  }
+
+  /* The shell travels; the ring inside it spins. They cannot be the
+     same element — `emblem-orbit-*` is a running animation on
+     `transform`, and a running animation beats a transition on the
+     same property, so the travel put on the ring never rendered.
+
+     The offsets are a share of each shell's OWN width rather than the
+     reference's flat 200px, so the gesture scales with the artwork
+     instead of swamping it on a phone. On the 480px desktop orbit
+     they work out at 199px and 202px — the reference's number, from
+     both sides. */
+  .word-orbit-ring-shell {
+    position: absolute;
+    transform: translateX(0);
+    transition: transform var(--dur-entrance) var(--ease-emphasized) var(--dur-entrance-delay);
+  }
+  .word-orbit-ring-shell-outer {
+    inset: 4%;
+  }
+  .word-orbit-ring-shell-inner {
+    inset: 22%;
+  }
+  .word-orbit:not(.is-in) .word-orbit-ring-shell-outer {
+    transform: translateX(45%);
+  }
+  .word-orbit:not(.is-in) .word-orbit-ring-shell-inner {
+    transform: translateX(-75%);
+  }
+
+  /* The rings recede while a value is being read, so the description
+     in the middle is the brightest thing in the frame. */
+  .word-orbit.is-active .word-orbit-ring {
+    opacity: 0.45;
+  }
+  .word-orbit-ring {
+    inset: 0;
+    transition:
+      opacity var(--dur-base) var(--ease-standard),
+      border-color var(--dur-base) var(--ease-standard);
+  }
+
+  /* ── The centre ─────────────────────────────────────────────────
+        Mark and readout occupy the same box and cross-fade. Both stay
+        mounted: swapping them would resize the centre and shove the
+        ring, and an element that unmounts takes its `aria-live`
+        region with it. */
+  .word-orbit-core {
+    position: absolute;
+    inset: 22%;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    pointer-events: none;
+  }
+  /* The SHELL is what occupies the centre box and what animates —
+     the mark inside it is running `emblem-float`, and that animation
+     owns its `transform`. (Which is why `.is-active`'s scale(0.8) on
+     the mark never actually rendered before: it was competing with
+     the float and losing. It is on the shell now, and works.) */
+  .word-orbit-mark-shell,
+  .word-orbit-readout {
+    grid-area: 1 / 1;
+    transition:
+      opacity var(--dur-base) var(--ease-standard),
+      transform var(--dur-base) var(--ease-standard);
+  }
+  .word-orbit-mark-shell {
+    display: grid;
+    place-items: center;
+  }
+  /* The reference's `.logo-image`: rotateZ -180deg → 0 over the same
+     500ms/100ms as the rings, so the mark unwinds as they close in. */
+  .word-orbit:not(.is-in) .word-orbit-mark-shell {
+    opacity: 0;
+    transform: rotate(-180deg);
+  }
+  .word-orbit.is-in .word-orbit-mark-shell {
+    transition:
+      opacity var(--dur-entrance) var(--ease-standard) var(--dur-entrance-delay),
+      transform var(--dur-entrance) var(--ease-standard) var(--dur-entrance-delay);
+  }
+  /* …but once a value is being read, the mark's exit is the fast dial
+     transition again, not the slow arrival one. */
+  .word-orbit.is-in.is-active .word-orbit-mark-shell {
+    transition:
+      opacity var(--dur-base) var(--ease-standard),
+      transform var(--dur-base) var(--ease-standard);
+  }
+  /* Colour only. The SIZE is `h-12 sm:h-16` on the element itself —
+     a `block-size` here loses to `Spiral`'s own `h-6` default, which
+     Tailwind emits from the utilities layer, and it lost silently for
+     as long as it was written here. Do not put it back. */
+  .word-orbit-mark {
+    color: rgba(169, 225, 211, 0.9);
+  }
+  .word-orbit-readout {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    /* Wider than the inner ring it sits in: the ring is a guide, not
+       a frame, and clipping a value's description to a circle would
+       cost two lines of it. */
+    inline-size: 128%;
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  .word-orbit.is-active .word-orbit-mark-shell {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  .word-orbit.is-active .word-orbit-readout {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .word-orbit-readout-title {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: var(--brand-200);
+  }
+  .word-orbit-readout-body {
+    font-size: 0.8125rem;
+    line-height: 1.75;
+    color: var(--text-secondary);
+    text-wrap: pretty;
+  }
+  @media (max-width: 640px) {
+    /* The mark's small-screen step is `h-12` on the element (see
+       above); only the readout needs shrinking here. */
+    .word-orbit-readout {
+      inline-size: 150%;
+      gap: 0.25rem;
+    }
+    .word-orbit-readout-title {
+      font-size: 0.9375rem;
+    }
+    .word-orbit-readout-body {
+      font-size: 0.6875rem;
+      line-height: 1.6;
+    }
+  }
+  .word-orbit-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(169, 225, 211, 0.16);
+  }
+  /* The inner ring is dashed, so the two rings turning at different
+     speeds are actually legible as two rings rather than as one
+     slightly thicker circle. */
+  .word-orbit-ring-dashed {
+    border-style: dashed;
+    border-color: rgba(169, 225, 211, 0.22);
+  }
+
+  /* The word's ANCHOR: owns `left`/`top` from the angle computed in
+     JS, and the -50% centring. It never animates. Splitting it from
+     the chip is what lets the chip carry a motion transform without
+     the library's `transform` string wiping out the centring. */
+  .word-orbit-slot {
+    position: absolute;
+    transform: translate(-50%, -50%);
+  }
+  /* The chip is a real <button>. Sizing, colour and lift are all
+     transitions on composited properties, so five of them changing at
+     once during a sweep across the ring costs nothing. */
+  .word-orbit-word {
+    display: inline-block;
+    white-space: nowrap;
+    border-radius: 999px;
+    border: 1px solid rgba(169, 225, 211, 0.18);
+    background: rgba(4, 25, 27, 0.72);
+    backdrop-filter: blur(6px);
+    padding: 0.4rem 0.85rem;
+    font: inherit;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition:
+      border-color var(--dur-base) var(--ease-standard),
+      background-color var(--dur-base) var(--ease-standard),
+      color var(--dur-base) var(--ease-standard),
+      opacity var(--dur-base) var(--ease-standard),
+      box-shadow var(--dur-base) var(--ease-standard),
+      transform var(--dur-base) var(--ease-standard);
+  }
+  /* While one value is being read the other four step back, so the
+     ring says which one the centre is describing. */
+  .word-orbit.is-active .word-orbit-word {
+    opacity: 0.4;
+  }
+  .word-orbit .word-orbit-word.is-on,
+  .word-orbit.is-active .word-orbit-word.is-on {
+    opacity: 1;
+    transform: scale(1.06);
+    border-color: rgba(169, 225, 211, 0.55);
+    background: rgba(12, 52, 54, 0.95);
+    color: var(--brand-200);
+    box-shadow: 0 10px 26px -10px rgba(0, 0, 0, 0.85);
+  }
+  .word-orbit-word:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+
+  /* ── The chips' arrival ─────────────────────────────────────────
+        The one beat the reference does NOT have: its words are part
+        of the wrapper that fades in, so all six land together. Five
+        landing together on a ring that has just finished closing
+        reads as a pop; landing them in ring order reads as the ring
+        being populated, which is the "حيوي" the client asked for.
+
+        `--chip-index` is written per chip in WordOrbit.jsx. The whole
+        delay is built from motion tokens, so it collapses to 0 with
+        everything else under prefers-reduced-motion — the stagger
+        cannot outlive the animation it is staggering. The 0.5 puts
+        the first chip in while the rings still have half their travel
+        left, so the two gestures overlap instead of queueing. */
+  .word-orbit:not(.is-in) .word-orbit-word {
+    opacity: 0;
+  }
+  .word-orbit.is-in .word-orbit-word {
+    animation: word-orbit-chip-in var(--dur-entrance) var(--ease-emphasized) backwards;
+    animation-delay: calc(
+      var(--dur-entrance-delay) + var(--dur-entrance) * 0.5 + var(--chip-index, 0) *
+        var(--dur-entrance-step)
+    );
+  }
+
+  /* On a phone the ring is ~290px across and five chips at 13px sit
+     almost edge to edge, so the chip shrinks with it.
+
+     The width cap is the other half of the same problem, and it is
+     about the SCROLL ROTATION rather than the chips: rotating a
+     square by θ grows its bounding box to side × (cos θ + sin θ), so
+     the ±12° the stage travels swells it by ~19%. At full width on a
+     320px screen the rings reach past the viewport edge at the ends
+     of that travel. Capping the orbit at 82% scales the rings, the
+     glow, the mark and the word ring together — the composition is
+     identical, just smaller — where insetting only the rings would
+     leave the outer words floating outside the circle they belong to. */
+  @media (max-width: 640px) {
+    .word-orbit {
+      width: 82%;
+    }
+  }
+  @media (max-width: 400px) {
+    .word-orbit-word {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.6875rem;
+    }
+  }
+
+  /* ── Numbered process rail ──────────────────────────────────────
+        The vertical connector behind a `<ProcessSteps>` list. Drawn
+        per STEP rather than once for the whole list, so each segment
+        spans exactly its own step's box: the line can then stop at
+        the last marker instead of running past it and down the side
+        of the last paragraph. See the note in `ProcessSteps.jsx`.
+
+        Two strokes share the geometry:
+          ::before          the dim track, always present
+          .process-rail-fill the bright stroke, scaled by scroll
+
+        `--rail-w` is the marker's own size, so the column, the track
+        and the fill cannot drift apart when the marker resizes at a
+        breakpoint. */
+  .process-rail {
+    position: relative;
+    --rail-w: 2.25rem; /* = size-9, the marker */
+    inline-size: var(--rail-w);
+  }
+  @media (min-width: 640px) {
+    .process-rail {
+      --rail-w: 2.75rem; /* = sm:size-11 */
+    }
+  }
+  .process-rail::before,
+  .process-rail-fill {
+    content: '';
+    position: absolute;
+    /* From the marker's centre down to the end of the step's box,
+       which is where the next marker's centre begins. */
+    inset-block: calc(var(--rail-w) / 2) 0;
+    inset-inline-start: calc(var(--rail-w) / 2);
+    width: 2px;
+    margin-inline-start: -1px;
+    border-radius: 1px;
+  }
+  .process-rail::before {
+    background: rgba(169, 225, 211, 0.14);
+  }
+  /* The travelling stroke. `origin-top` + scaleY is a compositor-only
+     grow; animating `height` would relayout the column on every
+     scroll frame. */
+  .process-rail-fill {
+    transform-origin: top;
+    background: linear-gradient(
+      to bottom,
+      rgba(169, 225, 211, 0.85),
+      rgba(99, 192, 183, 0.55) 70%,
+      rgba(99, 192, 183, 0.3)
+    );
+    box-shadow: 0 0 12px -2px rgba(169, 225, 211, 0.5);
+    will-change: transform;
+  }
+  /* The last step has nothing after it to connect to. */
+  .process-step:last-child .process-rail::before,
+  .process-step:last-child .process-rail-fill {
+    display: none;
+  }
+
+  /* ── The step rhythm ────────────────────────────────────────────
+        The gap between one step and the next, applied as the copy
+        column's bottom padding so the rail runs unbroken THROUGH the
+        gap rather than restarting at each row (the segment above is
+        measured against this same box).
+
+        The condition is on `.process-step`, not on the copy div: the
+        copy is always the last child of its own <li>, so a `last:`
+        utility on it matched every step and zeroed the rhythm on all
+        of them. The step is the element that knows whether anything
+        follows it. See the note in `ProcessSteps.jsx`.
+
+        `--step-gap` so a section can open the rhythm up without
+        touching the component — `.process-steps-roomy` is the client's
+        "اعطي مساحة اكبر": 88px between goals on desktop, which is what
+        the strategic-goals and adopted-definition lists are set to. */
+  .process-step-copy {
+    --step-gap: 3.5rem; /* 56 */
+    padding-block-end: var(--step-gap);
+  }
+  @media (min-width: 640px) {
+    .process-step-copy {
+      --step-gap: 4.5rem; /* 72 */
+    }
+  }
+  .process-steps-roomy .process-step-copy {
+    --step-gap: 4rem; /* 64 */
+  }
+  @media (min-width: 640px) {
+    .process-steps-roomy .process-step-copy {
+      --step-gap: 5.5rem; /* 88 */
+    }
+  }
+  .process-step:last-child .process-step-copy {
+    padding-block-end: 0;
+  }
+}
+
+/* ================================================================
+   THE TWO REFERENCE HOVERS THAT MUST OUTRANK A UTILITY
+   ----------------------------------------------------------------
+   Deliberately OUTSIDE `@layer components`. Unlayered declarations
+   beat every layer, and these two have to beat Tailwind's own.
+
+   Why: Tailwind v4 emits `transform` and the padding longhands from
+   the `utilities` layer, which outranks `components` no matter how
+   specific the component-layer selector is. `Button`'s accent variant
+   carries `active:translate-y-px`, so the button already has a
+   utility-layer `transform` — a `.public-site .btn-press:hover` rule
+   inside `@layer components` computed to identity and the press
+   simply never happened. Verified in the browser, not assumed.
+
+   Both are scoped to `.public-site` (PublicLayout's shell), so
+   neither can reach the dashboard — the brief puts it out of scope
+   and `Button` is shared between the two.
+
+   1. BUTTONS PRESS IN. The reference's `primary-big-button` hover is
+      TRANSFORM_SCALE 0.9 + a text/background swap over 300ms — the
+      button gets SMALLER, which is the opposite of the lift most
+      templates reach for and is the most recognisable thing about
+      this reference's feel.
+
+      0.96 here, not 0.9: the reference's CTA is a short English word,
+      Bedar's is `تعرّف على خدماتنا` at ~260px, and taking a tenth off
+      that moves its end 26px — read as the button flinching away from
+      the cursor rather than accepting the press.
+
+   2. LINKS TRAVEL ALONG THE READING AXIS. `dropdown-nav-link` and the
+      footer links move TRANSFORM_MOVE x:0→20 on hover.
+      `padding-inline-start` is the logical equivalent, so the travel
+      runs leftward in RTL — into the line, as the reference's runs
+      into its own. 10px rather than 20: the reference's links sit
+      alone in a wide panel, these sit in four-column footer stacks
+      where 20px crosses into the neighbouring column.
+   ================================================================ */
+
+.public-site .btn-press {
+  transition:
+    transform var(--dur-base) var(--ease-standard),
+    background-color var(--dur-base) var(--ease-standard),
+    color var(--dur-base) var(--ease-standard),
+    box-shadow var(--dur-base) var(--ease-standard);
+}
+.public-site .btn-press:hover {
+  transform: scale(0.96);
+}
+.public-site .btn-press:active {
+  transform: scale(0.94);
+}
+
+.public-site .link-slide {
+  transition:
+    color var(--dur-fast) var(--ease-standard),
+    padding-inline-start var(--dur-base) var(--ease-standard);
+}
+.public-site .link-slide:hover,
+.public-site .link-slide:focus-visible {
+  padding-inline-start: 0.625rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-site .btn-press:hover,
+  .public-site .btn-press:active {
+    transform: none;
+  }
+  .public-site .link-slide:hover,
+  .public-site .link-slide:focus-visible {
+    padding-inline-start: 0;
+  }
+}
+
+/* ── No hover, no clamp ──────────────────────────────────────────
+      Unlayered for the same reason as the two rules above: it has to
+      beat Tailwind's `line-clamp-*` utility.
+
+      The clamp exists to make a ROW of cards even, and the swap is
+      what gives the hidden text back. On a touch device there is no
+      hover, so the swap never fires — and a phone shows these grids
+      one card per row, where there is no row to even up. Both halves
+      of the trade are therefore pointless on touch, so the clamp comes
+      off and every description is simply there, in full.
+
+      `hover: none` rather than a width query: it is the absence of a
+      POINTER that breaks the swap, not a narrow screen. A touch
+      laptop at 1280px has the same problem. */
+@media (hover: none) {
+  .public-site .band-tile .swap-rest > p {
+    -webkit-line-clamp: unset;
+    overflow: visible;
+  }
+  .public-site .band-tile .swap-in {
+    display: none;
+  }
+}

@@ -1,47 +1,31 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo } from 'react';
 
 import { SITE_DIR, SITE_LANG } from '@utils/constants.js';
 
 const ThemeContext = createContext(null);
 
-const STORAGE_KEY = 'bedar.theme';
-
-function readInitialTheme() {
-  if (typeof window === 'undefined') return 'light';
-  const stored = window.localStorage.getItem(STORAGE_KEY);
-  if (stored === 'light' || stored === 'dark') return stored;
-  // Bedar's default surface is light; dark is opt-in, not
-  // system-driven, so the marketing site always renders as designed.
-  return 'light';
-}
-
 /**
  * Owns `data-theme`, `lang` and `dir` on <html>.
  *
- * `dir="rtl"` / `lang="ar"` are already set in index.html so the very
- * first paint is correct. This re-asserts them because the admin
- * dashboard renders in the same document and nothing should be able
- * to drift them.
+ * Bedar is DARK-ONLY, everywhere. The marketing site always rendered
+ * dark (it pins `data-theme="dark"` on its own shell — see
+ * PublicLayout), and the dashboard now matches it: the old light/dark
+ * toggle was removed by request, so there is no light path and nothing
+ * to persist. `data-theme="dark"` is asserted here so the whole
+ * document — public site and dashboard alike — is dark from first
+ * paint, and nothing can drift it.
  */
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(readInitialTheme);
-
   useEffect(() => {
     const root = document.documentElement;
-    root.setAttribute('data-theme', theme);
+    root.setAttribute('data-theme', 'dark');
     root.setAttribute('lang', SITE_LANG);
     root.setAttribute('dir', SITE_DIR);
-    window.localStorage.setItem(STORAGE_KEY, theme);
-  }, [theme]);
-
-  const toggleTheme = useCallback(() => {
-    setTheme((current) => (current === 'dark' ? 'light' : 'dark'));
   }, []);
 
-  const value = useMemo(
-    () => ({ theme, setTheme, toggleTheme, isDark: theme === 'dark' }),
-    [theme, toggleTheme],
-  );
+  // Kept as a context so `useTheme` consumers keep working, but the
+  // value is fixed: there is no toggle any more.
+  const value = useMemo(() => ({ theme: 'dark', isDark: true }), []);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

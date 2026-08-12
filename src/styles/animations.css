@@ -113,6 +113,24 @@
   }
 }
 
+/* A word chip arriving on the ring. It is a KEYFRAME and not a
+   transition because the chip's `transition` shorthand is already
+   carrying six hover properties, and a `transition-delay` long enough
+   to stagger the arrival would also delay every one of those — the
+   colour change on hover would lag by half a second for the life of
+   the page. An animation runs once, owns `transform` only while it
+   runs, and hands the property straight back to the transitions. */
+@keyframes word-orbit-chip-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @layer components {
   /* ── The dark hero / impact-band / footer treatment.
         Deep teal base + soft mint radial glow. Reserved for
@@ -131,6 +149,24 @@
     background: var(--hero-glow);
     pointer-events: none;
     z-index: -1;
+  }
+
+  /* ── ONE CONTINUOUS SURFACE (dark, i.e. the whole public site) ──
+        The client asked for the site to read as a single lit surface
+        rather than a stack of separately-coloured bands. In dark, the
+        section treatments stop painting opaque blocks and instead let
+        the page's fixed background (PublicLayout) show through: only
+        their soft glows remain, so sections are marked by light rather
+        than by hard colour changes. */
+  [data-theme='dark'] .surface-dark {
+    background: transparent;
+    color: var(--text-primary);
+  }
+  [data-theme='dark'] .surface-dark::before {
+    opacity: 0.7;
+  }
+  [data-theme='dark'] .section-wash {
+    background: transparent;
   }
 
   /* ── Aurora: three drifting colour fields behind the hero.
@@ -217,7 +253,8 @@
     .emblem-orbit-reverse,
     .emblem-breathe,
     .emblem-float,
-    .emblem-trace {
+    .emblem-trace,
+    .word-orbit.is-in .word-orbit-word {
       animation: none;
     }
   }
@@ -231,28 +268,45 @@
         symmetric regardless of which corner it sits in. `isolation`
         keeps the negative z-index pseudo-elements from bleeding into
         a sibling section's stacking context. */
+  /* The glows live on a SEPARATE absolutely-positioned layer
+     (`<Section>` renders it), not on the section's own
+     pseudo-elements. Two reasons, both learned the hard way:
+
+     • The clipping has to be `overflow: hidden` — `clip-path` hides
+       the glows but still counts them in the page's scrollable area,
+       which put 112px of horizontal scroll on every glowing page.
+
+     • `overflow: hidden` makes an element a scroll container, and a
+       `position: sticky` descendant then sticks to a box that never
+       scrolls. With the clip on a sibling layer instead of on the
+       section, a `.sticky-col` inside a glowing section still pins.
+
+     So: section = positioning context only, layer = the clip. */
   .section-glow {
     position: relative;
-    overflow: hidden;
     isolation: isolate;
   }
-  .section-glow::before,
-  .section-glow::after {
-    content: '';
+  .section-glow-layer {
     position: absolute;
+    inset: 0;
     z-index: -1;
-    border-radius: 9999px;
-    filter: blur(70px);
+    overflow: hidden;
     pointer-events: none;
   }
-  .section-glow::before {
+  .section-glow-layer span {
+    position: absolute;
+    display: block;
+    border-radius: 9999px;
+    filter: blur(70px);
+  }
+  .section-glow-layer span:nth-child(1) {
     inset-inline-start: -8rem;
     top: -8rem;
     width: 30rem;
     height: 30rem;
     background: var(--section-glow-a);
   }
-  .section-glow::after {
+  .section-glow-layer span:nth-child(2) {
     inset-inline-end: -7rem;
     bottom: -10rem;
     width: 27rem;
@@ -261,10 +315,10 @@
   }
   /* Swaps the pairing so three glowing sections in a row don't read
      as the same decoration repeated — used on every other one. */
-  .section-glow-alt::before {
+  .section-glow-alt .section-glow-layer span:nth-child(1) {
     background: var(--section-glow-c);
   }
-  .section-glow-alt::after {
+  .section-glow-alt .section-glow-layer span:nth-child(2) {
     background: var(--section-glow-a);
   }
 
@@ -279,6 +333,51 @@
       var(--section-wash-via) 55%,
       var(--section-wash-to) 100%
     );
+  }
+
+  /* ── Brand card — the dashboard welcome-band aesthetic, ported to
+        the marketing site (brief §9): a deep-teal gradient panel with
+        a soft corner glow and the spiral mark set as a watermark. Two
+        variants so a row of them is not the same panel repeated — the
+        glow enters from opposite corners and shifts hue. The spiral
+        watermark itself is a child (<Spiral>), clipped by `overflow`. */
+  .brand-card {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: linear-gradient(155deg, #0c2a2d 0%, #04191b 72%);
+    border: 1px solid rgba(169, 225, 211, 0.1);
+  }
+  .brand-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(30rem 20rem at 88% -24%, rgba(169, 225, 211, 0.22), transparent 62%),
+      radial-gradient(24rem 20rem at 4% 122%, rgba(30, 158, 147, 0.2), transparent 60%);
+  }
+  .brand-card-alt {
+    background: linear-gradient(155deg, #0b2b2b 0%, #05191a 72%);
+  }
+  .brand-card-alt::before {
+    background:
+      radial-gradient(28rem 20rem at 8% -24%, rgba(99, 192, 183, 0.22), transparent 62%),
+      radial-gradient(24rem 20rem at 100% 122%, rgba(64, 116, 121, 0.24), transparent 60%);
+  }
+  /* A touch of lift + a brighter edge on hover, matching the rest of
+     the card language. */
+  .brand-card.lift-hover {
+    transition:
+      transform var(--dur-base) var(--ease-standard),
+      border-color var(--dur-base) var(--ease-standard),
+      box-shadow var(--dur-base) var(--ease-standard);
+  }
+  .brand-card.lift-hover:hover {
+    transform: translateY(-2px);
+    border-color: rgba(169, 225, 211, 0.28);
+    box-shadow: var(--shadow-e3);
   }
 
   /* ── Card lift: 2px on hover. Nothing flashier. ─────────── */

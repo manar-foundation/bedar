@@ -47,13 +47,13 @@ export function Spiral({ className, title, ...rest }) {
 export function SpiralDivider({ className }) {
   return (
     <div
-      className={cn('flex items-center gap-4 text-brand-300', className)}
+      className={cn('flex items-center gap-4 text-brand-200', className)}
       role="separator"
       aria-orientation="horizontal"
     >
-      <span className="h-px flex-1 bg-gradient-to-l from-transparent to-current opacity-40" />
-      <Spiral className="size-5 shrink-0 opacity-70" />
-      <span className="h-px flex-1 bg-gradient-to-r from-transparent to-current opacity-40" />
+      <span className="h-px flex-1 bg-gradient-to-l from-transparent to-current opacity-70" />
+      <Spiral className="size-5 shrink-0 opacity-100" />
+      <span className="h-px flex-1 bg-gradient-to-r from-transparent to-current opacity-70" />
     </div>
   );
 }
@@ -70,14 +70,16 @@ export function SpiralDivider({ className }) {
  * their own padding and touch, and the divider is a deliberate line
  * connecting them rather than filler inside an empty strip.
  *
- * `tone` tints the rule for the surface it lands on — `light` for the
- * pale sections, `dark` when the seam touches a `surface-dark` band.
+ * `tone` tints the rule for the surface it lands on. The site is
+ * dark-only, so both tones are lightened teal — clearly visible on the
+ * unified dark surface, which is exactly the fix the brief asked for
+ * (the seam was too faint in dark).
  */
 export function SectionSeam({ tone = 'light', className }) {
   return (
     <div aria-hidden="true" className={cn('relative z-10 h-0', className)}>
       <div className="container-page absolute inset-x-0 top-0 -translate-y-1/2">
-        <SpiralDivider className={tone === 'dark' ? 'text-white/25' : 'text-brand-400/60'} />
+        <SpiralDivider className={tone === 'dark' ? 'text-brand-200/60' : 'text-brand-200/85'} />
       </div>
     </div>
   );

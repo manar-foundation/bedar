@@ -43,18 +43,34 @@ export { Tabs } from './Tabs.jsx';
 export { Breadcrumbs } from './Breadcrumbs.jsx';
 export { Accordion } from './Accordion.jsx';
 
+/* ── Page composition ────────────────────────────────────────────
+      The primitives that give a page its structure. `Section` owns
+      the band (container + rhythm + surface treatment); `StickySplit`
+      is the editorial two-column spread with a pinned heading. Both
+      exist so a page describes its layout instead of re-typing the
+      same wrapper classes — see components/ui/Section.jsx. */
+export { Section } from './Section.jsx';
+export { StickySplit } from './StickySplit.jsx';
+
 /* ── Marketing blocks ────────────────────────────────────────── */
 export { Hero } from './Hero.jsx';
 export { HeroEmblem } from './HeroEmblem.jsx';
 export { SectionHeading } from './SectionHeading.jsx';
+export { ProcessSteps } from './ProcessSteps.jsx';
+export { NumberedList } from './NumberedList.jsx';
 export { FeatureGrid } from './FeatureGrid.jsx';
 export { ContentCard } from './ContentCard.jsx';
+export { IconCard } from './IconCard.jsx';
+export { BrandCard } from './BrandCard.jsx';
+export { WordOrbit } from './WordOrbit.jsx';
 export { Testimonial } from './Testimonial.jsx';
 export { TestimonialsCarousel } from './TestimonialsCarousel.jsx';
 export { StatBand } from './StatBand.jsx';
+export { StatRow } from './StatRow.jsx';
 export { CtaBand } from './CtaBand.jsx';
 export { RichText } from './RichText.jsx';
 
 /* ── Brand ───────────────────────────────────────────────────── */
 export { Logo } from './Logo.jsx';
 export { Spiral, SpiralDivider, SectionSeam } from './Spiral.jsx';
+export { SocialIcon } from './SocialIcon.jsx';

@@ -125,10 +125,7 @@ export function ContentProvider({ children }) {
         ...footer,
         latestArticles: {
           ...footer.latestArticles,
-          items: (collections.articles.length
-            ? collections.articles
-            : footer.latestArticles.seed
-          )
+          items: (collections.articles.length ? collections.articles : footer.latestArticles.seed)
             .slice(0, footer.latestArticles.limit)
             .map((article) => ({ id: article.id, title: article.title, href: article.href })),
         },

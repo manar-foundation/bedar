@@ -13,12 +13,10 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
-  Moon,
   Plug,
   Settings as SettingsIcon,
   ShieldCheck,
   Shuffle,
-  Sun,
   Users as UsersIcon,
   X,
 } from 'lucide-react';
@@ -26,7 +24,6 @@ import {
 import { Spiral } from '@components/ui/Spiral.jsx';
 import { useAuth } from '@context/AuthContext.jsx';
 import { useContent } from '@context/ContentContext.jsx';
-import { useTheme } from '@context/ThemeContext.jsx';
 import { ROLES } from '@utils/constants.js';
 import { cn } from '@utils/cn.js';
 
@@ -105,7 +102,6 @@ export default function AdminLayout() {
   const [open, setOpen] = useState(false);
   const { user, profile, signOut } = useAuth();
   const { source } = useContent();
-  const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -146,7 +142,7 @@ export default function AdminLayout() {
   const sectionLabel = currentSectionLabel(pathname);
 
   return (
-    <div className="admin-canvas flex min-h-dvh bg-app">
+    <div data-theme="dark" className="admin-canvas flex min-h-dvh bg-app">
       {/* Backdrop for the mobile drawer */}
       <AnimatePresence>
         {open ? (
@@ -242,7 +238,14 @@ export default function AdminLayout() {
             </span>
           </div>
 
-          <button type="button" onClick={handleSignOut} className="admin-nav-item mt-1 w-full">
+          {/* Sign-out is a prominent, distinct control — not another
+              muted nav row — so it never gets lost at the foot of the
+              rail. Bordered + danger-tinted on hover. */}
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/5 px-3 py-2.5 text-sm font-semibold text-white transition-colors duration-(--dur-fast) hover:border-error-400/60 hover:bg-error-500/20 hover:text-white"
+          >
             <LogOut className="mirror-rtl size-[1.125rem] shrink-0" aria-hidden="true" />
             تسجيل الخروج
           </button>
@@ -314,18 +317,18 @@ export default function AdminLayout() {
               <span className="hidden sm:inline">معاينة الموقع</span>
             </a>
 
+            {/* Always-visible sign-out — the rail's control is off
+                screen on a phone and behind a long form on desktop, so
+                the header carries one too (Admin brief §4). */}
             <button
               type="button"
-              onClick={toggleTheme}
-              aria-label={isDark ? 'التبديل إلى المظهر الفاتح' : 'التبديل إلى المظهر الداكن'}
-              title={isDark ? 'المظهر الفاتح' : 'المظهر الداكن'}
-              className="inline-flex size-9 items-center justify-center rounded-md text-ink-secondary transition-colors duration-(--dur-fast) hover:bg-[var(--state-hover-tint)] hover:text-ink"
+              onClick={handleSignOut}
+              aria-label="تسجيل الخروج"
+              title="تسجيل الخروج"
+              className="inline-flex h-9 items-center gap-2 rounded-md border border-subtle px-3 text-[13px] font-medium text-ink-secondary transition-colors duration-(--dur-fast) hover:border-error-400/60 hover:bg-error-500/10 hover:text-error-600"
             >
-              {isDark ? (
-                <Sun className="size-4" aria-hidden="true" />
-              ) : (
-                <Moon className="size-4" aria-hidden="true" />
-              )}
+              <LogOut className="mirror-rtl size-4" aria-hidden="true" />
+              <span className="hidden sm:inline">تسجيل الخروج</span>
             </button>
           </div>
         </header>

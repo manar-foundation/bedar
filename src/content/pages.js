@@ -144,8 +144,13 @@ export const faq = [
   {
     id: 'acceptance-criteria',
     question: 'ما هي معايير قبول أفكار المبادرات المجتمعية أو المشاريع في برامجكم؟',
-    answer: 'تتمثل معايير القبول بـما يلي:',
-    list: ['الابتكارية', 'الأثر المجتمعي', 'كفاءة فريق العمل', 'جدوى الفكرة أو المشروع'],
+    // Self-contained answer: the FAQ store keeps `answer` as a single
+    // text column, so the criteria are folded into one natural sentence
+    // rather than a separate list field the database cannot hold — the
+    // answer then reads the same whether it comes from the seed or from
+    // Supabase.
+    answer:
+      'تتمثل معايير القبول بأربعة معايير رئيسية، هي: الابتكارية، والأثر المجتمعي، وكفاءة فريق العمل، وجدوى الفكرة أو المشروع.',
   },
   {
     id: 'team-required',
@@ -192,6 +197,10 @@ export const home = {
     title: 'نحدث التغيير ببرامج مجتمعية مبتكرة',
     collection: 'programs',
     limit: 3,
+    // The section header is a split row — title on one side, this
+    // link opposite it. Data, not JSX, so the dashboard can retitle
+    // it and so it never drifts from the nav label.
+    cta: { label: 'كل البرامج', href: '/programs' },
   },
 
   about: {
@@ -208,6 +217,7 @@ export const home = {
   services: {
     title: 'تعرف على خدمات الريادة الاجتماعية',
     lede: 'تنتهج منصة بدار استراتيجية عمليّة في تطوير حلول مجتمعية مدروسة من خلال خدمات تخصصية متكاملة',
+    cta: { label: 'كل الخدمات', href: '/services' },
   },
 
   audience: {
@@ -235,7 +245,15 @@ export const home = {
     ],
   },
 
-  faq: { eyebrow: 'أهم الأسئلة', title: 'الأسئلة المكررة' },
+  // The FAQ band is a split spread: this heading stays pinned beside
+  // the question list, so it carries a lede and a way out for the
+  // reader whose question is not in the list.
+  faq: {
+    eyebrow: 'أهم الأسئلة',
+    title: 'الأسئلة المكررة',
+    lede: 'لم تجد إجابة سؤالك؟ فريق بدار جاهز للرد عليك',
+    cta: contactCta.cta,
+  },
 
   testimonials: { eyebrow: 'آراء الخبراء', title: 'ماذا قالوا عن منصة بدار؟' },
 };

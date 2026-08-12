@@ -6,6 +6,17 @@
   --dur-slow: 360ms; /* @kind other */
   --dur-slower: 560ms; /* @kind other */
 
+  /* Scroll-into-view entrance. These three are the reference
+     template's own numbers, read out of its IX2 "About Scroll
+     Section" action list (`embrace-center-wcopilot.webflow.io`): a
+     500ms move/fade on a 100ms delay. `--dur-entrance-step` is the
+     per-item stagger, which the reference does not have — it arrives
+     everything at once — and is what turns the ring of words into a
+     sequence rather than a single pop. */
+  --dur-entrance: 500ms; /* @kind other */
+  --dur-entrance-delay: 100ms; /* @kind other */
+  --dur-entrance-step: 70ms; /* @kind other */
+
   --ease-standard: cubic-bezier(0.2, 0, 0, 1); /* @kind other */
   --ease-emphasized: cubic-bezier(0.3, 0, 0, 1.2); /* @kind other */
   --ease-out: cubic-bezier(0, 0, 0.2, 1); /* @kind other */
@@ -17,5 +28,8 @@
     --dur-base: 0ms; /* @kind other */
     --dur-slow: 0ms; /* @kind other */
     --dur-slower: 0ms; /* @kind other */
+    --dur-entrance: 0ms; /* @kind other */
+    --dur-entrance-delay: 0ms; /* @kind other */
+    --dur-entrance-step: 0ms; /* @kind other */
   }
 }

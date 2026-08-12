@@ -8,11 +8,22 @@
      3. theme.css     — @theme bridge: tokens → Tailwind utilities
      4. base.css      — @layer base document defaults
      5. rtl.css       — RTL rules + container/section primitives
-     6. animations.css— keyframes + surface treatments
-     7. admin.css     — the /admin shell's own surfaces
+     6. layout.css    — page-composition primitives (panels, tiles,
+                        sticky + staggered columns, section rhythm)
+     7. animations.css— keyframes + surface treatments
+     8. admin.css     — the /admin shell's own surfaces
    ================================================================ */
 
 @import 'tailwindcss';
+
+/* Drive the `dark:` variant from `data-theme="dark"` instead of the OS
+   `prefers-color-scheme`. The whole app themes off the `data-theme`
+   attribute (see tokens/colors.css), so a `dark:` utility has to track
+   the same signal or it fires on the wrong pages. Matches both the
+   element that carries the attribute and everything inside it, so the
+   public site — which pins `data-theme="dark"` on its own shell — gets
+   dark utilities regardless of what the admin toggle left on <html>. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
 /* ── Design-system tokens (verbatim from Bedar Design System,
       except the two documented renames noted in each file) ────── */
@@ -28,5 +39,6 @@
 @import './theme.css';
 @import './base.css';
 @import './rtl.css';
+@import './layout.css';
 @import './animations.css';
 @import './admin.css';

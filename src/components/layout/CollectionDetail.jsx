@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Navigate, Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, CalendarDays, Tag } from 'lucide-react';
 
 import { Breadcrumbs, RichText, Spiral } from '@components/ui';
-import { Reveal } from '@components/motion/Reveal.jsx';
+import { Reveal, RevealOnMount } from '@components/motion/Reveal.jsx';
 import { useSeo } from '@hooks/useSeo.js';
 import { findBySlug, loadBody } from '@content/collections.js';
 import { fetchItemBody, hasSupabase } from '@services/publicContent.js';
@@ -100,57 +100,97 @@ function DetailBody({ item, collectionName, backHref, backLabel, breadcrumbLabel
   const loading = body === null;
   const hasBody = Array.isArray(body) && body.length > 0;
 
+  const hasCover = typeof item.image === 'string' && Boolean(item.image);
+
   return (
     <>
       {/* Title band. Dark treatment is fine here — it carries a
-          heading and metadata, not long-form body copy. */}
-      <section className="surface-dark">
-        <div className="container-page py-16 lg:py-20">
+          heading and metadata, not long-form body copy. The drifting
+          aurora + spiral watermark give an otherwise text-only header
+          the same life the homepage hero has. Top padding clears the
+          FIXED navbar (`--nav-h`) so the breadcrumb never tucks under
+          the floating header. */}
+      <section className="surface-dark relative overflow-hidden">
+        <div className="hero-aurora" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
+
+        {/* Oversized spiral watermark, bled off the inline-start edge. */}
+        <Spiral
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-16 -start-16 size-72 text-brand-200/[0.06]"
+        />
+
+        <div className="container-page relative pb-16 pt-[calc(var(--nav-h)+3.5rem)] lg:pb-24 lg:pt-[calc(var(--nav-h)+5rem)]">
           <div className="mx-auto max-w-3xl">
-            <Breadcrumbs
-              className="[&_a]:text-brand-100/70 [&_a:hover]:text-brand-200 [&_span]:text-white"
-              items={[
-                { label: 'الرئيسية', href: '/' },
-                { label: breadcrumbLabel, href: backHref },
-                { label: item.title },
-              ]}
-            />
+            <RevealOnMount>
+              <Breadcrumbs
+                className="[&_a]:text-brand-100/70 [&_a:hover]:text-brand-200 [&_span]:text-white"
+                items={[
+                  { label: 'الرئيسية', href: '/' },
+                  { label: breadcrumbLabel, href: backHref },
+                  { label: item.title },
+                ]}
+              />
+            </RevealOnMount>
 
             {item.category ? (
-              <p className="mt-6 text-xs font-semibold text-brand-200">{item.category}</p>
+              <RevealOnMount delay={1} className="mt-6">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-brand-100 ring-1 ring-inset ring-white/15">
+                  <Tag className="size-3.5" aria-hidden="true" />
+                  {item.category}
+                </span>
+              </RevealOnMount>
             ) : null}
 
-            <h1 className="mt-3 text-3xl font-bold text-white md:text-4xl">{item.title}</h1>
+            <RevealOnMount delay={2}>
+              <h1 className="mt-5 text-3xl font-bold leading-tight text-white md:text-4xl lg:text-[2.75rem]">
+                {item.title}
+              </h1>
+            </RevealOnMount>
 
             {item.date ? (
-              <time
-                dateTime={toISODate(item.date)}
-                className="mt-4 block text-sm text-brand-100/70"
-              >
-                {formatDate(item.date)}
-              </time>
+              <RevealOnMount delay={3}>
+                <time
+                  dateTime={toISODate(item.date)}
+                  className="mt-5 inline-flex items-center gap-2 text-sm text-brand-100/70"
+                >
+                  <CalendarDays className="size-4" aria-hidden="true" />
+                  {formatDate(item.date)}
+                </time>
+              </RevealOnMount>
             ) : null}
           </div>
         </div>
       </section>
 
-      {/* Body — light surface. Long-form Arabic never sits on dark. */}
+      {/* Body. The cover runs at the container's full width — an
+          article's one image should not be capped at the text
+          measure — and the prose below it sits in a 3xl column, which
+          is ~70 Arabic characters per line. */}
       <article className="container-page section-y">
-        <div className="mx-auto max-w-3xl">
-          {/* Cover image — dashboard-uploaded, resolved from Storage.
-              Pulled up to overlap the dark title band above it. */}
-          {typeof item.image === 'string' && item.image ? (
-            <Reveal className="-mt-14 mb-10 overflow-hidden rounded-2xl shadow-e3 lg:-mt-20">
-              <img
-                src={item.image}
-                alt={item.imageAlt ?? ''}
-                className="aspect-[16/9] w-full object-cover"
-              />
-            </Reveal>
-          ) : null}
+        {/* Cover image — dashboard-uploaded, resolved from Storage.
+            Pulled up to overlap the dark title band above it. */}
+        {hasCover ? (
+          <Reveal className="-mt-14 mb-12 overflow-hidden rounded-2xl shadow-e3 ring-1 ring-white/10 lg:-mt-28 lg:mb-16">
+            <img
+              src={item.image}
+              alt={item.imageAlt ?? ''}
+              className="aspect-[16/9] w-full object-cover"
+            />
+          </Reveal>
+        ) : null}
 
+        <div className="mx-auto max-w-3xl">
           {item.excerpt ? (
-            <Reveal as="p" className="text-lg leading-relaxed text-ink">
+            // Lead paragraph — set apart from the body with a larger
+            // measure and an inline-start accent rule (flips in RTL).
+            <Reveal
+              as="p"
+              className="border-s-2 border-brand-300 ps-5 text-lg font-medium leading-relaxed text-ink dark:border-brand-500"
+            >
               {item.excerpt}
             </Reveal>
           ) : null}
@@ -173,11 +213,15 @@ function DetailBody({ item, collectionName, backHref, backLabel, breadcrumbLabel
             </Reveal>
           )}
 
-          <Reveal className="mt-12 border-t border-subtle pt-8">
-            {/* ArrowRight unmirrored — in RTL "back" is rightward. */}
+          <Reveal className="mt-14 border-t border-subtle pt-8">
+            {/* ArrowRight unmirrored — in RTL "back" is rightward.
+                `.arrow-link` is the site-wide gesture: the arrow moves
+                away from the label on hover rather than the link
+                sliding, so this reads the same as every other arrow on
+                the site. */}
             <Link
               to={backHref}
-              className="inline-flex items-center gap-2 text-sm font-semibold text-brand-600 no-underline hover:text-brand-700"
+              className="arrow-link text-sm font-semibold text-brand-200 no-underline hover:text-mint-300"
             >
               <ArrowRight className="size-4" aria-hidden="true" />
               {backLabel}

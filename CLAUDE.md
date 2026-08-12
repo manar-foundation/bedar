@@ -91,6 +91,29 @@ indexes, triggers and RLS policies in the same file that creates it.
 - A write that RLS refuses comes back as **PGRST116** (zero rows), not 42501 —
   an UPDATE simply matches nothing. Error text has to name both causes.
 
+## Page layout
+
+Compose a marketing page from `Section` / `StickySplit` / `SectionHeading` —
+never re-type `<section><div className="container-page section-y">`. The CSS
+primitives are in `src/styles/layout.css`; the README's "Page composition"
+table says which piece is for what.
+
+- **Alternate the band shape.** `SectionHeading layout="split"` for listings,
+  `layout="aside"` inside a `StickySplit` for long reads, centred only where
+  the content is genuinely symmetrical. A page of identically-centred headings
+  is the failure mode this replaced.
+- **Ordered content gets `ProcessSteps`**, not bullets.
+- A split header's link label and an aside's lede are **copy** — they belong in
+  `content/pages.js`, not in the JSX.
+- **`overflow: hidden` on any ancestor kills `position: sticky`** — the element
+  then sticks to a box that never scrolls, silently. `.section-glow` used to
+  set it; the glows now live on `.section-glow-layer`, a sibling of the content
+  that `<Section>` renders, so a `StickySplit` works inside a glowing band.
+  Do not "fix" a clipping problem by putting `overflow: hidden` back on a
+  section, and do not reach for `clip-path` instead: it hides the overflow but
+  still counts it in the document's scroll width, which is 112px of horizontal
+  scroll on every glowing page.
+
 ## Content is data
 
 Navbar, footer and collections are data (`src/content/site.js`, then Supabase).
