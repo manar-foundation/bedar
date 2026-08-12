@@ -204,6 +204,26 @@ export default function Footer() {
                   </li>
                 ))}
               </ul>
+
+              {/* The site's one call to action, moved up here under the
+                  latest-articles column (client, Aug 2026) so it sits in
+                  the footer's main region rather than in the legal bar
+                  below. Same `headerCta` object the navbar renders, so
+                  header and footer stay in lock-step. ArrowLeft
+                  unmirrored — in RTL "forward" is leftward. */}
+              <Button
+                variant="inverse"
+                to={headerCta.href}
+                className="group mt-7 self-start"
+                iconEnd={
+                  <ArrowLeft
+                    aria-hidden="true"
+                    className="size-4 transition-transform duration-(--dur-base) ease-(--ease-standard) group-hover:-translate-x-0.5"
+                  />
+                }
+              >
+                {headerCta.label}
+              </Button>
             </nav>
 
             {/* ── Newsletter ─────────────────────────────────── */}
@@ -214,42 +234,28 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* ── Bottom bar ─────────────────────────────────────── */}
-        <div className="mt-12 flex flex-col gap-6 border-t border-white/10 pt-8 lg:mt-16 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-6">
-            <p className="text-xs text-brand-100/60">
-              {legalBefore}
-              <span className="ltr-run">{year}</span>
-              {legalAfter}
-            </p>
-            <p className="text-xs text-brand-100/60">
-              {footer.credit.prefix}{' '}
-              <a
-                href={footer.credit.href}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="inline-flex min-h-6 items-center text-brand-200 no-underline hover:underline"
-              >
-                {footer.credit.label}
-              </a>
-            </p>
-          </div>
-
-          {/* The same CTA object the navbar renders. ArrowLeft
-                unmirrored — in RTL "forward" is leftward. */}
-          <Button
-            variant="inverse"
-            to={headerCta.href}
-            className="group self-start lg:self-auto"
-            iconEnd={
-              <ArrowLeft
-                aria-hidden="true"
-                className="size-4 transition-transform duration-(--dur-base) ease-(--ease-standard) group-hover:-translate-x-0.5"
-              />
-            }
-          >
-            {headerCta.label}
-          </Button>
+        {/* ── Bottom bar ───────────────────────────────────────
+               Legal + design credit only. The call to action moved up
+               into the main link region (above); the reference keeps
+               its footer's closing bar to the fine print, which is what
+               this is now. */}
+        <div className="mt-12 flex flex-col gap-2 border-t border-white/10 pt-8 sm:flex-row sm:items-center sm:justify-between sm:gap-6 lg:mt-16">
+          <p className="text-xs text-brand-100/60">
+            {legalBefore}
+            <span className="ltr-run">{year}</span>
+            {legalAfter}
+          </p>
+          <p className="text-xs text-brand-100/60">
+            {footer.credit.prefix}{' '}
+            <a
+              href={footer.credit.href}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-flex min-h-6 items-center text-brand-200 no-underline hover:underline"
+            >
+              {footer.credit.label}
+            </a>
+          </p>
         </div>
       </div>
     </footer>

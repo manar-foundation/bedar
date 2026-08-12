@@ -1020,4 +1020,17 @@
   .public-site .band-tile .swap-in {
     display: none;
   }
+  /* A tap is not a hover: on touch the pointer has nowhere to leave
+     to, so tapping a card left it in a sticky `:hover` state. That
+     fired the resting-face fade-out (`opacity: 0`), but the incoming
+     face it hands off to is `display: none` here — so the card simply
+     emptied itself when pressed. Pin the resting face visible under
+     `:hover`/`:focus-within` so a tap can never blank a card's
+     content. Unlayered, so it beats the layered fade rule; scoped to
+     `hover: none`, so desktop pointer behaviour is untouched. */
+  .public-site .band-tile:hover .swap-rest,
+  .public-site .band-tile:focus-within .swap-rest {
+    opacity: 1;
+    transform: none;
+  }
 }

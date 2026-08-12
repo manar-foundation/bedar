@@ -151,7 +151,12 @@ export default function Home() {
              copy — one source of truth with the About page. */}
       <Section tone="glow">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-          <Reveal>
+          {/* On mobile the copy leads and the orbit follows (client,
+              Aug 2026): `order-last` drops the ring below the text in
+              the single-column stack. `lg:order-none` restores source
+              order at the split, so the ring is back on the right
+              (inline-start in RTL) on desktop — desktop is untouched. */}
+          <Reveal className="order-last lg:order-none">
             {/* The full value objects, not just their titles — the
                 ring reveals each value's own description in its
                 centre when you pick one. Same source as /about. */}
