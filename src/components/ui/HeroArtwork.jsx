@@ -1,4 +1,6 @@
 import heroPhoto from '@assets/services/photo-expert-network.webp';
+import { useHeroScrollTarget } from './heroScroll.js';
+import { ScrollExit } from '@components/motion/ScrollExit.jsx';
 import { cn } from '@utils/cn.js';
 
 /* ================================================================
@@ -42,6 +44,29 @@ import { cn } from '@utils/cn.js';
    five hairlines for 1.6s, once, and it is over before the visitor
    can scroll.
 
+   THE SCROLL EXIT IS THE PHOTO'S ALONE
+   ----------------------------------------------------------------
+   `Hero` used to wrap this whole component in `<ScrollExit>`, which
+   shrank and dissolved the arcs along with the photograph. The arcs
+   are the band's STRUCTURE, not part of the photo — they read as
+   drawn onto the surface — so they now stay put at full opacity and
+   only the photograph dissolves as the hero leaves.
+
+   The range comes off `HeroScrollContext` — the hero SECTION's ref,
+   handed down rather than measured here, because the exit has to be
+   timed against a box that does not change size: the photo shrinks
+   as it goes, and a `useScroll` target that shrinks underneath
+   itself feeds its own progress and eases out early. Outside a hero
+   the context is `null` and the photo simply renders static. See
+   `heroScroll.js`.
+
+   The `ScrollExit` is a WRAPPER around `.hero-artwork-photo`, never
+   the same element. That element is running `hero-artwork-in` with
+   `animation-fill-mode: forwards`, and a filling animation outranks
+   inline styles on the same property — the scroll-driven scale and
+   opacity would compute and then simply never render. Same trap as
+   `.word-orbit-ring-shell` and `.btn-press`.
+
    RTL
    ----------------------------------------------------------------
    The arcs are anchored to the bottom INLINE-START corner, which is
@@ -77,6 +102,8 @@ const CX = 60;
 const CY = 820;
 
 export function HeroArtwork({ alt, className }) {
+  const scrollTargetRef = useHeroScrollTarget();
+
   return (
     <div
       className={cn('hero-artwork relative mx-auto w-full max-w-[30rem] lg:max-w-none', className)}
@@ -121,9 +148,15 @@ export function HeroArtwork({ alt, className }) {
             purely aspect-driven: the hero is exactly one viewport
             tall now, so the artwork has to yield to the copy on a
             short laptop instead of pushing the CTA out of the
-            frame. ─────────────────────────────────────────────── */}
-      <div className="hero-artwork-photo relative">
-        <div className="relative overflow-hidden rounded-[2rem] border border-white/10 shadow-[0_40px_90px_-30px_rgba(0,0,0,0.75)]">
+            frame.
+
+            `ScrollExit` is the outer layer and `.hero-artwork-photo`
+            the inner one — one owns the exit, the other the entrance,
+            and they cannot share an element (see the header note).
+            No target means no subscription: the artwork renders
+            static, which is what every other call site wants. ─── */}
+      <ScrollExit targetRef={scrollTargetRef} className="relative">
+        <div className="hero-artwork-photo relative overflow-hidden rounded-[2rem] border border-white/10 shadow-[0_40px_90px_-30px_rgba(0,0,0,0.75)]">
           <img
             src={heroPhoto}
             alt={alt}
@@ -147,7 +180,7 @@ export function HeroArtwork({ alt, className }) {
             className="absolute inset-0 bg-gradient-to-t from-[color-mix(in_oklab,var(--hero-bg)_75%,transparent)] via-transparent to-[color-mix(in_oklab,var(--hero-bg)_25%,transparent)]"
           />
         </div>
-      </div>
+      </ScrollExit>
     </div>
   );
 }

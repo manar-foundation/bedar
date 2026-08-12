@@ -55,6 +55,40 @@ export const headerCta = {
   href: '/contact-us',
 };
 
+/**
+ * The breadcrumb trail for an interior page, built from the NAVIGATION
+ * rather than from a per-page string.
+ *
+ * `PageHero` opens every page that is not the homepage with a trail,
+ * and a breadcrumb's label is the same word the header uses for that
+ * page — so reading it out of `navigation` is what keeps the two in
+ * step. Renaming "الخدمات" in the dashboard renames it in the trail on
+ * the same publish; a second copy in `pages.js` would be a second
+ * place to forget.
+ *
+ * `fallback` is for pages that are not in the navigation at all (the
+ * contact page is the header CTA, not a nav link — see the note above
+ * `headerCta`) and for a page that is renamed out of the nav later.
+ * The trail degrades to just "الرئيسية" rather than rendering an
+ * empty crumb.
+ */
+export function breadcrumbsFor(href, fallback) {
+  const label = findNavLabel(navigation, href) ?? fallback;
+  const trail = [{ label: 'الرئيسية', href: '/' }];
+  if (label) trail.push({ label });
+  return trail;
+}
+
+/** Depth-first lookup — nav items nest one level (Dashboard spec §3.1). */
+function findNavLabel(items, href) {
+  for (const item of items) {
+    if (item.href === href) return item.label;
+    const nested = item.children ? findNavLabel(item.children, href) : null;
+    if (nested) return nested;
+  }
+  return null;
+}
+
 export const footer = {
   /**
    * Brand blurb. On the live site the whole sentence is one link to

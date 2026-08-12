@@ -124,15 +124,15 @@ Both are documented in-file at the point of change:
 import { Button, Card, Input, Hero } from '@components/ui';
 ```
 
-| Group       | Components                                                                                                                                                                     |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Core        | `Button` `IconButton` `Badge` `Tag`                                                                                                                                            |
-| Forms       | `Field` `Input` `Textarea` `Select` `Checkbox` `Radio` `Switch` `FileUpload`                                                                                                   |
-| Surfaces    | `Card` `Modal` `Tooltip`                                                                                                                                                       |
-| Data & nav  | `Table` `Tabs` `Breadcrumbs` `Accordion`                                                                                                                                       |
-| Composition | `Section` `StickySplit`                                                                                                                                                        |
-| Blocks      | `Hero` `HeroEmblem` `SectionHeading` `ProcessSteps` `NumberedList` `FeatureGrid` `ContentCard` `IconCard` `BrandCard` `Testimonial` `StatBand` `StatRow` `CtaBand` `WordOrbit` |
-| Brand       | `Logo` `Spiral` `SpiralDivider` `SocialIcon`                                                                                                                                   |
+| Group       | Components                                                                                                                                                                                |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Core        | `Button` `IconButton` `Badge` `Tag`                                                                                                                                                       |
+| Forms       | `Field` `Input` `Textarea` `Select` `Checkbox` `Radio` `Switch` `FileUpload`                                                                                                              |
+| Surfaces    | `Card` `Modal` `Tooltip`                                                                                                                                                                  |
+| Data & nav  | `Table` `Tabs` `Breadcrumbs` `Accordion`                                                                                                                                                  |
+| Composition | `Section` `StickySplit`                                                                                                                                                                   |
+| Blocks      | `Hero` `PageHero` `HeroEmblem` `SectionHeading` `ProcessSteps` `NumberedList` `FeatureGrid` `ContentCard` `IconCard` `BrandCard` `Testimonial` `StatBand` `StatRow` `CtaBand` `WordOrbit` |
+| Brand       | `Logo` `Spiral` `SpiralDivider` `SocialIcon`                                                                                                                                              |
 
 The ports are visually faithful. Where one differs from its source it is
 because the design-system file is a static specimen and this is a live RTL
@@ -159,17 +159,17 @@ wrapper classes. The CSS primitives they lean on are in `styles/layout.css`
 `.rule-fade`, `.process-rail`), one file so a section's shape has one place to
 be wrong in.
 
-| Piece                       | What it is                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `<Section tone size>`       | `<section>` + `.container-page` + vertical rhythm + surface treatment. Replaced the three-line wrapper every band used to open with.                                                                                                                                                                                                                                                                                                          |
-| `<StickySplit aside ratio>` | Two-column spread whose heading half pins (`.sticky-col`) while the content half scrolls. For long reads. `ratio` is written aside/content: `narrow` 0.8/1.2, `even`, `wide` 1.15/0.85, `roomy` 0.68/1.32. A page that needs a wider content column asks for a wider ratio — it must never reorder the columns visually, because the aside is first in the DOM for a reason.                                                                  |
-| `<SectionHeading layout>`   | `stack` (centred/start), `split` (title one side, CTA the other, hairline under both), `aside` (narrow, for `StickySplit`).                                                                                                                                                                                                                                                                                                                   |
-| `<ProcessSteps>`            | Numbered vertical timeline on a rail. For content that is ordered.                                                                                                                                                                                                                                                                                                                                                                            |
-| `<NumberedList>`            | Rows numbered `01.`, `02.` … with a hairline between them. For content that is _enumerated_ but not ordered — use `ProcessSteps` when it really is a sequence.                                                                                                                                                                                                                                                                                |
-| `<StatRow>`                 | Figures in one ruled row, no tiles. The inline shape, for numbers that sit inside another band. `StatBand` is still the tiled, full-band version.                                                                                                                                                                                                                                                                                             |
-| `<IconCard>`                | The one card behind every "what we offer / value / sector" grid. `compact` for dense label grids. `lines` clamps the paragraph and `titleLines` reserves a floor for the title, so every card in a row starts its copy on the same baseline — the service descriptions run 220–366 characters and the titles 16–60, and unclamped that variance is what made those grids look ragged. The copy is never edited; `/services` shows it in full. |
-| `<WordOrbit>`               | A ring of words around the spiral. The homepage About band's artwork; the words are `about.values[].title`, never new copy.                                                                                                                                                                                                                                                                                                                   |
-| `<CollectionListing>`       | `/programs`, `/blog`, `/news`: newest item full width, rest in a grid whose column count is derived from how many remain.                                                                                                                                                                                                                                                                                                                     |
+| Piece                       | What it is                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `<Section tone size>`       | `<section>` + `.container-page` + vertical rhythm + surface treatment. Replaced the three-line wrapper every band used to open with.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `<StickySplit aside ratio>` | Two-column spread whose heading half pins (`.sticky-col`) while the content half scrolls. For long reads. `ratio` is written aside/content: `narrow` 0.8/1.2, `even`, `wide` 1.15/0.85, `roomy` 0.68/1.32. A page that needs a wider content column asks for a wider ratio — it must never reorder the columns visually, because the aside is first in the DOM for a reason.                                                                                                                                                                                                                                                                                       |
+| `<SectionHeading layout>`   | `stack` (centred/start), `split` (title one side, CTA the other, hairline under both), `aside` (narrow, for `StickySplit`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `<ProcessSteps>`            | Numbered vertical timeline on a rail. For content that is ordered.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `<NumberedList>`            | Rows numbered `01.`, `02.` … with a hairline between them. For content that is _enumerated_ but not ordered — use `ProcessSteps` when it really is a sequence.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `<StatRow>`                 | Figures in one ruled row, no tiles. The inline shape, for numbers that sit inside another band. `StatBand` is still the tiled, full-band version.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `<IconCard>`                | The one card behind every "what we offer / value / sector" grid. `compact` for dense label grids. `titleLines` reserves a floor for the title so every card in a row starts its copy on the same baseline. `lines` clamps the paragraph — and **`lines={null}` drops the clamp and the hover swap together**, which is what the homepage services and hackathon goals grids now pass. An unclamped paragraph only balances if the measure can hold it: at the 278px tile a 4-up grid gives, the longest service description is 332px of text in a 128px slot, so those grids went to 3-up in the same change. Pair with `auto-rows-fr` for identical card heights. |
+| `<WordOrbit>`               | A ring of words around the spiral. The homepage About band's artwork; the words are `about.values[].title`, never new copy.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `<CollectionListing>`       | `/programs`, `/blog`, `/news`: newest item full width, rest in a grid whose column count is derived from how many remain.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 
 **Vary the band shape down a page.** Nine sections of "centred heading, grid
 under it" is what made the site read as a template — the heading landed in the
@@ -186,18 +186,19 @@ Five CSS primitives in `styles/layout.css` carry every hover on the public
 site. Use them rather than writing a new transition per component — the point
 is that a card behaves the same way on every page.
 
-| Class                                  | What it does                                                                                                                                                                                      |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.media-frame` + `.media-zoom`         | A 10px window that clips its image; the image scales to 1.06 on hover (the frame must not scale, or its corners swell). Also fires from an ancestor `.group`.                                     |
-| `.arrow-link`                          | Label + arrow whose `gap` opens from 4px to 12px on hover. `gap` is logical, so the arrow travels leftward in RTL — forward.                                                                      |
-| `.band-tile`                           | The card hover: 3px lift, shadow shift, brighter edge, plus an accent line wiping across the top and a corner bloom. Transform, opacity and shadow only, so a grid of twelve costs nothing.       |
-| `.stat-row`                            | Figures separated by hairlines. Which child loses its rule depends on the breakpoint (2-up vs 4-up), which is why it is CSS and not a class string.                                               |
-| `.word-orbit*`                         | The ring, its words and their hover. Positions are computed in `WordOrbit`, so the ring stays even at any item count.                                                                             |
-| `.process-rail` + `.process-rail-fill` | The numbered timeline's connector: a dim track per step with a bright stroke over it that `ProcessSteps` scales from scroll. Drawn per segment, never as one element — see the note in that file. |
-| `.process-step-copy`                   | The gap between one step and the next. Lives in CSS, keyed off `.process-step:not(:last-child)`, because a `last:` utility on the copy div matches **every** step — the copy is always the last child of its own `<li>`. `.process-steps-roomy` opens it from 72px to 88px. |
-| `.footer-band`                         | The full-bleed closing band. A hairline across the whole viewport plus a step down in tone; the content stays in `.container-page`.                                                               |
-| `.quote-panel` + `.quote-watermark`    | The testimonials card and the large, masked brand mark behind it.                                                                                                                                 |
-| `.social-chip`                         | The footer's 44px round account button, carrying a real brand mark from `SocialIcon`.                                                                                                             |
+| Class                                  | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.media-frame` + `.media-zoom`         | A 10px window that clips its image; the image scales to 1.06 on hover (the frame must not scale, or its corners swell). Also fires from an ancestor `.group`.                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `.arrow-link`                          | Label + arrow whose `gap` opens from 4px to 12px on hover. `gap` is logical, so the arrow travels leftward in RTL — forward.                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `.band-tile`                           | The card hover: 3px lift, shadow shift, brighter edge, plus an accent line wiping across the top and a corner bloom. Transform, opacity and shadow only, so a grid of twelve costs nothing.                                                                                                                                                                                                                                                                                                                                                                                |
+| `.swap-rest` + `.swap-in`              | The card's two faces. **The incoming one draws the title exactly as the resting one does** — same size, weight, colour and mint rule, wrapping — so the heading stays legible through the swap instead of shrinking to a truncated mint caption. Only the icon and the clamped paragraph trade places. Leaving the title out of the swap and pinning it instead does not fit: the space under a fixed heading is 127px and the longest description needs 229px.                                                                                                            |
+| `.stat-row`                            | Figures separated by hairlines. Which child loses its rule depends on the breakpoint (2-up vs 4-up), which is why it is CSS and not a class string.                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `.word-orbit*`                         | The ring, its words and their hover. Positions are computed in `WordOrbit`, so the ring stays even at any item count.                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `.process-rail` + `.process-rail-fill` | The numbered timeline's connector: a dim track per step with a bright stroke over it that `ProcessSteps` scales from scroll. Drawn per segment, never as one element — see the note in that file. It runs from one marker's **outer edge** to the next one's, never centre to centre: the marker's resting fill is mint at 12%, so a line starting inside it is plainly visible through the numeral. `ProcessSteps` also takes a `date`/`meta` per step — the hackathon timeline's stage dates, as a plain string because several are ranges and `Intl` cannot format one. |
+| `.process-step-copy`                   | The gap between one step and the next. Lives in CSS, keyed off `.process-step:not(:last-child)`, because a `last:` utility on the copy div matches **every** step — the copy is always the last child of its own `<li>`. `.process-steps-roomy` opens it from 72px to 88px.                                                                                                                                                                                                                                                                                                |
+| `.footer-band`                         | The full-bleed closing band. A hairline across the whole viewport plus a step down in tone; the content stays in `.container-page`.                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `.quote-panel` + `.quote-stack`        | The testimonials card, and the grid cell every slide shares. All five are rendered and the inactive ones are `visibility: hidden` — measured, so the panel is the height of the longest quote and the band cannot resize when the slide changes.                                                                                                                                                                                                                                                                                                                           |
+| `.social-chip`                         | The footer's 44px round account button, carrying a real brand mark from `SocialIcon`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
 ### The reference's interaction patterns, and where they came from
 
@@ -253,7 +254,7 @@ Two structural rules make it work and are easy to undo by accident:
   renders as nothing at all.
 - **`.word-orbit-rings` must keep its `overflow: hidden`.** A ring translated
   200px at rest would otherwise extend the document's scroll width. Clipping is
-  safe *here* (and not on a section) because nothing inside that box is
+  safe _here_ (and not on a section) because nothing inside that box is
   `position: sticky`.
 
 `Reveal` / `StaggerItem` carry four entrance variants: `rise` (default), `lift`
@@ -263,6 +264,42 @@ flipped for RTL, because the gesture is spatial rather than reading-order). A
 grid whose visual order is not its DOM order — a diagonal cascade — sets the
 parent's `step` to 0 and gives each item its own `delay`.
 
+**Everything a page did not animate by hand still arrives.**
+`components/motion/AutoReveal.jsx` is mounted once in `PublicLayout` and gives
+every remaining block on every public page — body copy, article bodies, the
+footer, forms, listings — the same 22px rise over 620ms, from ONE
+IntersectionObserver. `styles/reveal.css` holds the states. Four things about it
+are load-bearing:
+
+- **It never touches a subtree Framer already owns.** `Reveal`, `Stagger`,
+  `StaggerItem` and `ScrollExit` stamp `data-reveal="off"` on themselves; a
+  container that _holds_ one is skipped too, so a list of animated rows is not
+  faded in underneath them. `data-no-reveal` is the manual opt-out and
+  `data-reveal="on" | "left" | "right"` the manual opt-in.
+- **Only JavaScript ever hides anything.** Every rule is keyed off an attribute
+  that only the observer writes, so no JS means a fully visible page. It also
+  refuses to hide an element measuring 0×0 — a collapsed accordion panel cannot
+  be left invisible after it opens.
+- **The attribute is removed once the reveal settles.** The rules are unlayered
+  (they have to beat Tailwind's `transform` utilities), so a lingering
+  `transform: none` would outrank `.band-tile:hover` for the life of the page.
+  A settled element is byte-for-byte the element it would be without the file.
+- **The stagger is decided at reveal time, over the elements arriving in the
+  same observer batch** — not at scan time by DOM position. Numbering during
+  the scan gives the twentieth paragraph of an article a permanent 420ms delay
+  when it is the only thing on screen.
+- **Nothing may still be hidden once the reader is at the bottom of the
+  document.** The observer's root is shrunk 8% at the bottom so a block starts
+  arriving before it is fully on screen — which in the middle of a page is
+  free, and at the END of one is a dead band the reader cannot scroll past. It
+  cost the footer's legal bar on every page: at 1440×900 the band is 72px, the
+  shrunk root ends at 828, and the copyright line sits at 854–870, so
+  `كافة الحقوق محفوظة ©` and the design credit were at `opacity: 0` site-wide.
+  `flushTail()` is the guard — at maximum scroll it shows anything still
+  marked, driven from `scroll`, `resize`, the observer callback and each scan.
+  It also covers the page that never scrolls at all. If you change
+  `ROOT_MARGIN`, that guard is what keeps the change from hiding content.
+
 The homepage bands, `Navbar`, `Footer` and the card system follow the
 **Embrace Center** reference layout (`embrace-center-wcopilot.webflow.io`).
 Where its shape needed content this site does not have, the shape changed —
@@ -270,6 +307,36 @@ copy was never written, cut or reworded to fit it. Two ports that are
 deliberately partial: its 74px/0.9-leading headline sizes carry over but its
 leading does not (Arabic collides below ~1.18), and its `scale(1.2)` image zoom
 is 1.06 here, because 1.2 on a 16:10 crop throws away a fifth of the frame.
+
+### The interior banner
+
+Every page that is **not** the homepage opens with `PageHero`. It is the title
+band the program detail pages were already rendering, lifted out of
+`layout/CollectionDetail.jsx` at the client's request ("the layout on the
+hackathon inner page is what I want on all sub-pages", Aug 2026): `.surface-dark`
+
+- drifting aurora, an oversized spiral watermark bled off the inline-start edge,
+  and a `max-w-3xl` column — centred in the container, **start**-aligned inside —
+  carrying breadcrumbs → category chip → eyebrow → `h1` → date.
+
+Three things about it are load-bearing:
+
+- **The background photograph is a prop, and one file sets them all.**
+  `src/content/page-banners.js` maps a page to its banner; a page with `null`
+  renders on the aurora alone, which is exactly how the hackathon banner looks
+  today. The image is dimmed to 30% under a gradient scrim (`.page-hero-photo`
+  / `.page-hero-scrim`) — a banner is the one element whose text cannot be
+  allowed to fail contrast, and a photograph at full strength puts arbitrary
+  luminance behind white Arabic display type. Do not pre-darken the file.
+- **The eyebrow is bracketed** — `/ خدمات بدار /` — drawn exactly as
+  `SectionHeading` draws its own. The old interior `Hero` printed it bare,
+  which is why `/services` was the only listing page whose header looked
+  different from `/programs`, `/blog` and `/news`.
+- **The breadcrumb label comes from the navigation**, via `breadcrumbsFor(href)`
+  in `content/site.js`, not from a per-page string. Renaming a nav item in the
+  dashboard renames it in the trail on the same publish.
+
+`Hero` is now the homepage's split shape only.
 
 ### The homepage hero
 
@@ -281,7 +348,17 @@ The copy column is always first in the DOM, which is what puts the text above
 the artwork on mobile. No `order-*` utility is involved: reordering visually
 would leave the tab order following the layout instead of the reading order.
 
-`HeroEmblem` is the artwork — the brand spiral inside three counter-rotating
+`HeroArtwork` is the artwork — a set of drawn arcs radiating from the bottom
+inline-start corner with the photograph over them. On scroll, **only the
+photograph leaves**: `ScrollExit` wraps the photo alone, and the arcs stay
+drawn and fully opaque as the band's own structure. The scroll range is the
+hero SECTION's, published on `HeroScrollContext` (`ui/heroScroll.js`) because
+the photo shrinks as it goes and a `useScroll` target that shrinks underneath
+itself feeds its own progress. `ScrollExit` must never be the same element as
+`.hero-artwork-photo`: that one runs `hero-artwork-in` with `forwards`, and a
+filling animation outranks the inline styles Framer writes.
+
+`HeroEmblem` was the previous artwork — the brand spiral inside three counter-rotating
 orbits, over a breathing glow, with the `.hero-aurora` colour fields drifting
 behind the whole band. It is CSS animation and not Framer Motion: nothing in it
 is interactive, so it belongs on the compositor rather than on the main thread
@@ -520,8 +597,23 @@ authorised to write, they just should not be able to write `<script>`.
 
 `/programs/hackathon` is a bespoke Webflow landing page with no rich-text block,
 so the script falls back to walking its prose between the `<h1>` and the footer.
-That preserves every word but flattens the dated timeline into headings — if the
-client wants that layout back it is a page build, not a content migration.
+That preserves every word but flattens the dated timeline into headings.
+
+**That page build has since happened** (Aug 2026). `content/hackathon.js` holds
+its content as structure — goals, three tabbed lists, a dated timeline, an FAQ —
+and `pages/public/Hackathon.jsx` is the layout, routed ahead of `:slug` in
+`routes.jsx`. Every other program still renders through `ProgramDetail` →
+`CollectionDetail`, and the hackathon still appears in the /programs listing like
+any other; only its detail view differs.
+
+Three things the prose walk could not reach were read back from the source's
+markup and now live in `content/hackathon.js`: the timeline's **dates** (the
+source keeps them outside its prose), the FAQ's **questions** (the migrated body
+has only the four answers), and the section eyebrows. Two sections the migration
+duplicated — the timeline and the tracks list, which the Webflow page renders
+twice for its mobile breakpoint — are one list each. `collection-bodies.js` is
+untouched and still holds the flat body: it is generated, and re-running
+`migrate-bodies.mjs` must not fight the built page.
 
 **Never import `collection-bodies.js` statically from `collections.js`.** It is
 ~49 kB raw, and `collections.js` is reached from `ContentContext`, which every

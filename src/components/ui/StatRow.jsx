@@ -35,11 +35,17 @@ function Stat({ value, suffix, prefix, label, countUp = true, grouped = true, in
         ref={ref}
         className="flex items-baseline text-4xl font-bold tabular-nums text-brand-200 lg:text-5xl"
       >
-        {prefix ? <span>{prefix}</span> : null}
-        {/* .ltr-run keeps the digits in logical order beside the
-            Arabic label without breaking the flex baseline. */}
-        <span className="ltr-run">{grouped ? formatNumber(shown) : String(shown)}</span>
-        {suffix ? <span>{suffix}</span> : null}
+        {/* ONE `.ltr-run` around the whole figure, not just the digits.
+            The unit is part of the number, so prefix + digits + suffix
+            have to be typeset as a single LTR run: with the suffix
+            outside it, RTL flow laid the three flex items out
+            right-to-left and "20" + "M" rendered as `M20`. Isolated
+            together they read `20M`, which is what the figure is. */}
+        <span className="ltr-run">
+          {prefix}
+          {grouped ? formatNumber(shown) : String(shown)}
+          {suffix}
+        </span>
       </span>
 
       <span className="text-sm leading-relaxed text-ink-secondary">{label}</span>

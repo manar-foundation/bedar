@@ -1,11 +1,13 @@
 import { Mail, Phone } from 'lucide-react';
 
-import { Hero, Section, SectionHeading } from '@components/ui';
+import { PageHero, Section, SectionHeading } from '@components/ui';
 import { ContactForm } from '@components/layout/ContactForm.jsx';
 import { Reveal } from '@components/motion/Reveal.jsx';
 import { useContent } from '@context/ContentContext.jsx';
 import { useSeo } from '@hooks/useSeo.js';
 import { contact } from '@content/pages.js';
+import { pageBanners } from '@content/page-banners.js';
+import { breadcrumbsFor } from '@content/site.js';
 
 /**
  * تواصل معنا — the contact form plus the direct channels.
@@ -26,7 +28,16 @@ export default function Contact() {
 
   return (
     <>
-      <Hero title={contact.hero.title} subtitle={contact.hero.subtitle} showSpiral={false} />
+      {/* `/contact-us` is the header CTA rather than a nav link, so
+          the trail's label is passed as the fallback — see
+          `breadcrumbsFor` in content/site.js. */}
+      <PageHero
+        breadcrumbs={breadcrumbsFor('/contact-us', contact.hero.eyebrow)}
+        eyebrow={contact.hero.eyebrow}
+        title={contact.hero.title}
+        subtitle={contact.hero.subtitle}
+        image={pageBanners.contact}
+      />
 
       <Section>
         <div className="grid items-start gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">

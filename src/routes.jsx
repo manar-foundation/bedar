@@ -22,6 +22,9 @@ const About = lazy(() => import('@pages/public/About.jsx'));
 const SocialEntrepreneurship = lazy(() => import('@pages/public/SocialEntrepreneurship.jsx'));
 const Programs = lazy(() => import('@pages/public/Programs.jsx'));
 const ProgramDetail = lazy(() => import('@pages/public/ProgramDetail.jsx'));
+/* One program has a page rather than an article body — see the note
+   on its route below, and the header of pages/public/Hackathon.jsx. */
+const Hackathon = lazy(() => import('@pages/public/Hackathon.jsx'));
 const Services = lazy(() => import('@pages/public/Services.jsx'));
 const Blog = lazy(() => import('@pages/public/Blog.jsx'));
 const ArticleDetail = lazy(() => import('@pages/public/ArticleDetail.jsx'));
@@ -62,6 +65,20 @@ export default function AppRoutes() {
           <Route path="about" element={<About />} />
           <Route path="social-entrepreneurship" element={<SocialEntrepreneurship />} />
           <Route path="programs" element={<Programs />} />
+          {/* BEFORE the `:slug` route, so the static segment wins.
+              React Router 7 ranks a static segment above a dynamic one
+              regardless of declaration order, so this is belt and
+              braces — but the order is also what a reader expects, and
+              it keeps the exception visible next to the rule.
+
+              The hackathon is the one program whose source was a built
+              landing page rather than an article, so its content is
+              structured (`content/hackathon.js`) and it has its own
+              layout. Every other program still renders through
+              `ProgramDetail` → `CollectionDetail`, and the hackathon
+              still appears in the /programs listing like any other —
+              only the detail view differs. */}
+          <Route path="programs/hackathon" element={<Hackathon />} />
           <Route path="programs/:slug" element={<ProgramDetail />} />
           {/* The live site linked some detail pages under the singular
               /program/:slug. The path is now unified on the plural

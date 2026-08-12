@@ -268,20 +268,56 @@ export default function Home() {
           }
         />
 
-        <Stagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {/* THREE COLUMNS, AND EVERY DESCRIPTION IN FULL
+            ------------------------------------------------------
+            This grid ran four-up from `xl` with each paragraph
+            clamped to four lines, on the trade documented in
+            `IconCard`: an even row, bought with a summary the reader
+            had to hover to finish. The client has ruled the other way
+            — the description must read at rest — so the clamp is gone
+            (`lines={null}`, which drops the hover swap with it).
+
+            The column count is what makes that affordable, and it is
+            not a taste call. Measured at 1280px: the four-up tile is
+            278px wide, where the longest description is 332px of text
+            in a 128px slot — unclamping it there gives one card twice
+            the height of its neighbours and a band that is mostly
+            empty tile. At three-up the same tile is 389px, the same
+            description sets in nine lines, and the card lands at
+            roughly 389×424 — the squarish proportion it already had.
+
+            Seven cards fill a three-column grid EXACTLY when two of
+            them are double-width, so the lead and the last one span:
+
+              lg (3 cols)  [lead ██ · s2] [s3 · s4 · s5] [s6 · s7 ██]
+              sm (2 cols)  [lead ████] [s2 · s3] [s4 · s5] [s6 · s7]
+
+            which is why the two spans are at different breakpoints —
+            at two-up the lead alone already closes the grid, and a
+            second double-width card would reopen it. The device is
+            the site's own: /about's values grid evens a 5-in-a-3-up
+            the same way.
+
+            `auto-rows-fr` sizes every row to the tallest, so the
+            seven cards are identical in height rather than merely
+            even row by row. Same treatment as the /services grid. */}
+        <Stagger className="grid auto-rows-fr gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((service, index) => {
             const Icon = SERVICE_ICONS[service.id];
             const lead = index === 0;
+            const last = index === services.length - 1;
             return (
-              <StaggerItem key={service.id} className={cn('h-full', lead && 'sm:col-span-2')}>
+              <StaggerItem
+                key={service.id}
+                className={cn('h-full', lead && 'sm:col-span-2', last && 'lg:col-span-2')}
+              >
                 <IconCard
                   title={service.title}
                   description={service.description}
-                  // The wide card has roughly twice the measure, so it
-                  // can show a line more before the hover swap has to
-                  // give the rest back — same call as /about's lead
-                  // value card.
-                  lines={lead ? 5 : 4}
+                  // No clamp: the full paragraph is on the card's
+                  // resting face, which is the whole point of the
+                  // change above.
+                  lines={null}
                   icon={Icon ? <Icon aria-hidden="true" strokeWidth={1.75} /> : null}
                 />
               </StaggerItem>

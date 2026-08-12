@@ -272,7 +272,13 @@ export const about = {
       'بدار منصة تابعة لمؤسسة منار، تدعم ريادة الأعمال الاجتماعية عبر تمكين المبادرين وتمويلهم. احتضنت وطورت أكثر من 120 مشروعاً أحدث أثراً إيجابياً في مجتمعاتنا',
   },
 
+  /* `eyebrow` is the bracketed label `PageHero` draws above the h1
+     — `/ من نحن /`. Every interior page carries one now (the client
+     asked for the same header on all of them, Aug 2026); the four
+     that had none reuse the label their own first section already
+     uses, so nothing here is newly written copy. */
   hero: {
+    eyebrow: 'من نحن',
     title: 'منصة تفاعلية نوعية لإنضاج مشاريع ريادة الأعمال الاجتماعية والمستدامة',
     subtitle:
       'نخلق تحولات ثورية لمواجهة التحديات المجتمعية من خلال حلول مستدامة في شكل مشاريع ريادية تحدث تغييرات ملموسة في مجتمعاتنا المحلية',
@@ -373,6 +379,7 @@ export const socialEntrepreneurship = {
   },
 
   hero: {
+    eyebrow: 'الريادة المجتمعية',
     title: 'الريادة المجتمعية:',
     titleSecondLine: 'السبيل نحو مجتمع أفضل',
     subtitle:
@@ -464,6 +471,11 @@ export const servicesPage = {
   },
 
   hero: {
+    /* The one the client reported missing: /services was the only
+       listing page whose header had no bracketed label over the h1,
+       while /programs, /blog and /news all carry one. Same "<noun>
+       بدار" shape as those three. */
+    eyebrow: 'خدمات بدار',
     title: 'الخدمات التي تقدمها منصة بدار من خلال برامجها في ريادة الأعمال الاجتماعية',
     subtitle:
       'تنتهج منصة بدار استراتيجية عمليّة في تطوير حلول مجتمعية مدروسة من خلال خدمات تخصصية متكاملة',
@@ -536,6 +548,7 @@ export const contact = {
   },
 
   hero: {
+    eyebrow: 'تواصل معنا',
     title: 'تواصل معنا الآن',
     subtitle: 'مستعدون للإجابة عن أسئلتك واستفساراتك.. لا تتردد بالتواصل معنا',
   },

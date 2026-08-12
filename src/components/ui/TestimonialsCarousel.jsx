@@ -35,6 +35,31 @@ import avatarMohammad from '@assets/experts/expert-mohammad-kahlani.avif';
    swaps `shown` once the exit transition's duration has elapsed, so
    the crossfade never depends on an animation-frame callback firing.
 
+   THE PANEL'S HEIGHT IS FIXED, AND IT IS FIXED BY THE DATA
+   ----------------------------------------------------------------
+   The five quotes run from 150 to 260 characters, and rendering only
+   the current one made the panel's height a function of which slide
+   was showing: every advance — including the 6.5s autoplay, which
+   nobody asked for — resized the band and shoved the FAQ and the CTA
+   below it up or down the page. That is a layout shift on a timer.
+
+   So EVERY slide is rendered, all of them stacked in a single CSS
+   grid cell (`.quote-stack`), and the inactive ones are
+   `visibility: hidden` — which keeps them in layout. The grid row is
+   therefore as tall as the LONGEST testimonial, always, and nothing
+   outside the panel can move when the slide changes.
+
+   `visibility: hidden` rather than `opacity: 0` or `display: none` is
+   the whole trick: `display: none` takes the slide out of layout and
+   the height starts varying again, while `opacity: 0` would leave
+   five overlapping cards in the accessibility tree and in the hit
+   test. Hidden ones are out of both and still measured.
+
+   A fixed `min-height` in CSS would have been less code and wrong:
+   the count and the copy are DATA (the dashboard publishes these),
+   so a hardcoded height is a number that silently stops matching the
+   content the first time an editor writes a longer quote.
+
    Avatars are a display concern, not content — `testimonials` in
    `content/pages.js` stays plain data (id/quote/author/role) per the
    "content is data" rule, and this map is the one place a person's
@@ -228,8 +253,6 @@ export function TestimonialsCarousel({ items, className }) {
     return () => window.clearInterval(timerRef.current);
   }, [paused, reduceMotion, count, next]);
 
-  const item = items[shown];
-  const avatar = resolveAvatar(item);
   // Slides out toward the exit edge; the swapped-in card then
   // transitions back from that same edge to center (a crossfade with
   // a small directional drift, not a true two-edge slide) — see the
@@ -261,85 +284,121 @@ export function TestimonialsCarousel({ items, className }) {
       onKeyDown={onKeyDown}
     >
       <div className="quote-panel">
-        <figure
-          ref={figureRef}
-          role="group"
-          aria-roledescription="slide"
-          aria-label={`${shown + 1} من ${count}`}
-          style={cardStyle}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
-          // `touch-action: pan-y` hands vertical scrolling back to the
-          // browser and keeps horizontal for the swipe. `select-none`
-          // stops a drag from turning into a text selection of the
-          // quote, which is what makes a hand-written slider feel
-          // broken on desktop.
-          className="quote-slide relative flex touch-pan-y select-none flex-col gap-7 px-6 py-10 sm:px-12 sm:py-14"
-        >
-          {/* The Bedar wordmark opens the card, in the corner the
-              lucide quotation glyph used to hold. The client asked for
-              the comma-shaped mark gone and the site logo in its place
-              — one clean brand mark, not a faint watermark behind the
-              text. White silhouette, since the panel is near-black;
-              `self-start` so the wide wordmark keeps its own width and
-              sits at the reading edge (right in RTL) rather than
-              stretching. Decorative — the region already carries the
-              "آراء الخبراء" label, so the logo is aria-hidden. */}
-          <img
-            src={logoWhiteUrl}
-            alt=""
-            aria-hidden="true"
-            draggable="false"
-            className="h-8 w-auto shrink-0 self-start opacity-90 sm:h-9"
-          />
+        {/* Every slide, stacked in one grid cell. The row is as tall as
+            the longest quote and stays that height for the life of the
+            band — see the note at the top of this file. */}
+        <div className="quote-stack">
+          {items.map((slide, slideIndex) => {
+            const live = slideIndex === shown;
+            const avatar = resolveAvatar(slide);
 
-          {/* Start-aligned, not centred: five lines of centred Arabic
-              gives every line a different start point and the eye has
-              to re-find the margin on each one. The band reads as an
-              editorial pull-quote now, which is what it is. */}
-          <blockquote className="text-balance text-lg leading-[1.9] text-ink sm:text-xl sm:leading-[1.9]">
-            {item.quote}
-          </blockquote>
-
-          <figcaption className="mt-1 flex items-center gap-4 border-t border-subtle pt-6">
-            <span className="size-14 shrink-0 overflow-hidden rounded-full ring-2 ring-brand-300/40 ring-offset-2 ring-offset-transparent sm:size-16">
-              {avatar ? (
+            return (
+              <figure
+                key={slide.id}
+                // The ref follows the visible card: it is the drag
+                // handlers' target, and only the live slide has any.
+                ref={live ? figureRef : null}
+                role="group"
+                aria-roledescription="slide"
+                aria-label={`${slideIndex + 1} من ${count}`}
+                // Belt and braces with `visibility: hidden`, which
+                // already takes a subtree out of the a11y tree — this
+                // says so declaratively, for the next reader.
+                aria-hidden={live ? undefined : 'true'}
+                style={live ? cardStyle : undefined}
+                onPointerDown={live ? onPointerDown : undefined}
+                onPointerMove={live ? onPointerMove : undefined}
+                onPointerUp={live ? onPointerUp : undefined}
+                onPointerCancel={live ? onPointerUp : undefined}
+                // `touch-action: pan-y` hands vertical scrolling back
+                // to the browser and keeps horizontal for the swipe.
+                // `select-none` stops a drag from turning into a text
+                // selection of the quote, which is what makes a
+                // hand-written slider feel broken on desktop.
+                className={cn(
+                  'quote-slide relative flex touch-pan-y select-none flex-col gap-7 px-6 py-10 sm:px-12 sm:py-14',
+                  !live && 'quote-slide-ghost',
+                )}
+              >
+                {/* The Bedar wordmark opens the card, in the corner the
+                    lucide quotation glyph used to hold. The client asked
+                    for the comma-shaped mark gone and the site logo in
+                    its place — one clean brand mark, not a faint
+                    watermark behind the text. White silhouette, since
+                    the panel is near-black; `self-start` so the wide
+                    wordmark keeps its own width and sits at the reading
+                    edge (right in RTL) rather than stretching.
+                    Decorative — the region already carries the
+                    "آراء الخبراء" label, so the logo is aria-hidden. */}
                 <img
-                  src={avatar}
+                  src={logoWhiteUrl}
                   alt=""
-                  className="size-full object-cover"
-                  width={200}
-                  height={200}
-                  loading="lazy"
-                  decoding="async"
+                  aria-hidden="true"
                   draggable="false"
+                  className="h-8 w-auto shrink-0 self-start opacity-90 sm:h-9"
                 />
-              ) : (
-                <span className="flex size-full items-center justify-center bg-tint-brand text-sm font-semibold text-tint-brand-fg">
-                  {item.author.slice(0, 1)}
-                </span>
-              )}
-            </span>
 
-            <span className="flex min-w-0 flex-col">
-              <span className="font-semibold text-ink">{item.author}</span>
-              <span className="text-sm leading-snug text-ink-muted">{item.role}</span>
-            </span>
+                {/* Start-aligned, not centred: five lines of centred
+                    Arabic gives every line a different start point and
+                    the eye has to re-find the margin on each one. The
+                    band reads as an editorial pull-quote now, which is
+                    what it is.
 
-            {/* "N / 5", the live-site slider's own counter. Western
-                digits and `.ltr-run` so the pair never bidi-reorders
-                into "5 / N" beside the Arabic name. */}
-            {count > 1 ? (
-              <span className="ms-auto hidden shrink-0 text-sm tabular-nums text-ink-muted sm:block">
-                <span className="ltr-run">
-                  {shown + 1} / {count}
-                </span>
-              </span>
-            ) : null}
-          </figcaption>
-        </figure>
+                    `my-auto` is what makes a fixed-height panel look
+                    intentional. The card is the height of the LONGEST
+                    quote, so the 131-character one has 76px of slack;
+                    left at the top it hangs off the logo with a hole
+                    under it. Absorbed into the quote's own margins,
+                    the slack splits above and below and every slide
+                    reads as centred between a mark and a byline that
+                    never move. This is also why the figcaption needs
+                    no auto margin of its own — a second one would
+                    split the same space three ways and put the gap
+                    back, above the rule this time. */}
+                <blockquote className="my-auto text-balance text-lg leading-[1.9] text-ink sm:text-xl sm:leading-[1.9]">
+                  {slide.quote}
+                </blockquote>
+
+                <figcaption className="flex items-center gap-4 border-t border-subtle pt-6">
+                  <span className="size-14 shrink-0 overflow-hidden rounded-full ring-2 ring-brand-300/40 ring-offset-2 ring-offset-transparent sm:size-16">
+                    {avatar ? (
+                      <img
+                        src={avatar}
+                        alt=""
+                        className="size-full object-cover"
+                        width={200}
+                        height={200}
+                        loading="lazy"
+                        decoding="async"
+                        draggable="false"
+                      />
+                    ) : (
+                      <span className="flex size-full items-center justify-center bg-tint-brand text-sm font-semibold text-tint-brand-fg">
+                        {slide.author.slice(0, 1)}
+                      </span>
+                    )}
+                  </span>
+
+                  <span className="flex min-w-0 flex-col">
+                    <span className="font-semibold text-ink">{slide.author}</span>
+                    <span className="text-sm leading-snug text-ink-muted">{slide.role}</span>
+                  </span>
+
+                  {/* "N / 5", the live-site slider's own counter. Western
+                      digits and `.ltr-run` so the pair never bidi-reorders
+                      into "5 / N" beside the Arabic name. */}
+                  {count > 1 ? (
+                    <span className="ms-auto hidden shrink-0 text-sm tabular-nums text-ink-muted sm:block">
+                      <span className="ltr-run">
+                        {slideIndex + 1} / {count}
+                      </span>
+                    </span>
+                  ) : null}
+                </figcaption>
+              </figure>
+            );
+          })}
+        </div>
       </div>
 
       {/* ── Controls ─────────────────────────────────────────────

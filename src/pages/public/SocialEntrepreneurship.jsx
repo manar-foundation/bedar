@@ -19,8 +19,8 @@ import {
 import {
   BrandCard,
   CtaBand,
-  Hero,
   IconCard,
+  PageHero,
   ProcessSteps,
   Section,
   SectionHeading,
@@ -31,6 +31,8 @@ import { Reveal, Stagger, StaggerItem } from '@components/motion/Reveal.jsx';
 import { useIsMobile } from '@hooks/useMediaQuery.js';
 import { useSeo } from '@hooks/useSeo.js';
 import { socialEntrepreneurship as page } from '@content/pages.js';
+import { pageBanners } from '@content/page-banners.js';
+import { breadcrumbsFor } from '@content/site.js';
 
 /* Clean line-marks, one per قطاع (keyed by id) — they replaced the
    raster illustrations the brief flagged as poor on the dark surface. */
@@ -88,7 +90,9 @@ export default function SocialEntrepreneurship() {
 
   return (
     <>
-      <Hero
+      <PageHero
+        breadcrumbs={breadcrumbsFor('/social-entrepreneurship')}
+        eyebrow={page.hero.eyebrow}
         title={
           <>
             {page.hero.title}
@@ -96,7 +100,7 @@ export default function SocialEntrepreneurship() {
           </>
         }
         subtitle={page.hero.subtitle}
-        showSpiral={false}
+        image={pageBanners.socialEntrepreneurship}
       />
 
       {/* ── The concept ─────────────────────────────────────── */}

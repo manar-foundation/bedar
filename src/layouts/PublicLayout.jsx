@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from '@components/layout/Navbar.jsx';
 import Footer from '@components/layout/Footer.jsx';
 import BackToTop from '@components/layout/BackToTop.jsx';
+import AutoReveal from '@components/motion/AutoReveal.jsx';
 
 /**
  * Shell for every public page: sticky navbar, animated main, footer.
@@ -20,6 +21,12 @@ import BackToTop from '@components/layout/BackToTop.jsx';
  * on its own shell rather than trusting the global <html> attribute,
  * so the admin theme toggle (the only remaining toggle) can never
  * leak light mode onto the marketing site.
+ *
+ * `AutoReveal` is mounted here, once, for the whole public site: one
+ * IntersectionObserver that gives every block of content on every page
+ * the same scroll entrance, without nine page files having to wrap
+ * every element they own. It renders nothing and it never touches a
+ * subtree that Framer already animates — see that component's header.
  *
  * The whole page shares ONE fixed background — a deep-teal base with a
  * couple of soft, static glows drifting off the top and bottom
@@ -48,6 +55,8 @@ export default function PublicLayout() {
             'radial-gradient(60rem 48rem at 50% 108%, rgba(11,122,115,0.10), transparent 62%)',
         }}
       />
+
+      <AutoReveal />
 
       <Navbar />
 

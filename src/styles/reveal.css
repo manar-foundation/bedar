@@ -1,0 +1,125 @@
+/* ================================================================
+   SCROLL REVEAL — the site-wide entrance.
+
+   `Reveal` / `Stagger` (components/motion/Reveal.jsx) animate the
+   things a page author reached for explicitly. This is the other
+   half: every remaining block of content on every public page —
+   headings, paragraphs, lists, images, cards, panels, tables, forms
+   — arrives the same way, driven by ONE IntersectionObserver in
+   `components/motion/AutoReveal.jsx`.
+
+   THE CONTRACT WITH THE JS
+   ----------------------------------------------------------------
+   AutoReveal writes three things and nothing else:
+
+     data-reveal-state="hidden"   the resting state, below
+     data-reveal-state="shown"    the played state
+     --reveal-step: <n>           0-6, this element's place among the
+                                  elements arriving WITH it — set at
+                                  reveal time, not at scan time, so a
+                                  paragraph that scrolls in alone
+                                  plays immediately instead of
+                                  carrying its position in the
+                                  article as a delay
+
+   …and then REMOVES both once the transition has finished. That last
+   step is not tidiness, it is the whole reason this is safe:
+
+   • `transform: none` on a settled element would otherwise keep
+     beating `.band-tile:hover { transform: translateY(-3px) }` and
+     every other hover on the site (see "UNLAYERED" below), and
+   • a lingering transform makes the element a containing block for
+     any `position: fixed` descendant and can hold a compositor layer
+     open for the life of the page.
+
+   A revealed element ends up byte-for-byte the element it would have
+   been with this file deleted.
+
+   NOTHING IS EVER HIDDEN BY CSS ALONE
+   ----------------------------------------------------------------
+   Every rule here is keyed off `[data-reveal-state]`, an attribute
+   only JavaScript ever writes. No JS, no IntersectionObserver, a
+   thrown error before the effect runs — the page renders fully
+   visible. Content is never gated behind an animation that might not
+   play. (`AutoReveal` additionally refuses to hide any element that
+   measures 0×0 at scan time, so a collapsed accordion panel or a
+   `hidden` tab panel cannot be left invisible after it opens.)
+
+   UNLAYERED, ON PURPOSE
+   ----------------------------------------------------------------
+   Tailwind v4 emits `transform`, `opacity` and `transition` from the
+   `utilities` layer, which outranks `@layer components` however
+   specific the selector is. Inside a layer these rules would compute
+   and silently never render on any element carrying a transform
+   utility — the same trap `.btn-press` documents in layout.css. So
+   they sit outside every layer, and the removal step above is what
+   keeps that from becoming a problem after the fact.
+
+   THE MOTION
+   ----------------------------------------------------------------
+   A 22px rise and a fade over 620ms on the site's own
+   `--ease-standard`, which is the design system's entrance stretched
+   just far enough to read as a scroll reveal rather than as a
+   hover. Transform and opacity only — no layout property is
+   touched, so a band of twelve cards arriving at once is a
+   composite, not a reflow, and holds 60fps on a phone.
+
+   Two horizontal variants are available per element, for content
+   that should arrive from the side rather than from below:
+
+     <div data-reveal="left">   arrives from the left edge
+     <div data-reveal="right">  arrives from the right edge
+
+   `x` is PHYSICAL and is deliberately not flipped for RTL — a tile
+   sliding in from the near edge of its own column is a spatial
+   gesture, not a reading-order one. Same call `StaggerItem
+   variant="slide"` already makes.
+
+   `data-reveal="off"` on any element opts its whole subtree out;
+   that is what `Reveal`, `Stagger`, `StaggerItem` and `ScrollExit`
+   stamp on themselves so the two systems can never both drive the
+   same node.
+   ================================================================ */
+
+[data-reveal-state] {
+  opacity: 0;
+  transform: translate3d(0, var(--reveal-y, 22px), 0);
+  transition:
+    opacity var(--reveal-dur, 620ms) var(--ease-standard) var(--reveal-delay, 0ms),
+    transform var(--reveal-dur, 620ms) var(--ease-standard) var(--reveal-delay, 0ms);
+  /* Each element's own place in its group's cascade. Capped at 6 by
+     AutoReveal, so a twenty-cell grid's last tile is not still
+     waiting a second and a half after the reader arrived. */
+  --reveal-delay: calc(var(--reveal-step, 0) * 70ms);
+}
+
+/* The two side entrances. Higher specificity than the base rule by
+   construction (two attribute selectors), so only the transform is
+   restated — the timing above still applies. */
+[data-reveal='left'][data-reveal-state] {
+  transform: translate3d(calc(-1 * var(--reveal-x, 30px)), 0, 0);
+}
+[data-reveal='right'][data-reveal-state] {
+  transform: translate3d(var(--reveal-x, 30px), 0, 0);
+}
+
+[data-reveal-state='shown'],
+[data-reveal='left'][data-reveal-state='shown'],
+[data-reveal='right'][data-reveal-state='shown'] {
+  opacity: 1;
+  transform: none;
+}
+
+/* No motion means NO motion — not "a faster reveal", and above all
+   not "hidden until an animation that will never run". `!important`
+   because the horizontal variants above are two attribute selectors
+   deep and this has to win against all of them from one rule.
+   AutoReveal also declines to run at all under this preference; this
+   is the guarantee for a reader who changes the setting mid-visit. */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal-state] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}

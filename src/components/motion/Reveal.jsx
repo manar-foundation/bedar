@@ -81,7 +81,7 @@ export function Reveal({
   if (reduceMotion) {
     const Plain = as;
     return (
-      <Plain className={className} {...rest}>
+      <Plain className={className} data-reveal="off" {...rest}>
         {children}
       </Plain>
     );
@@ -94,6 +94,9 @@ export function Reveal({
       viewport={{ once: true, amount }}
       transition={{ duration: DURATION, delay: delay * STEP, ease: EASE }}
       className={cn(className)}
+      /* Claimed by Framer Motion — `AutoReveal` must not also drive
+         this subtree. See components/motion/AutoReveal.jsx. */
+      data-reveal="off"
       {...rest}
     >
       {children}
@@ -113,7 +116,7 @@ export function RevealOnMount({ children, delay = 0, y = 24, as = 'div', classNa
   if (reduceMotion) {
     const Plain = as;
     return (
-      <Plain className={className} {...rest}>
+      <Plain className={className} data-reveal="off" {...rest}>
         {children}
       </Plain>
     );
@@ -125,6 +128,9 @@ export function RevealOnMount({ children, delay = 0, y = 24, as = 'div', classNa
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: DURATION, delay: delay * STEP, ease: EASE }}
       className={cn(className)}
+      /* Claimed by Framer Motion — `AutoReveal` must not also drive
+         this subtree. See components/motion/AutoReveal.jsx. */
+      data-reveal="off"
       {...rest}
     >
       {children}
@@ -161,7 +167,7 @@ export function Stagger({
   if (reduceMotion) {
     const Plain = as;
     return (
-      <Plain className={className} {...rest}>
+      <Plain className={className} data-reveal="off" {...rest}>
         {children}
       </Plain>
     );
@@ -177,6 +183,9 @@ export function Stagger({
         shown: { transition: { staggerChildren: step, delayChildren: delay } },
       }}
       className={cn(className)}
+      /* Claimed by Framer Motion — `AutoReveal` must not also drive
+         this subtree. See components/motion/AutoReveal.jsx. */
+      data-reveal="off"
       {...rest}
     >
       {children}
@@ -210,7 +219,7 @@ export function StaggerItem({
   if (reduceMotion) {
     const Plain = as;
     return (
-      <Plain className={className} {...rest}>
+      <Plain className={className} data-reveal="off" {...rest}>
         {children}
       </Plain>
     );
@@ -226,6 +235,9 @@ export function StaggerItem({
         },
       }}
       className={cn(className)}
+      /* Claimed by Framer Motion — `AutoReveal` must not also drive
+         this subtree. See components/motion/AutoReveal.jsx. */
+      data-reveal="off"
       {...rest}
     >
       {children}

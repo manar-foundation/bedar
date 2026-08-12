@@ -4,8 +4,8 @@ import {
   BrandCard,
   Button,
   CtaBand,
-  Hero,
   IconCard,
+  PageHero,
   ProcessSteps,
   Section,
   SectionHeading,
@@ -16,6 +16,8 @@ import {
 import { Reveal, Stagger, StaggerItem } from '@components/motion/Reveal.jsx';
 import { useSeo } from '@hooks/useSeo.js';
 import { about } from '@content/pages.js';
+import { pageBanners } from '@content/page-banners.js';
+import { breadcrumbsFor } from '@content/site.js';
 import { cn } from '@utils/cn.js';
 
 /* One mark per value, keyed by id — the same pattern the services
@@ -63,7 +65,17 @@ export default function About() {
 
   return (
     <>
-      <Hero title={about.hero.title} subtitle={about.hero.subtitle} showSpiral={false} />
+      {/* The site-wide interior banner — the hackathon program page's
+          header, which the client asked to standardise onto every
+          sub-page. Set `about` in content/page-banners.js to put a
+          photograph behind it; nothing else changes. */}
+      <PageHero
+        breadcrumbs={breadcrumbsFor('/about')}
+        eyebrow={about.hero.eyebrow}
+        title={about.hero.title}
+        subtitle={about.hero.subtitle}
+        image={pageBanners.about}
+      />
 
       {/* ── Intro ───────────────────────────────────────────── */}
       <Section>

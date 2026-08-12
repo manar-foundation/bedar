@@ -1,8 +1,10 @@
-import { Hero } from '@components/ui';
+import { PageHero } from '@components/ui';
 import { CollectionListing } from '@components/layout/CollectionListing.jsx';
 import { useContent } from '@context/ContentContext.jsx';
 import { useSeo } from '@hooks/useSeo.js';
 import { programsPage } from '@content/pages.js';
+import { pageBanners } from '@content/page-banners.js';
+import { breadcrumbsFor } from '@content/site.js';
 import { PUBLISH_STATE } from '@utils/constants.js';
 
 /**
@@ -27,10 +29,11 @@ export default function Programs() {
 
   return (
     <>
-      <Hero
+      <PageHero
+        breadcrumbs={breadcrumbsFor('/programs')}
         eyebrow={programsPage.hero.eyebrow}
         title={programsPage.hero.title}
-        showSpiral={false}
+        image={pageBanners.programs}
       />
 
       <CollectionListing items={visible} empty={programsPage.empty} readMore="إقرأ المزيد" />

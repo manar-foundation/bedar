@@ -13,6 +13,10 @@ import { cn } from '@utils/cn.js';
    scrollbar instead, so it is scaled down and gone by the time the
    section below arrives.
 
+   It wraps the hero PHOTOGRAPH only — not the arcs behind it, which
+   stay drawn and fully opaque (see `HeroArtwork`). Wrap the smallest
+   thing that should leave, not the container it sits in.
+
    THE RANGE
    ----------------------------------------------------------------
    `offset: ['start start', 'end start']` puts progress 0 at the
@@ -68,6 +72,10 @@ function ScrollExitMotion({ targetRef, children, className, ...rest }) {
     <motion.div
       style={{ scale, opacity, willChange: 'transform, opacity' }}
       className={cn(className)}
+      // This subtree's opacity belongs to the scroll, not to
+      // `AutoReveal` — two systems writing the same property is a
+      // photo that fades in as it is fading out.
+      data-reveal="off"
       {...rest}
     >
       {children}
@@ -78,9 +86,14 @@ function ScrollExitMotion({ targetRef, children, className, ...rest }) {
 export function ScrollExit({ targetRef, children, className, ...rest }) {
   const reduceMotion = useReducedMotion();
 
-  if (reduceMotion) {
+  // No target, no exit. `useScroll` with an undefined target falls
+  // back to the WINDOW's progress, which would dissolve the element
+  // against the whole document's height instead of its section's —
+  // a silent, very wrong animation. A component that renders this
+  // without a range simply wants the static version.
+  if (reduceMotion || !targetRef) {
     return (
-      <div className={cn(className)} {...rest}>
+      <div className={cn(className)} data-reveal="off" {...rest}>
         {children}
       </div>
     );

@@ -1,6 +1,6 @@
 import {
   CtaBand,
-  Hero,
+  PageHero,
   Section,
   SectionHeading,
   SectionSeam,
@@ -11,6 +11,8 @@ import { Reveal } from '@components/motion/Reveal.jsx';
 import { useContent } from '@context/ContentContext.jsx';
 import { useSeo } from '@hooks/useSeo.js';
 import { servicesPage, services } from '@content/pages.js';
+import { pageBanners } from '@content/page-banners.js';
+import { breadcrumbsFor } from '@content/site.js';
 
 import photoIdeaDevelopment from '@assets/services/photo-idea-development.webp';
 import photoFeasibility from '@assets/services/photo-feasibility-review.webp';
@@ -42,10 +44,16 @@ export default function Services() {
 
   return (
     <>
-      <Hero
+      {/* `eyebrow` is the fix for the header the client reported as
+          inconsistent: this page was the only listing page with no
+          bracketed label over its h1. `PageHero` draws it the way
+          `SectionHeading` does — `/ خدمات بدار /`. */}
+      <PageHero
+        breadcrumbs={breadcrumbsFor('/services')}
+        eyebrow={servicesPage.hero.eyebrow}
         title={servicesPage.hero.title}
         subtitle={servicesPage.hero.subtitle}
-        showSpiral={false}
+        image={pageBanners.services}
       />
 
       {/* ── Intro ───────────────────────────────────────────── */}
@@ -72,17 +80,35 @@ export default function Services() {
              paragraph, and three columns makes an unreadable
              30-character measure in Arabic.
 
-             `grid-stagger` offsets the second column by 80px from
-             `lg` up. Seven cards in a plain two-column grid is a
-             ledger; offsetting one column turns the same seven into a
-             spread, and it is what stops the last odd card from
-             looking like a gap. Each card leads with its own
-             editorial photo, and carries a Western-digit index so a
-             reader can refer to "الخدمة 3". */}
+             EVERY CARD IS THE SAME SIZE (client, Aug 2026)
+             ------------------------------------------------------
+             This grid used to carry `grid-stagger`, which drops every
+             even child 80px to make a two-column run read as a spread
+             rather than as a ledger. It is a good device and it is the
+             wrong one HERE: the margin comes out of the child's
+             stretched height, so the even card in every row rendered
+             80px shorter than the odd one beside it — measured at
+             690/610, 690/610, 666/586. The client read that, correctly,
+             as seven cards of seven different sizes.
+
+             So the offset comes off and `auto-rows-fr` goes on. `1fr`
+             on the implicit rows sizes EVERY row to the tallest one in
+             the grid, not just each row to its own tallest, so all
+             seven cards end up identical in both axes however long
+             their copy runs. The photo frame is a fixed ratio and the
+             copy block sits under it, so the slack lands at the bottom
+             of the shorter cards — which is what "equal height cards"
+             means and what makes the column edges line up.
+
+             The stagger is not missed: the cards are big, photographic
+             and evenly ruled, and it was the one thing stopping them
+             from lining up. Each card leads with its own editorial
+             photo and carries a Western-digit index so a reader can
+             refer to "الخدمة 3". */}
       <Section tone="glow">
-        <div className="grid-stagger grid gap-6 lg:grid-cols-2 lg:gap-8">
+        <div className="grid auto-rows-fr gap-6 lg:grid-cols-2 lg:gap-8">
           {services.map((service, index) => (
-            <Reveal key={service.id} delay={index % 2}>
+            <Reveal key={service.id} delay={index % 2} className="h-full">
               {/* Same shell as `ContentCard`: inset media in a 10px
                   frame that the photo scales inside, and the whole
                   card lifting on `.band-tile`. These are the only

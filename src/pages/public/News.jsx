@@ -1,8 +1,10 @@
-import { Hero } from '@components/ui';
+import { PageHero } from '@components/ui';
 import { CollectionListing } from '@components/layout/CollectionListing.jsx';
 import { useContent } from '@context/ContentContext.jsx';
 import { useSeo } from '@hooks/useSeo.js';
 import { newsPage } from '@content/pages.js';
+import { pageBanners } from '@content/page-banners.js';
+import { breadcrumbsFor } from '@content/site.js';
 
 /**
  * الأخبار — the news listing.
@@ -17,7 +19,12 @@ export default function News() {
 
   return (
     <>
-      <Hero eyebrow={newsPage.hero.eyebrow} title={newsPage.hero.title} showSpiral={false} />
+      <PageHero
+        breadcrumbs={breadcrumbsFor('/news')}
+        eyebrow={newsPage.hero.eyebrow}
+        title={newsPage.hero.title}
+        image={pageBanners.news}
+      />
 
       <CollectionListing
         items={collections.news}

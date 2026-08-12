@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 
+import { HeroScrollContext } from './heroScroll.js';
 import { Spiral, SpiralDivider } from './Spiral.jsx';
 import { RevealOnMount } from '@components/motion/Reveal.jsx';
 import { ScrollExit } from '@components/motion/ScrollExit.jsx';
@@ -239,25 +240,45 @@ export function Hero({
           {/* ── Artwork — second in the DOM, so it lands under the
                 copy on mobile and beside it from lg up.
 
-                No `RevealOnMount` here any more: `HeroArtwork` runs
-                its own two-beat entrance (arcs draw, then photo), and
-                a wrapper fading the whole thing in at 240ms would
-                have shown the finished lines before they had drawn
-                themselves. `ScrollExit` owns the other end of its
-                life — shrinking and dissolving it as the section
-                leaves. ──────────────────────────────────────── */}
+                No `RevealOnMount` here: `HeroArtwork` runs its own
+                two-beat entrance (arcs draw, then photo), and a
+                wrapper fading the whole thing in at 240ms would have
+                shown the finished lines before they had drawn
+                themselves.
+
+                THE SCROLL EXIT IS THE PHOTO'S, NOT THE ARTWORK'S
+                ------------------------------------------------
+                This used to wrap the whole `visual` in `ScrollExit`,
+                which took the drawn arcs down with the photograph.
+                The client asked for the opposite: the PHOTO dissolves
+                on scroll, the arcs stay drawn and fully visible as
+                the band's own structure.
+
+                So the section's scroll range is published on
+                `HeroScrollContext` and `HeroArtwork` puts the
+                `ScrollExit` around its photo alone. The range has to
+                stay the section's — see the note on `sectionRef`
+                above — which is why it is handed down rather than
+                re-measured inside the artwork, and a context rather
+                than a prop because that is the one way to pass a ref
+                two levels down without anything reading `.current`
+                during render (see `heroScroll.js`).
+
+                The legacy `image` prop has no inner structure to
+                target, so it keeps the wrapper. ───────────────── */}
           {split ? (
-            <ScrollExit
-              targetRef={sectionRef}
-              className={cn(
-                'w-full',
-                // A framed photo keeps its card; drawn artwork must
-                // not sit in a box.
-                visual ? '' : 'aspect-[4/3] overflow-hidden rounded-2xl bg-sunken shadow-e3',
-              )}
-            >
-              {media}
-            </ScrollExit>
+            visual ? (
+              <HeroScrollContext.Provider value={sectionRef}>
+                <div className="w-full">{visual}</div>
+              </HeroScrollContext.Provider>
+            ) : (
+              <ScrollExit
+                targetRef={sectionRef}
+                className="aspect-[4/3] w-full overflow-hidden rounded-2xl bg-sunken shadow-e3"
+              >
+                {media}
+              </ScrollExit>
+            )
           ) : null}
         </div>
       </div>

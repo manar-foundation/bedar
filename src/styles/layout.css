@@ -44,6 +44,57 @@
     }
   }
 
+  /* ── Page-hero banner photograph ────────────────────────────────
+        The optional backdrop behind `<PageHero>` (components/ui/
+        PageHero.jsx). The band renders identically with or without
+        one — this is the whole of what an image adds — so a page can
+        be given its own banner by setting one key in
+        `content/page-banners.js` and nothing else moves.
+
+        TWO LAYERS, AND BOTH ARE REQUIRED.
+
+        The photo is dimmed to 30% rather than dropped in at full
+        strength. `.surface-dark` is a deep-teal base and the h1 on it
+        is pure white; a photograph at full opacity puts arbitrary
+        luminance behind that type, and any light region in the frame
+        takes the title straight through AA. 0.3 keeps the image
+        legible as a scene while holding the band's own darkness.
+
+        The scrim is the second half of the same guarantee, and it is
+        a GRADIENT rather than a flat wash: the copy column sits in
+        the lower half of the band, so the cover runs from nearly
+        opaque at the bottom to almost clear at the top. The photo
+        stays visible where there is no text over it.
+
+        `object-fit: cover` with no fixed aspect — the band is sized
+        by its copy, exactly as it is without an image, and the photo
+        crops to whatever height that comes to.
+
+        `z-index` is not set on either: both are in flow before the
+        content div, which is `position: relative`, so they stack
+        underneath it without creating a context that would trap the
+        aurora. */
+  .page-hero-photo {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+  .page-hero-scrim {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgba(3, 20, 22, 0.55) 0%,
+      rgba(3, 20, 22, 0.72) 45%,
+      rgba(3, 20, 22, 0.9) 100%
+    );
+  }
+
   /* ── Inset panel ────────────────────────────────────────────────
         A section's content held inside a rounded, bordered surface
         instead of running to the page gutters. Both references use
@@ -208,6 +259,32 @@
       radial-gradient(26rem 22rem at 6% 130%, rgba(30, 158, 147, 0.28), transparent 62%),
       var(--hero-bg);
     box-shadow: var(--shadow-e2);
+  }
+
+  /* ── The stack that fixes the panel's height ────────────────────
+        Every testimonial is rendered and every one lands in the SAME
+        grid cell, so the row is sized by the tallest of them and the
+        band's height never depends on which slide is showing. Without
+        this the 6.5s autoplay resized the section on a timer and
+        pushed the whole page below it up and down.
+
+        `align-items: stretch` (the default) is load-bearing: it makes
+        the live card fill the row, which is what lets its `mt-auto`
+        figcaption sit on the panel's floor on every slide instead of
+        halfway up on the short ones.
+
+        The hidden slides keep their box — `visibility: hidden` is
+        measured, `display: none` is not — and are out of the hit test
+        and the accessibility tree. Do not "optimise" this into
+        rendering one slide again; the height is the feature. */
+  .quote-stack {
+    display: grid;
+  }
+  .quote-stack > * {
+    grid-area: 1 / 1;
+  }
+  .quote-slide-ghost {
+    visibility: hidden;
   }
 
   /* The draggable slide. `grab`/`grabbing` is the whole affordance —
@@ -433,48 +510,104 @@
       opacity var(--dur-slow) var(--ease-standard),
       transform var(--dur-slow) var(--ease-standard);
   }
-  /* The incoming face covers the card's whole padding box and centres
-     itself in it, so the longest description has the full height to
-     use rather than whatever a title left over. */
+  /* ── The incoming face ──────────────────────────────────────────
+        It covers the card's padding box, so the longest description
+        has the whole tile to use rather than whatever a title left
+        over.
+
+        IT CARRIES THE REAL TITLE.
+        ----------------------------------------------------------
+        It used to carry a 15px mint caption on one `nowrap` line
+        with an ellipsis. Two things were wrong with that and the
+        client reported them as one: the longest service titles were
+        cut off mid-word the moment the pointer landed, and even the
+        ones that fitted dropped two type steps and changed colour —
+        so pointing at a card read as its heading DISAPPEARING.
+
+        So this face now draws the title exactly as the resting face
+        does: same 17px, same weight, same `--text-primary`, same
+        40px mint rule under it, wrapping to as many lines as it
+        needs. The card's heading is legible before, during and after
+        the hover. Only the icon and the clamped paragraph trade
+        places, which is the reference's animation, untouched.
+
+        The other obvious answer — leave the title OUT of the swap
+        and pin it in place — does not survive measurement. On the
+        live grid the space under a persistent title is 127px and the
+        longest description needs 229px at this size; keeping the
+        heading put keeps the icon's 72px with it, so the tile would
+        have to grow to ~424px in a four-up grid to buy back what
+        redrawing one heading gives for free.
+
+        The inset is tighter than the resting face's 1.75rem padding
+        (1rem block / 1.25rem inline) because those pixels ARE the
+        margin. The tightest tile on the site is the first 4-up row
+        at exactly 1280px — a 268px card — and it clears its own
+        longest description by 17px. Every rem taken out of here is
+        spent there; do not restore it to match the resting padding
+        without re-measuring that card. */
   .swap-in {
     position: absolute;
-    inset: 1.75rem;
+    inset: 1rem 1.25rem;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 0.375rem;
+    /* Top-aligned, not centred. A heading sits at the top of its
+       box — and centring was the mechanism of the original bug: a
+       description taller than the face overflowed BOTH ways, and the
+       half that went up took the heading out through the card's
+       clipped top edge. */
+    justify-content: flex-start;
     opacity: 0;
     transform: translateY(1.75rem);
     pointer-events: none;
   }
-  /* One line, always. The two longest service titles wrap to two
-     lines here, and those 24px are exactly what their descriptions
-     needed — the pair were the only cards left scrolling. Truncating
-     is safe on THIS face specifically: the resting face above it
-     shows the same title in full, and the reader was looking at it a
-     moment ago. */
+  /* Matches `IconCard`'s resting <h3> declaration for declaration —
+     if that one moves, this moves with it. The whole point is that a
+     reader cannot tell the two apart.
+
+     `flex: none` so the title takes the lines it needs and the BODY
+     absorbs any squeeze (it has `min-height: 0` and can scroll),
+     rather than flex splitting the shortfall across both and
+     clipping the heading again. */
   .swap-in-title {
-    font-size: 0.9375rem;
+    flex: none;
+    font-size: 1.0625rem;
     font-weight: 600;
-    color: var(--brand-200);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.35;
+    color: var(--text-primary);
+    text-wrap: pretty;
   }
-  /* 13px on a 1.6 leading. The longest service description is 366
-     characters, which is ~11 lines at this size in a 280px column —
-     224px inside the 266px the card's padding box gives. At the
-     resting 15px it is 273px and the last two lines are clipped,
-     which is the whole reason this size is set here rather than
+  /* The resting face's underline, same width and colour, so the
+     heading block is identical across the swap. */
+  .swap-in-rule {
+    flex: none;
+    display: block;
+    inline-size: 2.5rem;
+    block-size: 2px;
+    margin-block-start: 0.375rem;
+    border-radius: 999px;
+    background: var(--brand-300);
+  }
+  /* 13px on a 1.55 leading. The longest service description is 370
+     characters — ~10 lines at this size in the 242px measure the
+     inset above gives, which clears the room left under a two-line
+     title by 26px. At the resting 15px it is 288px and the last
+     lines are clipped, which is why the size is set here rather than
      inherited. */
   .swap-in-body {
+    /* A flex item's floor is its content, so without this the body
+       refuses to shrink, pushes the title out of the box, and
+       `overflow-y` never gets the chance to do its job. */
+    min-height: 0;
+    margin-block-start: 0.5rem;
     font-size: 0.8125rem;
-    line-height: 1.6;
+    line-height: 1.55;
     color: var(--text-secondary);
     /* The guarantee: if a future description is longer than any of
        today's, it scrolls inside the card instead of being cut. */
     overflow-y: auto;
     overscroll-behavior: contain;
+    scrollbar-width: thin;
   }
   .band-tile {
     position: relative;
@@ -488,6 +621,13 @@
   .band-tile:focus-within .swap-in {
     opacity: 1;
     transform: translateY(0);
+    /* Only once it is the face on screen. The overlay sits on top of
+       the card, so leaving it pickable at rest would swallow every
+       pointer event the card needs; while it IS on screen it has to
+       be pickable, or the `overflow-y` fallback above is a scrollbar
+       nobody can reach. The card keeps `:hover` either way — the
+       overlay is its own descendant. */
+    pointer-events: auto;
     transition:
       opacity var(--dur-base) var(--ease-standard),
       transform var(--dur-base) var(--ease-standard);
@@ -682,11 +822,17 @@
   .word-orbit-readout {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    /* Title above, description under it — the reading order the
+       client asked for, and the order the markup is already in. The
+       gap is what separates them as two things rather than one
+       paragraph with a bold first line. */
+    gap: 0.6rem;
     /* Wider than the inner ring it sits in: the ring is a guide, not
        a frame, and clipping a value's description to a circle would
-       cost two lines of it. */
-    inline-size: 128%;
+       cost two lines of it. Widened again with the type — the
+       description is at body size now, and at 128% the longest value
+       ran past the bottom of the core box. */
+    inline-size: 148%;
     opacity: 0;
     transform: scale(0.94);
   }
@@ -698,30 +844,46 @@
     opacity: 1;
     transform: scale(1);
   }
+  /* The read-out is the band's ANSWER, so it is typeset as content
+     and not as a caption. The title runs at the section-subhead size
+     and the description at the site's body size (1rem, the same
+     `text-base` every paragraph on the site uses) — the client read
+     the old 17/13 pair as a tooltip. Both scale down a step under
+     640px, where the whole orbit is 82% of a phone's width. */
   .word-orbit-readout-title {
-    font-size: 1.0625rem;
+    font-size: 1.5rem;
     font-weight: 700;
+    line-height: 1.3;
     color: var(--brand-200);
   }
   .word-orbit-readout-body {
-    font-size: 0.8125rem;
+    font-size: 1rem;
     line-height: 1.75;
     color: var(--text-secondary);
     text-wrap: pretty;
   }
-  @media (max-width: 640px) {
-    /* The mark's small-screen step is `h-12` on the element (see
-       above); only the readout needs shrinking here. */
-    .word-orbit-readout {
-      inline-size: 150%;
-      gap: 0.25rem;
-    }
+  @media (max-width: 1024px) {
     .word-orbit-readout-title {
-      font-size: 0.9375rem;
+      font-size: 1.25rem;
     }
     .word-orbit-readout-body {
-      font-size: 0.6875rem;
-      line-height: 1.6;
+      font-size: 0.9375rem;
+    }
+  }
+  @media (max-width: 640px) {
+    /* The mark's small-screen step is `h-20` on the element (see
+       above); the readout is what has to give here — 5 lines of
+       16px Arabic in a 240px circle is taller than the circle. */
+    .word-orbit-readout {
+      inline-size: 158%;
+      gap: 0.35rem;
+    }
+    .word-orbit-readout-title {
+      font-size: 1.0625rem;
+    }
+    .word-orbit-readout-body {
+      font-size: 0.8125rem;
+      line-height: 1.65;
     }
   }
   .word-orbit-ring {
@@ -755,9 +917,20 @@
     border: 1px solid rgba(169, 225, 211, 0.18);
     background: rgba(4, 25, 27, 0.72);
     backdrop-filter: blur(6px);
-    padding: 0.4rem 0.85rem;
+    /* Raised from 13px at the client's request: these are the five
+       brand VALUES, the only words in the band, and at caption size
+       they read as labels on a diagram rather than as the content.
+       The padding grows with the type so the chip keeps its shape.
+
+       This is the one number that decides whether the ring fits: the
+       chips at 3 and 9 o'clock overhang the square by about half
+       their width, so every step up here is ~8px more overhang. The
+       breakpoints below step it back down for exactly that reason —
+       do not flatten them into one size. */
+    padding: 0.5rem 1.05rem;
     font: inherit;
-    font-size: 0.8125rem;
+    font-size: 1rem;
+    font-weight: 500;
     color: var(--text-secondary);
     cursor: pointer;
     transition:
@@ -827,11 +1000,15 @@
     .word-orbit {
       width: 82%;
     }
+    .word-orbit-word {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.875rem;
+    }
   }
   @media (max-width: 400px) {
     .word-orbit-word {
       padding: 0.3rem 0.6rem;
-      font-size: 0.6875rem;
+      font-size: 0.8125rem;
     }
   }
 
@@ -848,10 +1025,35 @@
 
         `--rail-w` is the marker's own size, so the column, the track
         and the fill cannot drift apart when the marker resizes at a
-        breakpoint. */
+        breakpoint.
+
+        THE LINE STARTS BELOW THE MARKER, NOT INSIDE IT
+        --------------------------------------------------------------
+        It used to run `inset-block: calc(var(--rail-w) / 2) 0` — from
+        the marker's CENTRE. The marker is not opaque (its resting fill
+        is `--tint-brand`, mint at 12%), so the stroke was plainly
+        visible straight through the middle of every numeral, and the
+        travelling fill drew itself through them one by one as the
+        section scrolled. That is the "الخط يخترق الأرقام" the client
+        reported on the strategic goals and on the adopted definition.
+
+        Starting at `--rail-w` puts the stroke's cap on the marker's
+        OUTER boundary: the line leaves the bottom edge of one number's
+        circle and arrives at the top edge of the next, which is where
+        a reader expects a connector to attach. `--rail-gap` is the
+        hair of clearance that keeps it off the lit marker's ring
+        (`ring-2` + the halo's `-inset-px`, ~3px proud of the circle) —
+        without it the stroke tucks under the halo and the join reads
+        as a smudge rather than as a touch.
+
+        Do NOT solve this by raising the marker's z-index or giving it
+        an opaque fill: the marker sits on four different surfaces
+        across the site (page, `.panel-quiet`, glow bands, the dark
+        band) and an opaque chip would show its seam on all of them. */
   .process-rail {
     position: relative;
     --rail-w: 2.25rem; /* = size-9, the marker */
+    --rail-gap: 0.25rem;
     inline-size: var(--rail-w);
   }
   @media (min-width: 640px) {
@@ -863,13 +1065,16 @@
   .process-rail-fill {
     content: '';
     position: absolute;
-    /* From the marker's centre down to the end of the step's box,
-       which is where the next marker's centre begins. */
-    inset-block: calc(var(--rail-w) / 2) 0;
+    /* From just under THIS marker's outer edge to just above the next
+       one's — the end of the step's box is exactly where the next
+       marker's top edge begins. */
+    inset-block: calc(var(--rail-w) + var(--rail-gap)) var(--rail-gap);
     inset-inline-start: calc(var(--rail-w) / 2);
     width: 2px;
     margin-inline-start: -1px;
-    border-radius: 1px;
+    /* Rounded caps, so the two ends read as touching the circles
+       above and below rather than as a bar that was cut off. */
+    border-radius: 999px;
   }
   .process-rail::before {
     background: rgba(169, 225, 211, 0.14);

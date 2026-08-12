@@ -53,11 +53,16 @@ function Stat({ value, suffix, prefix, label, countUp = true, grouped = true, to
           inverse ? 'text-brand-200' : 'text-brand-600 dark:text-brand-200',
         )}
       >
-        {prefix ? <span>{prefix}</span> : null}
-        {/* .ltr-run keeps the digits in logical order next to the
-            Arabic suffix without breaking the flex baseline. */}
-        <span className="ltr-run">{grouped ? formatNumber(shown) : String(shown)}</span>
-        {suffix ? <span>{suffix}</span> : null}
+        {/* ONE `.ltr-run` around the whole figure — prefix, digits and
+            suffix together. A suffix left outside it becomes its own
+            RTL flex item and lands to the LEFT of the digits, so
+            `20` + `M` rendered as `M20`. Isolated as one run it reads
+            `20M`. Same fix, same reason, in `StatRow`. */}
+        <span className="ltr-run">
+          {prefix}
+          {grouped ? formatNumber(shown) : String(shown)}
+          {suffix}
+        </span>
       </div>
       <p
         className={cn(

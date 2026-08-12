@@ -55,6 +55,10 @@ export { StickySplit } from './StickySplit.jsx';
 /* ── Marketing blocks ────────────────────────────────────────── */
 export { Hero } from './Hero.jsx';
 export { HeroArtwork } from './HeroArtwork.jsx';
+/* The banner every page that is NOT the homepage opens with — the
+   hackathon program page's own header, generalised. `Hero` is now the
+   homepage's split shape only. See components/ui/PageHero.jsx. */
+export { PageHero } from './PageHero.jsx';
 export { SectionHeading } from './SectionHeading.jsx';
 export { ProcessSteps } from './ProcessSteps.jsx';
 export { NumberedList } from './NumberedList.jsx';

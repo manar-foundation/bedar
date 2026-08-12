@@ -36,6 +36,29 @@ import { cn } from '@utils/cn.js';
    floor is the single change that makes the grid read as a system
    rather than as seven cards that happen to be adjacent.
 
+   …AND WHY `lines={null}` NOW EXISTS (client, Aug 2026)
+   ----------------------------------------------------------------
+   The trade above buys an even row at the price of a paragraph that
+   is visibly cut at rest, and the client has since ruled the other
+   way: "the description has to be readable without hovering". Passing
+   `lines={null}` is that ruling — it drops the clamp AND the hover
+   swap together (`hasSwap` reads the same flag), because a card with
+   nothing held back has nothing to swap TO; leaving the second face
+   on would replay the same words on top of themselves.
+
+   It is not the default, and it must not become one by accident. An
+   unclamped paragraph is only balanced if the MEASURE can hold it:
+   at the 278px tile a four-up grid gives, the longest description is
+   332px of text against a 128px slot, and unclamping it there simply
+   makes one card twice the height of its neighbours. The caller is
+   what owns that decision, which is why this is a prop — see the
+   note on the grid in `pages/public/Home.jsx`, which widened its
+   columns in the same change.
+
+   The rest of the hover is untouched: the tile still lifts, the
+   accent line still wipes across the top edge, the bloom still grows
+   and the icon still tilts. What goes away is only the text swap.
+
    THE HOVER IS A CONTENT SWAP (ported from the reference)
    ----------------------------------------------------------------
    Read from the reference template's own Webflow IX2 data
@@ -173,11 +196,20 @@ export function IconCard({
             <span
               className={cn(
                 'block',
-                // `lh` is the element's own line box, so the floor
-                // tracks the type ramp instead of being a magic rem
-                // that drifts the moment the size changes.
-                !compact && 'line-clamp-3',
+                // The title's own 3-line ceiling exists for the same
+                // reason the paragraph's does — to keep a 60-character
+                // title from pushing a row's cards out of step. It
+                // comes off with the paragraph's: a card that shows its
+                // description in full has no hover face left to reveal
+                // a cut-off heading on, so a clamp here would be the
+                // one truncation with no way back.
+                !compact && clamp && 'line-clamp-3',
               )}
+              // `lh` is the element's own line box, so the floor tracks
+              // the type ramp instead of being a magic rem that drifts
+              // the moment the size changes. It stays either way —
+              // reserving two lines is what puts the paragraphs of a
+              // row on one baseline, clamped or not.
               style={!compact ? { minHeight: `${titleLines}lh` } : undefined}
             >
               {title}
@@ -193,7 +225,18 @@ export function IconCard({
           <p
             className={cn(
               'relative leading-relaxed text-ink-secondary',
-              compact ? 'text-sm' : 'flex-1 text-[0.9375rem]',
+              compact ? 'text-sm' : 'text-[0.9375rem]',
+              // `flex-1` ONLY while the paragraph is clamped. It sets
+              // `flex-basis: 0`, which lets the paragraph shrink below
+              // its own text — harmless when a `line-clamp` has already
+              // fixed how many lines are drawn, and silently destructive
+              // without one: the card's min-content height stops
+              // including the copy, so the grid row sizes itself to
+              // less than the text needs and the last line is cut. That
+              // is a 9px clip on the longest service description,
+              // measured — the exact truncation `lines={null}` exists
+              // to remove.
+              !compact && clamp && 'flex-1',
               clamp,
             )}
           >
@@ -203,8 +246,17 @@ export function IconCard({
       </div>
 
       {/* ── The incoming face ──────────────────────────────────
-             Title plus the description in full, rising into the space
-             the resting face vacates.
+             The SAME title, drawn the same way, plus the description
+             in full — rising into the space the resting face vacates.
+
+             The title is not a caption here. It used to render at
+             15px in mint on one truncated line, which meant pointing
+             at a card visibly took its heading away; it now matches
+             the resting <h3> above declaration for declaration, rule
+             included, and wraps. Keep the two in step: `.swap-in-title`
+             / `.swap-in-rule` in layout.css mirror the classes on the
+             heading above, and the reason the swap works at all is
+             that a reader cannot tell which face they are looking at.
 
              `aria-hidden` because both strings are already in the
              accessibility tree above — this layer is a second VISUAL
@@ -216,7 +268,12 @@ export function IconCard({
              swap to. */}
       {hasSwap ? (
         <div aria-hidden="true" className="swap-in">
-          {title ? <p className="swap-in-title">{title}</p> : null}
+          {title ? (
+            <>
+              <p className="swap-in-title">{title}</p>
+              <span className="swap-in-rule" />
+            </>
+          ) : null}
           <p className="swap-in-body">{description}</p>
         </div>
       ) : null}

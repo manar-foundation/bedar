@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
+import { CalendarDays } from 'lucide-react';
 
 import { cn } from '@utils/cn.js';
 
@@ -64,6 +65,13 @@ import { cn } from '@utils/cn.js';
 function Step({ step, index, count, numbered, inverse, progress, animated }) {
   const title = step.title ?? step.label ?? step;
   const description = step.description ?? step.body;
+  // `meta` is a short label ABOVE the title — the hackathon timeline's
+  // stage dates. A plain string, not a Date: several of those stages
+  // are ranges ("15-19/08/2024") and `Intl` cannot format a range, so
+  // the caller owns the formatting and this component only places it.
+  // `.ltr-run` because a date is a Latin/numeric run inside Arabic
+  // prose (CLAUDE.md, RTL rules) — without it "15-19/08/2024" reorders.
+  const meta = step.meta ?? step.date;
   const last = index === count - 1;
   const draws = animated && !last;
 
@@ -149,6 +157,20 @@ function Step({ step, index, count, numbered, inverse, progress, animated }) {
             and it sidesteps the variant-ordering trap that made
             `sm:pb-*` outrank `last:pb-0` in the first place. */}
       <div className="process-step-copy flex min-w-0 flex-col gap-2">
+        {meta ? (
+          <span
+            className={cn(
+              'inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold',
+              inverse
+                ? 'bg-white/10 text-brand-100 ring-1 ring-inset ring-white/15'
+                : 'bg-tint-brand text-tint-brand-fg ring-1 ring-inset ring-tint-brand-ring',
+            )}
+          >
+            <CalendarDays className="size-3.5 shrink-0" aria-hidden="true" />
+            <span className="ltr-run">{meta}</span>
+          </span>
+        ) : null}
+
         <h3
           className={cn(
             'text-lg font-semibold leading-snug transition-colors duration-(--dur-base) group-hover/step:text-brand-200 sm:text-xl',

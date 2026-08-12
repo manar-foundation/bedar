@@ -53,14 +53,28 @@ export function NumberedList({
             delay={index % 4}
             className={cn(
               'group flex flex-col gap-3 py-7 sm:flex-row sm:gap-8 sm:py-8',
-              // A hairline between rows, never above the first or
-              // below the last — the section's own edges do that job.
-              index > 0 && 'border-t border-subtle',
+              // A rule between rows, never above the first or below
+              // the last — the section's own edges do that job.
+              //
+              // 2px on a mint tint rather than the 1px `border-subtle`
+              // hairline. `--border-subtle` is #1b2e31 in dark, which
+              // on this page's near-black surface is a rule you have
+              // to look for; the client asked for the segments to read
+              // as separated at a glance. Tinted rather than merely
+              // brighter grey, so it belongs to the same palette as
+              // the numbers it separates.
+              index > 0 && 'border-t-2 border-brand-300/25',
             )}
           >
+            {/* The counter, at display scale. It was `text-lg` — the
+                same size as the row's own title — so it read as a
+                prefix to the heading rather than as the enumeration.
+                At 3xl/4xl and `font-extrabold` it is the row's anchor,
+                which is what the numbering is for. The column widens
+                with it so two digits never crowd the title. */}
             <span
               aria-hidden="true"
-              className="shrink-0 text-lg font-bold tabular-nums text-brand-300/70 transition-colors duration-(--dur-base) ease-(--ease-standard) group-hover:text-brand-200 sm:w-16 sm:text-xl"
+              className="shrink-0 text-3xl font-extrabold leading-none tabular-nums text-brand-300/80 transition-colors duration-(--dur-base) ease-(--ease-standard) group-hover:text-brand-200 sm:w-24 sm:text-4xl lg:text-5xl"
             >
               <span className="ltr-run">{formatNumber(index + 1).padStart(2, '0')}.</span>
             </span>

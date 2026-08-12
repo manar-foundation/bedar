@@ -11,7 +11,9 @@
      6. layout.css    — page-composition primitives (panels, tiles,
                         sticky + staggered columns, section rhythm)
      7. animations.css— keyframes + surface treatments
-     8. admin.css     — the /admin shell's own surfaces
+     8. reveal.css    — the site-wide scroll-reveal (UNLAYERED — see
+                        the header in that file for why)
+     9. admin.css     — the /admin shell's own surfaces
    ================================================================ */
 
 @import 'tailwindcss';
@@ -41,4 +43,5 @@
 @import './rtl.css';
 @import './layout.css';
 @import './animations.css';
+@import './reveal.css';
 @import './admin.css';
