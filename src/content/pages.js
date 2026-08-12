@@ -190,6 +190,10 @@ export const home = {
     subtitle:
       'اجعل من فكرتك مبادرة مجتمعية ذات أثر وقيمة اجتماعية واسعة، تخلق مستقبلًا أفضل لمجتمعاتنا',
     cta: { label: 'تعرّف على خدماتنا', href: '/services' },
+    // The hero photograph's alternative text. Copy, so it lives here
+    // and not in `HeroArtwork` — a screen reader user is reading the
+    // page's words, and these are some of them.
+    imageAlt: 'فريق من رواد الأعمال الاجتماعيين يتشاركون العمل على مشروع مجتمعي',
   },
 
   programs: {

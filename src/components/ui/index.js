@@ -54,7 +54,7 @@ export { StickySplit } from './StickySplit.jsx';
 
 /* ── Marketing blocks ────────────────────────────────────────── */
 export { Hero } from './Hero.jsx';
-export { HeroEmblem } from './HeroEmblem.jsx';
+export { HeroArtwork } from './HeroArtwork.jsx';
 export { SectionHeading } from './SectionHeading.jsx';
 export { ProcessSteps } from './ProcessSteps.jsx';
 export { NumberedList } from './NumberedList.jsx';

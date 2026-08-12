@@ -83,14 +83,32 @@ import { cn } from '@utils/cn.js';
    call `StaggerItem variant="slide"` makes on /social-entrepreneurship.
    ================================================================ */
 
-/** Words start at the top and go clockwise, alternating radius so
-    two neighbours never collide at the same distance from centre. */
+/* Every chip sits at ONE radius, and that radius is the outer ring's
+   own: `.word-orbit-ring-shell-outer` is `inset: 4%`, so its circle
+   has a radius of (100 − 4 − 4) / 2 = 46% of the box. Matching it
+   here is what makes the words look threaded ONTO the ring rather
+   than scattered near it.
+
+   This used to alternate 0.46 / 0.36 to keep neighbours from
+   colliding. Two things were wrong with that. 0.36 is not the inner
+   ring either (that one is `inset: 22%`, so radius 28%) — the odd
+   chips floated in the gap between the two circles, belonging to
+   neither, which is exactly what the client flagged about الشفافية
+   and الإبداع. And the collision it guarded against cannot happen at
+   this count: five chips 72° apart on a 480px box are ~278px between
+   centres, against a chip about 90px wide.
+
+   That headroom is finite. Past roughly eight values the chips do
+   start to touch, and the fix then is a wider box or a smaller chip —
+   NOT a second radius, which is what produced this. */
+const RING_RADIUS = 0.46;
+
+/** Words start at the top and go clockwise. */
 function place(index, count) {
   const angle = (index / count) * 2 * Math.PI - Math.PI / 2;
-  const radius = index % 2 === 0 ? 0.46 : 0.36;
   return {
-    left: `${50 + Math.cos(angle) * radius * 100}%`,
-    top: `${50 + Math.sin(angle) * radius * 100}%`,
+    left: `${50 + Math.cos(angle) * RING_RADIUS * 100}%`,
+    top: `${50 + Math.sin(angle) * RING_RADIUS * 100}%`,
   };
 }
 
@@ -238,8 +256,14 @@ export function WordOrbit({ items = [], words, className }) {
               layout.css. So the mark at the centre of a 480px ring
               has been rendering at 24px against a design that asked
               for 64. `cn` is tailwind-merge, so naming the height
-              here drops the default instead of racing it. */}
-          <Spiral aria-hidden="true" className="word-orbit-mark emblem-float h-12 sm:h-16" />
+              here drops the default instead of racing it.
+
+              Raised again at the client's request — the mark read as
+              small inside a ring this wide. It still has to clear the
+              read-out that replaces it: `.is-active` scales the shell
+              to 0.8 and cross-fades, so the mark's footprint is what
+              sets how far the description has to travel. */}
+          <Spiral aria-hidden="true" className="word-orbit-mark emblem-float h-20 sm:h-24" />
         </span>
         <div className="word-orbit-readout" aria-live="polite">
           {active ? (

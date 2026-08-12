@@ -1,5 +1,8 @@
+import { useRef } from 'react';
+
 import { Spiral, SpiralDivider } from './Spiral.jsx';
 import { RevealOnMount } from '@components/motion/Reveal.jsx';
+import { ScrollExit } from '@components/motion/ScrollExit.jsx';
 import { cn } from '@utils/cn.js';
 
 /* ================================================================
@@ -42,6 +45,25 @@ import { cn } from '@utils/cn.js';
    keeps the title out from under the nav row: top padding starts at
    `--nav-h` and adds the section's own breathing room on top of it,
    rather than the two overlapping.
+
+   THE SPLIT HERO IS EXACTLY ONE SCREEN
+   ----------------------------------------------------------------
+   `lg:h-screen` — 100vh, not `min-h`. The homepage hero is meant to
+   be the whole first viewport and nothing more, so that the band
+   below it is always the reward for the first scroll.
+
+   Mobile gets `min-h-[100dvh]` instead, and the difference is not a
+   rounding detail:
+
+   • `dvh` rather than `vh`, because on iOS Safari `100vh` is the
+     height with the URL bar RETRACTED. Used as a fixed height it
+     puts the bottom of the hero underneath the browser chrome on
+     load, which is exactly the overlap the brief rules out.
+   • `min-h` rather than `h`, because the phone layout stacks the
+     copy AND the artwork in one column. Pinned to one screen that
+     would either clip the CTA or force the type down to nothing;
+     as a floor, the hero still fills the screen and is free to
+     grow past it when the content genuinely needs the room.
    ================================================================ */
 
 export function Hero({
@@ -49,14 +71,13 @@ export function Hero({
   title,
   subtitle,
   actions,
-  /** A short proof line under the actions — the reference layout's
-      `.info-clients-home-1-wrapper` ("5,000+ families / empowered
-      through donations"). One figure and its caption, no more: it is
-      the thing a visitor scans for before they read anything else,
-      and the full set of numbers still gets its own band further
-      down. Pass `{ value, label }`. */
-  proof,
-  /** Artwork for the second column — e.g. <HeroEmblem />. */
+  /* There was a `proof` prop here — one figure and its caption on a
+     hairline under the actions, ported from the reference layout's
+     `.info-clients-home-1-wrapper`. It is gone at the client's
+     request: the same number already leads the الأرقام band, and on
+     a hero that is now exactly one viewport tall the rule under the
+     buttons closed the column off instead of letting it breathe. */
+  /** Artwork for the second column — e.g. <HeroArtwork />. */
   visual,
   /** Kept for the older call sites that pass a framed image. */
   image,
@@ -70,11 +91,21 @@ export function Hero({
   const split = Boolean(media);
   const centered = align === 'center' && !split;
 
+  // The scroll range the artwork's exit is measured against. It has
+  // to be the SECTION and not the artwork's own box: the artwork
+  // shrinks as it goes, and a target that changes size underneath
+  // `useScroll` re-measures into a moving range — the shrink feeds
+  // its own progress and the whole thing eases out early.
+  const sectionRef = useRef(null);
+
   return (
     <section
+      ref={sectionRef}
       className={cn(
         'relative overflow-hidden',
         dark ? 'surface-dark' : 'bg-gradient-to-b from-brand-50 to-app',
+        // See "THE SPLIT HERO IS EXACTLY ONE SCREEN" above.
+        split && 'min-h-[100dvh] lg:h-screen',
         className,
       )}
     >
@@ -106,11 +137,12 @@ export function Hero({
         className={cn(
           'container-page',
           split
-            ? // A tall, breathing split hero — fills most of the viewport
-              // on desktop (`min-h`) with the copy + artwork vertically
-              // centred, so it reads as a proper landing band rather than
-              // a short strip. Mobile keeps simple top/bottom padding.
-              'pt-[calc(var(--nav-h)+2rem)] pb-16 lg:flex lg:min-h-[88vh] lg:items-center lg:pt-[calc(var(--nav-h)+3rem)] lg:pb-20'
+            ? // Fills the section it was just given, with the copy +
+              // artwork vertically centred in whatever is left once the
+              // floating nav has been cleared. `h-full` is what makes
+              // the centring act on the viewport-tall section rather
+              // than on the content's own height.
+              'flex h-full items-center pt-[calc(var(--nav-h)+2rem)] pb-16 lg:pt-[calc(var(--nav-h)+2rem)] lg:pb-12'
             : // The centred title band every INTERIOR page uses. The
               // brief called its top/bottom spacing too tight, so it is
               // widened here — one place, so every interior hero gets the
@@ -173,7 +205,15 @@ export function Hero({
                 as="p"
                 delay={3}
                 className={cn(
-                  'mt-6 max-w-xl text-lg leading-relaxed',
+                  'max-w-xl text-lg leading-relaxed',
+                  // The split hero owns a whole viewport, so its copy
+                  // is set on a looser rhythm than an interior title
+                  // band — the client asked for the column to breathe.
+                  // The gaps GROW down the stack (title → text →
+                  // buttons) rather than staying equal: equal spacing
+                  // reads as a list of three things, widening spacing
+                  // reads as one statement resolving into an action.
+                  split ? 'mt-7 lg:mt-9' : 'mt-6',
                   centered && 'mx-auto',
                   dark ? 'text-brand-100/80' : 'text-ink-secondary',
                 )}
@@ -186,50 +226,38 @@ export function Hero({
               <RevealOnMount
                 delay={4}
                 className={cn(
-                  'mt-10 flex flex-col gap-3 sm:flex-row',
+                  'flex flex-col gap-3 sm:flex-row',
+                  split ? 'mt-11 lg:mt-14' : 'mt-10',
                   centered ? 'items-center justify-center' : 'items-start',
                 )}
               >
                 {actions}
               </RevealOnMount>
             ) : null}
-
-            {/* The proof line, separated from the actions by a
-                hairline rather than by more space — the reference
-                divides them the same way, and on a dark surface a
-                rule is the only separator that reads at all. */}
-            {proof ? (
-              <RevealOnMount
-                delay={5}
-                className={cn(
-                  'mt-10 flex items-center gap-4 border-t border-subtle pt-6',
-                  centered && 'justify-center',
-                )}
-              >
-                <span className="text-3xl font-bold tabular-nums text-brand-200">
-                  <span className="ltr-run">{proof.value}</span>
-                </span>
-                <span className="max-w-[16rem] text-sm leading-relaxed text-ink-secondary">
-                  {proof.label}
-                </span>
-              </RevealOnMount>
-            ) : null}
           </div>
 
           {/* ── Artwork — second in the DOM, so it lands under the
-                copy on mobile and beside it from lg up. ─────── */}
+                copy on mobile and beside it from lg up.
+
+                No `RevealOnMount` here any more: `HeroArtwork` runs
+                its own two-beat entrance (arcs draw, then photo), and
+                a wrapper fading the whole thing in at 240ms would
+                have shown the finished lines before they had drawn
+                themselves. `ScrollExit` owns the other end of its
+                life — shrinking and dissolving it as the section
+                leaves. ──────────────────────────────────────── */}
           {split ? (
-            <RevealOnMount
-              delay={3}
+            <ScrollExit
+              targetRef={sectionRef}
               className={cn(
                 'w-full',
-                // A framed photo keeps its card; the emblem is drawn
-                // artwork and must not sit in a box.
+                // A framed photo keeps its card; drawn artwork must
+                // not sit in a box.
                 visual ? '' : 'aspect-[4/3] overflow-hidden rounded-2xl bg-sunken shadow-e3',
               )}
             >
               {media}
-            </RevealOnMount>
+            </ScrollExit>
           ) : null}
         </div>
       </div>

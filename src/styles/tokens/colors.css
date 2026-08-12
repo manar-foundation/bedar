@@ -216,10 +216,27 @@
   --action-primary-active: var(--mint-300);
   --action-primary-on: #04120e;
 
-  --action-accent: var(--accent-300);
-  --action-accent-hover: var(--accent-500);
+  /* Client direction (Aug 2026): every green button on the public
+     site is the mint highlight, not the darker turquoise it used to
+     be. This is the ONE place it is stated — `Button`'s accent
+     variant reads these tokens, so the hero CTA, the navbar, the
+     CtaBand and the footer all followed without being touched.
+
+     Deliberately NOT changed in the light theme above: there
+     `--action-accent` is `--accent-500`, the only teal in the
+     palette that clears AA against white (CLAUDE.md brand rules).
+     Mint on white would not, and the dashboard is the only surface
+     that renders light — the public site pins `data-theme="dark"`
+     (see layouts/PublicLayout.jsx).
+
+     Hover goes BRIGHTER, matching `--action-primary` two lines up.
+     It used to fall to `--accent-500`, which from a mint base would
+     be a light→dark flip AND would drop the near-black label to
+     ~4.1:1. Against mint the label is 13.1:1, and 15.2:1 on hover. */
+  --action-accent: var(--brand-200);
+  --action-accent-hover: var(--mint-200);
   --action-accent-on: #04120e;
-  --action-accent-glow: rgba(99, 192, 183, 0.38);
+  --action-accent-glow: rgba(169, 225, 211, 0.38);
 
   --action-danger: #d46e6e;
   --action-danger-hover: #e48f8f;

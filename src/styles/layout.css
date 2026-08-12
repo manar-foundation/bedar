@@ -525,7 +525,14 @@
   .word-orbit {
     position: relative;
     width: 100%;
-    max-width: 30rem;
+    /* 30rem originally; widened at the client's request. This is a
+       CAP, not a size — `width: 100%` means the artwork still shrinks
+       to whatever column it is given, so the extra 4rem only lands on
+       viewports that have the room. Do not turn it into a fixed
+       width: the chips at 3 and 9 o'clock overhang the square by
+       about half a chip, and on a narrow column that is what would
+       push the document's scroll width out. */
+    max-width: 34rem;
     margin-inline: auto;
     aspect-ratio: 1;
     /* The depth the pointer tilt is read in. Long, because a short

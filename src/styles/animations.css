@@ -107,9 +107,33 @@
   }
 }
 
-@keyframes emblem-trace {
+/* ── The hero artwork's two-beat entrance ──────────────────────
+   Beat one: the arcs draw. Every path carries `pathLength="1"`, so
+   "1" is a whole arc no matter its radius and one duration covers
+   all five honestly.
+
+   Beat two: the photo arrives, once the last arc has landed. Its
+   delay is the arc stagger and duration added up — see
+   `--hero-line-*` below, which is where those numbers actually
+   live so the two beats cannot drift apart. ─────────────────── */
+
+@keyframes hero-line-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
   to {
-    stroke-dashoffset: -1000;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes hero-artwork-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
@@ -219,6 +243,38 @@
     animation: aurora-c 22s var(--ease-standard) infinite;
   }
 
+  /* ── Hero artwork: arcs, then photo. ─────────────────────────
+        The two beats are declared here as one system. The photo's
+        delay is DERIVED from the arc timing (the last of five arcs
+        starts at 4 × stagger and takes one duration to land), so
+        retiming the draw cannot leave the photo arriving early over
+        a half-drawn set of lines. `HeroArtwork` sets each path's
+        own `animation-delay` inline from the same stagger. */
+  .hero-artwork {
+    /* The only two timing numbers in the sequence. Everything
+       below — each arc's offset, and the photo's cue — is derived
+       from them, and `HeroArtwork` supplies `--hero-line-last`
+       (its arc count minus one) so neither side has to hardcode
+       how many arcs there are. */
+    --hero-line-dur: 1100ms;
+    --hero-line-stagger: 120ms;
+  }
+  .hero-lines path {
+    /* Normalised by `pathLength="1"` on the path itself. */
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: hero-line-draw var(--hero-line-dur) var(--ease-standard) forwards;
+  }
+  .hero-artwork-photo {
+    opacity: 0;
+    animation: hero-artwork-in 900ms var(--ease-standard) forwards;
+    /* The last arc STARTS at `last × stagger` and needs a full
+       duration to land — so this is the first moment no line is
+       still being drawn. */
+    animation-delay: calc(var(--hero-line-stagger) * var(--hero-line-last) + var(--hero-line-dur));
+    will-change: transform, opacity;
+  }
+
   /* ── Emblem parts. Durations are long by design: a mark that
         spins fast is a loading spinner, not a logo. ─────────── */
   .emblem-orbit {
@@ -236,11 +292,6 @@
   .emblem-float {
     animation: emblem-float 6s var(--ease-standard) infinite;
   }
-  .emblem-trace {
-    stroke-dasharray: 6 10;
-    animation: emblem-trace 40s linear infinite;
-  }
-
   /* One switch for the whole hero. The motion tokens zero out the
      `--dur-*` transitions under reduced motion, but a keyframe
      animation with its own duration is not covered by that — an
@@ -253,9 +304,22 @@
     .emblem-orbit-reverse,
     .emblem-breathe,
     .emblem-float,
-    .emblem-trace,
     .word-orbit.is-in .word-orbit-word {
       animation: none;
+    }
+
+    /* The hero entrance is a run-once animation with `forwards`, so
+       cancelling it is not enough — the element would keep the
+       FROM state (an undrawn arc, an invisible photo) forever.
+       Each one has to be put into its finished state by hand. */
+    .hero-lines path {
+      animation: none;
+      stroke-dashoffset: 0;
+    }
+    .hero-artwork-photo {
+      animation: none;
+      opacity: 1;
+      transform: none;
     }
   }
 

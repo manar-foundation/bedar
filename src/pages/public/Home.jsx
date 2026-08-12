@@ -15,7 +15,7 @@ import {
   ContentCard,
   CtaBand,
   Hero,
-  HeroEmblem,
+  HeroArtwork,
   IconCard,
   NumberedList,
   Section,
@@ -31,7 +31,6 @@ import { useContent } from '@context/ContentContext.jsx';
 import { useSeo } from '@hooks/useSeo.js';
 import { home, services, about, contactCta } from '@content/pages.js';
 import { cn } from '@utils/cn.js';
-import { formatNumber } from '@utils/format.js';
 
 /* Clean single-line marks, one per service (keyed by id). */
 const SERVICE_ICONS = {
@@ -48,25 +47,37 @@ const SERVICE_ICONS = {
  * Homepage. Every string comes from `content/pages.js` — the page
  * owns the layout, the data owns the words (Infra spec §3).
  *
- * RESTRUCTURED TO THE REFERENCE LAYOUT
+ * BAND ORDER IS THE CLIENT'S, NOT THE REFERENCE'S
  * ----------------------------------------------------------------
- * Nine bands, one per band of the reference homepage, in its order.
- * The left column is what that layout does; the right is which
- * existing Bedar content moved into it. Nothing was written, cut or
- * reworded to make the fit — where a shape needed content this site
- * does not have, the shape changed, not the copy.
+ * The shapes still come from the reference homepage — the left
+ * column below is what that layout does, the right is which existing
+ * Bedar content sits in it. Nothing was written, cut or reworded to
+ * make the fit: where a shape needed content this site does not
+ * have, the shape changed, not the copy.
  *
- *   1 hero split + proof figure   home.hero + HeroEmblem + a stat
+ * The SEQUENCE, though, is the client's (Aug 2026 notes, §2). It
+ * argues the case before the offer: who we are, what we have done,
+ * then what we sell — so the figures now vouch for the platform
+ * immediately after it introduces itself, and the programs land
+ * after a reader knows which segment they are in.
+ *
+ *   1 hero split                  home.hero + HeroArtwork
  *   2 about, ring of words        home.about + about.values titles
- *   3 latest updates, split head  home.programs + programs cards
- *   4 numbered rows               home.audience
- *   5 "commitment" icon grid      home.services + the seven services
- *   6 collection cards, split     home.testimonials + carousel
- *   7 figures, ruled row          about.stats
+ *   3 figures, ruled row          about.stats
+ *   4 "commitment" icon grid      home.services + the seven services
+ *   5 numbered rows               home.audience
+ *   6 latest updates, split head  home.programs + programs cards
+ *   7 collection cards, split     home.testimonials + carousel
  *   8 FAQ, narrow column          home.faq + faq
  *   9 closing CTA panel           contactCta
  *
- * BAND 7 HAS NO HEADING ON PURPOSE
+ * Tones alternate across that order (glow → plain → dark → glow-alt
+ * → wash → glow → glow-alt) so no two neighbouring bands share a
+ * treatment. Re-check that if you reorder again: the sequence is
+ * what gives the page its rhythm, and two adjacent glows read as one
+ * very long section.
+ *
+ * BAND 3 HAS NO HEADING ON PURPOSE
  * ----------------------------------------------------------------
  * Not an omission. The reference's own achievements band renders its
  * slash marks with an EMPTY label between them — the numbers are the
@@ -88,18 +99,19 @@ export default function Home() {
   // collection renders nothing at all instead of a broken lead card.
   const [leadProgram, ...restPrograms] = latestPrograms;
 
-  // The hero's proof figure. Same source as band 7, so the number a
-  // visitor reads in the first screen can never drift from the one in
-  // the band below it.
-  const [headlineStat] = about.stats;
-
   return (
     <>
       {/* ── 1 · Hero ──────────────────────────────────────────────
              Copy on the inline-start side — the right half in RTL —
-             and the animated mark opposite it. On mobile the grid
-             collapses and the copy comes first, which is the DOM
-             order, so no `order-*` juggling.
+             and the drawn arcs + photograph opposite it. On mobile
+             the grid collapses and the copy comes first, which is the
+             DOM order, so no `order-*` juggling.
+
+             The artwork used to be `HeroEmblem`, the brand spiral in
+             an orbit. It went because it restated a mark the navbar
+             already carries, and because a hero pinned to exactly one
+             viewport should spend that screen on the people the
+             platform is for rather than on the logo a second time.
 
              The reference splits its headline across two colours,
              the first line in the accent. Bedar's title is already
@@ -136,8 +148,7 @@ export default function Home() {
             </Button>
           </>
         }
-        proof={{ value: formatNumber(headlineStat.value), label: headlineStat.label }}
-        visual={<HeroEmblem />}
+        visual={<HeroArtwork alt={home.hero.imageAlt} />}
       />
 
       <SectionSeam />
@@ -203,7 +214,106 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ── 3 · Latest programs ───────────────────────────────────
+      {/* ── 3 · The figures ───────────────────────────────────────
+             One ruled row, no tiles and no heading — see the note at
+             the top of this file. `size="sm"` because the band is a
+             single row of type and the standard rhythm would leave it
+             floating in its own screen. */}
+      <Section size="sm">
+        <StatRow stats={about.stats} />
+      </Section>
+
+      <SectionSeam />
+
+      {/* ── 4 · Services ──────────────────────────────────────────
+             The reference's `commitment` grid, on its dark band.
+
+             The header used to be the grid's FIRST CELL: seven cards
+             in a four-column grid leaves a hole on the last row, and
+             putting the heading inside turned 7 into 8 and closed the
+             block. The client asked for the other shape — title and
+             lede centred above the band, the cards in a full grid
+             underneath ("اريد العنوان و النص الوصف في الاعلى
+             بالمنتصف و مربعات الوصف تكون تحتها") — so the header comes
+             out and the hole it was plugging comes back.
+
+             The lead service takes the freed cell instead: it spans
+             two columns from `sm` up, which turns 7 into 8 again and
+             fills the grid exactly. It is the same device the values
+             grid on /about already uses for its 5-in-a-3-up, so this
+             is an existing pattern reused rather than a second way of
+             evening up a short last row — and the widest card goes to
+             تطوير الأفكار, which opens the service sequence. */}
+      <Section tone="dark">
+        <SectionHeading
+          title={home.services.title}
+          lede={home.services.lede}
+          align="center"
+          tone="inverse"
+          className="mb-12"
+          actions={
+            <Button
+              variant="outline"
+              to={home.services.cta.href}
+              className="group"
+              iconEnd={
+                <ArrowLeft
+                  aria-hidden="true"
+                  className="size-4 transition-transform duration-(--dur-base) ease-(--ease-standard) group-hover:-translate-x-1"
+                />
+              }
+            >
+              {home.services.cta.label}
+            </Button>
+          }
+        />
+
+        <Stagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {services.map((service, index) => {
+            const Icon = SERVICE_ICONS[service.id];
+            const lead = index === 0;
+            return (
+              <StaggerItem key={service.id} className={cn('h-full', lead && 'sm:col-span-2')}>
+                <IconCard
+                  title={service.title}
+                  description={service.description}
+                  // The wide card has roughly twice the measure, so it
+                  // can show a line more before the hover swap has to
+                  // give the rest back — same call as /about's lead
+                  // value card.
+                  lines={lead ? 5 : 4}
+                  icon={Icon ? <Icon aria-hidden="true" strokeWidth={1.75} /> : null}
+                />
+              </StaggerItem>
+            );
+          })}
+        </Stagger>
+      </Section>
+
+      {/* ── 5 · Target audience ───────────────────────────────────
+             The reference numbers this band 01–04 and hides three of
+             its four paragraphs behind an accordion. The numbering
+             ports; the hiding does not — these three segments each
+             address a different reader, and collapsing two of them
+             would bury content the brief says to preserve. Heading
+             pinned beside the rows, so the band's subject stays on
+             screen for as long as the rows do. */}
+      <Section tone="glow-alt">
+        <StickySplit
+          aside={
+            <SectionHeading
+              eyebrow={home.audience.eyebrow}
+              title={home.audience.title}
+              layout="aside"
+              size="base"
+            />
+          }
+        >
+          <NumberedList items={home.audience.items} />
+        </StickySplit>
+      </Section>
+
+      {/* ── 6 · Latest programs ───────────────────────────────────
              The reference's `title-section-bottom`: title one side,
              "view all" opposite, hairline under both. The newest item
              leads at full width and the remaining two sit beside each
@@ -269,100 +379,10 @@ export default function Home() {
         ) : null}
       </Section>
 
-      {/* ── 4 · Target audience ───────────────────────────────────
-             The reference numbers this band 01–04 and hides three of
-             its four paragraphs behind an accordion. The numbering
-             ports; the hiding does not — these three segments each
-             address a different reader, and collapsing two of them
-             would bury content the brief says to preserve. Heading
-             pinned beside the rows, so the band's subject stays on
-             screen for as long as the rows do. */}
-      <Section tone="glow-alt">
-        <StickySplit
-          aside={
-            <SectionHeading
-              eyebrow={home.audience.eyebrow}
-              title={home.audience.title}
-              layout="aside"
-              size="base"
-            />
-          }
-        >
-          <NumberedList items={home.audience.items} />
-        </StickySplit>
-      </Section>
-
-      <SectionSeam />
-
-      {/* ── 5 · Services ──────────────────────────────────────────
-             The reference's `commitment` grid, on its dark band.
-
-             The header used to be the grid's FIRST CELL: seven cards
-             in a four-column grid leaves a hole on the last row, and
-             putting the heading inside turned 7 into 8 and closed the
-             block. The client asked for the other shape — title and
-             lede centred above the band, the cards in a full grid
-             underneath ("اريد العنوان و النص الوصف في الاعلى
-             بالمنتصف و مربعات الوصف تكون تحتها") — so the header comes
-             out and the hole it was plugging comes back.
-
-             The lead service takes the freed cell instead: it spans
-             two columns from `sm` up, which turns 7 into 8 again and
-             fills the grid exactly. It is the same device the values
-             grid on /about already uses for its 5-in-a-3-up, so this
-             is an existing pattern reused rather than a second way of
-             evening up a short last row — and the widest card goes to
-             تطوير الأفكار, which opens the service sequence. */}
-      <Section tone="dark">
-        <SectionHeading
-          title={home.services.title}
-          lede={home.services.lede}
-          align="center"
-          tone="inverse"
-          className="mb-12"
-          actions={
-            <Button
-              variant="outline"
-              to={home.services.cta.href}
-              className="group"
-              iconEnd={
-                <ArrowLeft
-                  aria-hidden="true"
-                  className="size-4 transition-transform duration-(--dur-base) ease-(--ease-standard) group-hover:-translate-x-1"
-                />
-              }
-            >
-              {home.services.cta.label}
-            </Button>
-          }
-        />
-
-        <Stagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {services.map((service, index) => {
-            const Icon = SERVICE_ICONS[service.id];
-            const lead = index === 0;
-            return (
-              <StaggerItem key={service.id} className={cn('h-full', lead && 'sm:col-span-2')}>
-                <IconCard
-                  title={service.title}
-                  description={service.description}
-                  // The wide card has roughly twice the measure, so it
-                  // can show a line more before the hover swap has to
-                  // give the rest back — same call as /about's lead
-                  // value card.
-                  lines={lead ? 5 : 4}
-                  icon={Icon ? <Icon aria-hidden="true" strokeWidth={1.75} /> : null}
-                />
-              </StaggerItem>
-            );
-          })}
-        </Stagger>
-      </Section>
-
-      {/* ── 6 · Expert testimonials ───────────────────────────────
+      {/* ── 7 · Expert testimonials ───────────────────────────────
              The reference's third collection band, same split header
-             as band 3 so the two listings on the page read as one
-             system. */}
+             as the programs band above it so the two listings on the
+             page read as one system. */}
       <Section tone="glow">
         <SectionHeading
           eyebrow={home.testimonials.eyebrow}
@@ -374,15 +394,6 @@ export default function Home() {
         <Reveal>
           <TestimonialsCarousel items={testimonials} />
         </Reveal>
-      </Section>
-
-      {/* ── 7 · The figures ───────────────────────────────────────
-             One ruled row, no tiles and no heading — see the note at
-             the top of this file. `size="sm"` because the band is a
-             single row of type and the standard rhythm would leave it
-             floating in its own screen. */}
-      <Section size="sm">
-        <StatRow stats={about.stats} />
       </Section>
 
       {/* ── 8 · FAQ ───────────────────────────────────────────────
