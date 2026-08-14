@@ -166,6 +166,28 @@
       radial-gradient(38rem 24rem at 6% 112%, rgba(30, 158, 147, 0.12), transparent 60%);
   }
 
+  /* …except on the public site, which is the only place this band
+     renders and which is now ONE canvas from the hero to the bottom of
+     the page (`.page-ambient`, animations.css). The tonal step and the
+     hairline above were the two things that still drew a boundary
+     across it, so both come off here and the footer is simply where
+     the page's own light happens to end.
+
+     The corner glows on `::before` go with them. They fade before the
+     band's edges so they never drew a line — but they are anchored to
+     the FOOTER's box, which means the light they add begins where the
+     last section ends, and the eye reads "new surface" from a change
+     of lighting just as readily as from a change of colour. The page's
+     own field (`.page-ambient`) runs straight through the footer and
+     is the only thing lighting it now. */
+  [data-theme='dark'] .footer-band {
+    background: none;
+    border-top: 0;
+  }
+  [data-theme='dark'] .footer-band::before {
+    display: none;
+  }
+
   /* ── Social row + chip ──────────────────────────────────────────
         The footer's account list: a round mark, then the platform
         name and handle as visible text. `.social-row` is the whole

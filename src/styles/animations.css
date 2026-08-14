@@ -179,9 +179,9 @@
         The client asked for the site to read as a single lit surface
         rather than a stack of separately-coloured bands. In dark, the
         section treatments stop painting opaque blocks and instead let
-        the page's fixed background (PublicLayout) show through: only
-        their soft glows remain, so sections are marked by light rather
-        than by hard colour changes. */
+        the page's background (`.page-ambient`, below) show through:
+        only their soft glows remain, so sections are marked by light
+        rather than by hard colour changes. */
   [data-theme='dark'] .surface-dark {
     background: transparent;
     color: var(--text-primary);
@@ -191,6 +191,174 @@
   }
   [data-theme='dark'] .section-wash {
     background: transparent;
+  }
+
+  /* …but that glow only survives on a band that OPENS a page.
+     `.surface-dark::before` is anchored to `at 50% 0%` of its own
+     section, so on an interior band it is light that switches on
+     exactly at a section boundary and fades out a third of the way
+     down — a lit strip whose top edge is the join itself. That is the
+     "dark band / horizontal seam" this pass exists to remove, and it
+     was the last per-section source left after `.section-glow-layer`
+     was turned off.
+
+     `:has(.hero-aurora)` is the test because it is what actually
+     distinguishes the two cases in the markup, with no class to add:
+     `Hero` (homepage) and `PageHero` (every interior page) both mount
+     the aurora and both sit at the TOP of their page, where there is
+     no section above for the glow to give away. `<Section tone="dark">`
+     — the الأرقام band on the homepage, and its equivalents on the
+     hackathon and social-entrepreneurship pages — does not, and those
+     are exactly the three that were lighting up at their own top edge. */
+  [data-theme='dark'] .surface-dark:not(:has(.hero-aurora))::before {
+    display: none;
+  }
+
+  /* ── THE LIT CANVAS ─────────────────────────────────────────────
+        Every ambient glow on the public site, painted once across the
+        height of the whole document. `PublicLayout` carries it.
+
+        WHY IT REPLACED THE PER-SECTION GLOWS
+        ------------------------------------------------------------
+        `.section-glow-layer` (below) paints two blurred circles inside
+        each band and clips them with `overflow: hidden` — which it has
+        to, for the reasons in that block's own note. A circle sitting
+        at `top: -8rem` is therefore sliced off dead straight at the
+        section's top edge, and the band above it has its own circle
+        sliced at its bottom edge. Every join between two sections was
+        a horizontal line where the light stopped and restarted. That
+        is the "قطعات بصريّة" the client reported, and no amount of
+        retuning the blobs fixes it: the cut is the clip, not the blob.
+
+        A gradient on ONE document-tall box has no interior edges to be
+        cut at, so the light simply runs from the hero to the footer.
+
+        GRADIENTS, NOT BLURRED DIVS
+        ------------------------------------------------------------
+        Ten `filter: blur(80px)` circles is ten expensive layers to
+        repaint, and each one overhangs its box — which is exactly what
+        put 112px of horizontal scroll on every glowing page the last
+        time this was tried, and why `.section-glow-layer` needs its
+        clip in the first place. A `background-image` gradient is
+        painted INSIDE the box by definition: it cannot add a pixel of
+        scroll width, it needs no clip, and scrolling past it is free.
+
+        BOTH RADII ARE PERCENTAGES OF THE LAYER
+        ------------------------------------------------------------
+        …which is what makes one declaration correct on a 1,200px 404
+        page and on a 9,000px homepage. With `rem` radii the sources
+        would sit ~120px apart on the short page, stack six deep and
+        wash the whole thing mint. Sized as a share of the box, the
+        composition is identical at every page length — the light just
+        spreads further apart as the page grows.
+
+        THE RADII ARE ENORMOUS, AND THAT IS THE POINT
+        ------------------------------------------------------------
+        The first version of this was ten sources at a 22% vertical
+        radius — a 13.6% reach against a 20% same-side spacing. Every
+        source therefore had a visible core with a measurable trough
+        between it and the next, and the client read the result as ten
+        separate pools of light rather than as one atmosphere. It is
+        the same failure as the per-section glows, one scale up.
+
+        A field reads as CONTINUOUS when the sources overlap so far
+        that no single one has a discernible centre. So each source is
+        now 55% of the page tall — a 34% reach against a 27% same-side
+        spacing — which puts roughly five of them over every point on
+        the page. What varies down the document is which ones dominate,
+        not whether there is light at all, and the sum's slowest term
+        is longer than a viewport: you cannot see a change of intensity
+        and its opposite at the same time, which is what makes the
+        variation read as atmosphere rather than as banding.
+
+        `--page-glow-base` under all of it is the floor. It is a flat
+        tint, so the quietest pixel on the page is still lifted off
+        `--bg-app` into the hero's tone, and no stretch of the document
+        can fall back to the raw near-black the site used to be.
+
+        THE LIGHT STAYS OUT OF THE READING COLUMN
+        ------------------------------------------------------------
+        Every centre is at 10% or 90% of the width — outside the
+        measure. The horizontal radii are wide, so the middle of the
+        page gets the far tail of the falloff rather than any core, and
+        the type keeps the contrast the palette was built for.
+
+        Evaluated over the whole homepage field, the background lives
+        between #092424 and #122d2d — nine RGB steps end to end, which
+        is the number that matters here: it is why the eye cannot find
+        a section boundary from the background. `--text-primary` is
+        12.7:1 on the brightest of that band and `--text-secondary`
+        6.82:1, both clear of AA with the secondary the one to watch.
+        Moving a centre toward 50%, or raising an alpha, is what spends
+        that headroom — re-measure if you do either.
+
+        The row-mean luminance drifts 1.12x from the top of the page to
+        the bottom and never moves more than ~5% across any single
+        viewport height, so the variation is always slower than the
+        window you see it through.
+
+        IT IS THE SHELL'S OWN BACKGROUND, NOT A LAYER BEHIND IT
+        ------------------------------------------------------------
+        This class goes ON the `.public-site` element. It used to be a
+        `position: fixed; z-index: -10` child of it, and in that form
+        it had NEVER ONCE RENDERED — which is the actual reason the
+        site read as a lit hero on top of eight flat near-black bands.
+
+        `.public-site` is `position: relative` with `z-index: auto`, so
+        it does not open a stacking context. A negative-z-index child
+        therefore does not paint behind its PARENT's background; it
+        joins the root stacking context and paints at step 2, while the
+        positioned shell paints its own opaque `bg-app` at step 6, flat
+        over the top of it. Verified by forcing the layer to solid red
+        and finding the page unchanged.
+
+        A `background-image` on the element itself cannot lose that
+        argument: it is painted directly over that same `bg-app` and
+        under every descendant, with no z-index in play at all. If you
+        ever move these glows back onto a child, the child needs
+        `isolation: isolate` on `.public-site` to be visible — but
+        there is no reason to. ────────────────────────────────────── */
+  .page-ambient {
+    /* Ten sources, alternating sides every ~14% of the page, each one
+       55% of the page tall. Listed top-of-stack first, as CSS paints
+       background layers; the flat base tint is therefore last.
+
+       THE FIRST AND LAST ARE CENTRED OFF THE PAGE (-20% and 120%) and
+       only their tails reach in. Every source inside the document has
+       neighbours on both sides holding its level up; the ones at 2%
+       and 98% did not, so the field sagged at both ends — and the top
+       end is the hero, which is the one band that has to match. That
+       sag put the dimmest strip on the page exactly at the hero's
+       lower edge, where the aurora has finished fading and the join
+       with the first section happens. These two have no core inside
+       the page at all; they exist to give the real ends a neighbour.
+
+       Do not shrink `55%` to make an individual glow "read" better —
+       that is precisely what makes the field read as separate glows.
+       The alphas in `--page-glow-*` are the brightness knob. */
+    background-image:
+      radial-gradient(90% 55% at 12% -20%, var(--page-glow-brand), transparent 62%),
+      radial-gradient(92% 55% at 90% 2%, var(--page-glow-mint), transparent 62%),
+      radial-gradient(88% 55% at 10% 15%, var(--page-glow-teal), transparent 62%),
+      radial-gradient(94% 55% at 88% 29%, var(--page-glow-deep), transparent 62%),
+      radial-gradient(90% 55% at 12% 43%, var(--page-glow-brand), transparent 62%),
+      radial-gradient(92% 55% at 90% 57%, var(--page-glow-teal), transparent 62%),
+      radial-gradient(88% 55% at 10% 71%, var(--page-glow-mint), transparent 62%),
+      radial-gradient(94% 55% at 88% 85%, var(--page-glow-brand), transparent 62%),
+      radial-gradient(90% 55% at 12% 98%, var(--page-glow-deep), transparent 62%),
+      radial-gradient(92% 55% at 88% 120%, var(--page-glow-teal), transparent 62%),
+      linear-gradient(var(--page-glow-base), var(--page-glow-base));
+  }
+
+  /* The per-section glows are OFF wherever the lit canvas is on. They
+     are not deleted: `<Section tone="glow">` is used on ~15 bands and
+     the tone is still the right authoring intent — it is just that on
+     the public site the light now comes from the page rather than from
+     the band, and two sources would double up. The class and its
+     layer stay for the light theme (the dashboard) and so that
+     reverting this is one rule, not fifteen call sites. */
+  [data-theme='dark'] .section-glow-layer {
+    display: none;
   }
 
   /* ── Aurora: three drifting colour fields behind the hero.
@@ -210,6 +378,15 @@
     pointer-events: none;
     z-index: -1;
     overflow: hidden;
+    /* The third blob runs past the bottom of the hero, and the hero
+       clips it — so the aurora used to END on a straight line exactly
+       at the join with the section below, which is the one seam on the
+       page a reader cannot miss. The clip has to stay (without it the
+       blobs extend the document's scroll width), so the light is faded
+       out ahead of it instead: by the time the cut happens there is
+       nothing left to cut. Below that point `.page-ambient` carries
+       on, so the hero now dissolves into the page rather than ending. */
+    mask-image: linear-gradient(to bottom, #000 62%, transparent 96%);
   }
   .hero-aurora span {
     position: absolute;

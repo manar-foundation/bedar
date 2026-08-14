@@ -187,6 +187,23 @@
   --section-wash-via: var(--mint-100);
   --section-wash-to: var(--brand-50);
   --dot-grid-color: rgba(64, 116, 121, 0.09);
+
+  /* Page ambience — the glows that light the WHOLE document as one
+     canvas (`.page-ambient`, animations.css) rather than one band at a
+     time. Four hues, so a reader scrolling a long page never passes
+     the same light twice.
+
+     Declared in both themes for the same reason `--section-glow-*` is,
+     even though only the dark set can render today: `.page-ambient` is
+     mounted by `PublicLayout` alone, and that shell pins
+     `data-theme="dark"`. These are the light-surface equivalents —
+     a mint wash rather than a teal lift — so the class is not a
+     landmine if it is ever reached from the dashboard. */
+  --page-glow-base: rgba(169, 225, 211, 0.14); /* brand-200 */
+  --page-glow-mint: rgba(169, 225, 211, 0.22); /* brand-200 */
+  --page-glow-teal: rgba(30, 158, 147, 0.08); /* accent-400 */
+  --page-glow-deep: rgba(11, 122, 115, 0.08); /* accent-500 */
+  --page-glow-brand: rgba(64, 116, 121, 0.09); /* brand-500 */
 }
 
 /* --------- DARK MODE --------- */
@@ -289,4 +306,30 @@
   --section-wash-via: #0d2729;
   --section-wash-to: var(--bg-sunken);
   --dot-grid-color: rgba(169, 225, 211, 0.05);
+
+  /* The lit canvas the whole public site sits on — these five alphas
+     decide how bright the site is, and they are the only knob worth
+     turning if the client wants more or less of it. Do not reach for
+     the geometry in `.page-ambient` instead; the radii there are what
+     keep the field reading as one atmosphere.
+
+     `base` is a FLAT tint under everything: it is what carries the
+     hero's tone across the whole document, so the quietest pixel on
+     the page is still lifted off `--bg-app` and no stretch can fall
+     back to the raw near-black. The other four are the drifting
+     sources on top of it, and because ~5 of them overlap at any point
+     they are individually much lower than they look — the whole field
+     lands between #092424 and #122d2d, not near any one of these
+     values.
+
+     Mint stays the lowest of the four: it is the palette's brightest
+     hue, so at equal alpha it lifts the surface about twice as far as
+     the teals do, and it is the one that would put body copy on a pale
+     field. Raising it is what costs contrast first — `--text-secondary`
+     currently has 6.82:1 at the peak, so re-measure if you go up. */
+  --page-glow-base: rgba(11, 122, 115, 0.07);
+  --page-glow-mint: rgba(169, 225, 211, 0.055);
+  --page-glow-teal: rgba(30, 158, 147, 0.085);
+  --page-glow-deep: rgba(11, 122, 115, 0.09);
+  --page-glow-brand: rgba(86, 152, 146, 0.08);
 }

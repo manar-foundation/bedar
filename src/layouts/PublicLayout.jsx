@@ -28,13 +28,22 @@ import AutoReveal from '@components/motion/AutoReveal.jsx';
  * every element they own. It renders nothing and it never touches a
  * subtree that Framer already animates — see that component's header.
  *
- * The whole page shares ONE fixed background — a deep-teal base with a
- * couple of soft, static glows drifting off the top and bottom
- * corners, the same idea as the dashboard canvas. Individual sections
- * no longer paint their own opaque blocks (see `.surface-dark` /
- * `.section-wash` in animations.css, which go transparent in dark), so
- * the page reads as one lit surface with cards floating on it instead
- * of a stack of separately-coloured bands.
+ * The whole page shares ONE background: `bg-app` plus `.page-ambient`
+ * (animations.css), every soft glow on the site painted as gradients
+ * on THIS element, whose box is the full height of the document.
+ * Individual sections paint nothing of their own — `.surface-dark`,
+ * `.section-wash` and `.section-glow-layer` are all transparent or off
+ * in dark — so the page reads as one continuous lit canvas with cards
+ * floating on it instead of a stack of separately-coloured bands.
+ *
+ * The glows belong to the DOCUMENT, not to the viewport, and that is
+ * the point of this pass: the fixed layer that used to live here pinned
+ * three glows to the screen, so scrolling 9,000px moved the content
+ * past lighting that never changed. (It also never rendered at all —
+ * see the stacking-context note in `.page-ambient`, which is why the
+ * site read as one lit hero above eight flat bands.) Sized to the
+ * document, the light drifts from one side to the other as you read
+ * down the page and no two sections are lit alike.
  */
 export default function PublicLayout() {
   const { pathname } = useLocation();
@@ -44,18 +53,10 @@ export default function PublicLayout() {
     // (layout.css) so none of them can reach the dashboard, which the
     // brief puts explicitly out of scope. Both shells are dark, so
     // `data-theme` cannot be the discriminator.
-    <div data-theme="dark" className="public-site relative flex min-h-dvh flex-col bg-app">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 -z-10"
-        style={{
-          background:
-            'radial-gradient(60rem 42rem at 88% -4%, rgba(169,225,211,0.10), transparent 60%),' +
-            'radial-gradient(52rem 40rem at 6% 8%, rgba(30,158,147,0.09), transparent 58%),' +
-            'radial-gradient(60rem 48rem at 50% 108%, rgba(11,122,115,0.10), transparent 62%)',
-        }}
-      />
-
+    <div
+      data-theme="dark"
+      className="public-site page-ambient relative flex min-h-dvh flex-col bg-app"
+    >
       <AutoReveal />
 
       <Navbar />
