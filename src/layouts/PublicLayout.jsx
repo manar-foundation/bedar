@@ -59,6 +59,20 @@ export default function PublicLayout() {
     >
       <AutoReveal />
 
+      {/* Page aurora: three slowly-drifting layers of teal light — a
+          varied organic field (columns, highlights, corner blooms), not
+          just side bars (the threems.co.uk reference, in brand palette).
+          Real layers rather than a background so each can drift on its
+          own transform path; clipped and z-index -1, so it is contained
+          (no scroll width, sticky still pins) and paints behind all
+          content and between every section seam. See `.page-aurora` in
+          animations.css. */}
+      <div aria-hidden="true" className="page-aurora">
+        <span />
+        <span />
+        <span />
+      </div>
+
       <Navbar />
 
       <AnimatePresence mode="wait" initial={false}>
