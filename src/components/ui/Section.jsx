@@ -60,14 +60,20 @@ export function Section({
 
   return (
     <Tag className={cn('section-band relative', tones[tone] ?? tones.plain, className)} {...rest}>
-      {/* Ambient section lighting: a soft spotlight pooled at the HEAD
-          of the band and two rim glows bleeding in from the inline
-          EDGES, so every section is framed by light rather than only
-          lit behind its title (client, Aug 2026). Painted on a sibling
-          layer at z-index -1 (`.section-band` isolates, so it sits over
-          the band's own surface but under the content) and is
-          background-image only, so it can never add to the document's
-          scroll width. See `.section-ambient-layer` in animations.css. */}
+      {/* Ambient section lighting, and on the dark public site the only
+          lighting a reader really sees: a bloom rising at the HEAD of
+          the band, over its heading, plus round orbs pushing in from the
+          inline EDGES at a height, size and hue that change from one
+          band to the next (a four-step cycle keyed off `nth-of-type`).
+          That variation is the point — the page-tall light columns this
+          replaced were one unchanging shape for the whole document, and
+          the client read them as a rail rather than as lighting.
+
+          Painted on a sibling layer at z-index -1 (`.section-band`
+          isolates, so it sits over the band's own surface but under the
+          content) and is background-image only, so it can never add to
+          the document's scroll width. See `.section-ambient-layer` in
+          animations.css. */}
       <div aria-hidden="true" className="section-ambient-layer" />
 
       {/* The glow's clipping layer is a SIBLING of the content, never

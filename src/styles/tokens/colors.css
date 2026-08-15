@@ -201,16 +201,16 @@
      the real work, same as the page ambience above. */
   --section-top-glow: rgba(11, 122, 115, 0.06);
   --section-edge-glow: rgba(64, 116, 121, 0.05);
-  --section-entry-glow: rgba(11, 122, 115, 0.05);
 
-  /* Side aurora — the light-surface equivalents of the dark
-     `--aurora-*` (only the dark set renders today; the public shell pins
+  /* Section light — the light-surface equivalents of the dark `--sect-*`
+     (only the dark set renders today; the public shell pins
      `data-theme="dark"`). Kept faint so the class is never a landmine if
      reached from the dashboard. */
-  --aurora-mint: rgba(169, 225, 211, 0.1);
-  --aurora-teal: rgba(30, 158, 147, 0.08);
-  --aurora-deep: rgba(11, 122, 115, 0.08);
-  --aurora-brand: rgba(64, 116, 121, 0.09);
+  --sect-bloom: rgba(11, 122, 115, 0.05);
+  --sect-orb-mint: rgba(169, 225, 211, 0.1);
+  --sect-orb-teal: rgba(30, 158, 147, 0.05);
+  --sect-orb-deep: rgba(11, 122, 115, 0.05);
+  --sect-orb-brand: rgba(64, 116, 121, 0.06);
 
   /* Page ambience — the glows that light the WHOLE document as one
      canvas (`.page-ambient`, animations.css) rather than one band at a
@@ -343,32 +343,36 @@
   --section-top-glow: rgba(169, 225, 211, 0.06);
   --section-edge-glow: rgba(56, 178, 166, 0.05);
 
-  /* A gentle "welcome" light blooming just BELOW each section's top edge
-     — the soft glow the client asked for at the start of every new
-     section, after the SectionSeam. Mint, low, screen-blended and masked
-     off the very top edge (see `.section-ambient-layer`) so it never
-     hardens into a line at the divider the way the old top pool did. */
-  --section-entry-glow: rgba(133, 222, 206, 0.13);
+  /* SECTION LIGHT — the site's visible, "cinematic" lighting, composed
+     per band rather than run down the page as two columns (see
+     `.section-ambient-layer`, animations.css, for why that changed).
 
-  /* SIDE AURORA — tall columns of teal light down each inline edge of
-     the WHOLE document (`.page-ambient::after`). This is the reference
-     look (threems.co.uk) rebuilt in the teal palette: several soft
-     colour sources stacked and screen-blended so they MELT into one
-     drifting column rather than reading as separate blobs — mint at the
-     highlights, accent-teal as the body, accent-500 in the troughs.
+     `bloom` is the wide, shallow light over a section's heading; the
+     four `orb` hues are the round shapes that push in from the inline
+     edges, and a band picks two of them so no two neighbours light the
+     same colour. These alphas sit well above the near-invisible page
+     field below, because each one now covers a bounded patch of one
+     section instead of the whole document.
 
-     They are the site's visible "cinematic" light, so these alphas sit
-     well above the near-invisible page field below. The safety is
-     spatial, not faint: every core is at ≤8% / ≥92% of the width, so the
-     saturated part of each column lives in the outer margin and only its
-     far tail reaches the centred reading measure. Combined with
-     `mix-blend-mode: screen` (which only ever lightens), the columns add
-     depth at the edges at no cost to body-copy contrast. Raise these to
-     make the aurora bolder; if you move a core inward, re-measure AA. */
-  --aurora-mint: rgba(169, 225, 211, 0.19); /* mint — highlight */
-  --aurora-teal: rgba(30, 158, 147, 0.29); /* accent-400 — body */
-  --aurora-deep: rgba(11, 122, 115, 0.27); /* accent-500 — trough */
-  --aurora-brand: rgba(86, 152, 146, 0.23); /* brand-400 — muted */
+     The safety is spatial, not faint: every orb core is at ≤4% / ≥96%
+     of the width, so its saturated part lives in the outer margin and
+     only the far tail reaches the centred reading measure. Combined
+     with `mix-blend-mode: screen` (which only ever lightens), they add
+     depth at no cost to body-copy contrast. These are the brightness
+     knob — raise them to make the lighting bolder; if you move a core
+     inward instead, re-measure AA. */
+  /* The head light is the one source that sits INSIDE the reading
+     measure, so it is the one with a contrast budget rather than a
+     spatial safety. Measured over the composed field, its brightest
+     point in the centred measure is #193b3b: 10.56:1 for
+     `--text-primary` (the heading it lights) and 5.67:1 for
+     `--text-secondary`, both clear of AA. 0.17 was 5.44:1 — still
+     passing, but with less room than the rest of the site keeps. */
+  --sect-bloom: rgba(133, 222, 206, 0.15); /* mint — head light */
+  --sect-orb-mint: rgba(169, 225, 211, 0.16); /* mint — highlight */
+  --sect-orb-teal: rgba(30, 158, 147, 0.26); /* accent-400 — body */
+  --sect-orb-deep: rgba(11, 122, 115, 0.26); /* accent-500 — trough */
+  --sect-orb-brand: rgba(86, 152, 146, 0.2); /* brand-400 — muted */
 
   /* The lit canvas the whole public site sits on — these five alphas
      decide how bright the site is, and they are the only knob worth
@@ -398,17 +402,19 @@
 }
 
 /* On phones the reading column runs full-width (the container is edge to
-   edge), so body copy sits UNDER the aurora cores instead of clear of
-   them the way it is on the centred desktop measure. The desktop
-   contrast argument — every column fades to transparent by ~27% of the
-   width, well outside a centred measure — does not hold when the text
-   reaches the very edges, so the aurora is damped here. Same hues, lower
-   alpha; `.page-ambient::after` and its geometry are unchanged. */
+   edge), so body copy sits UNDER the orb cores instead of clear of them
+   the way it is on the centred desktop measure. The desktop contrast
+   argument — the core sits in the outer margin and the copy only ever
+   gets the tail — does not hold when the text reaches the very edges, so
+   the section light is damped here. Same hues, lower alpha; the geometry
+   in `.section-ambient-layer` is unchanged (its `min(…, 46vw)` radius
+   cap is the other half of this). */
 @media (max-width: 768px) {
   [data-theme='dark'] {
-    --aurora-mint: rgba(169, 225, 211, 0.11);
-    --aurora-teal: rgba(30, 158, 147, 0.15);
-    --aurora-deep: rgba(11, 122, 115, 0.14);
-    --aurora-brand: rgba(86, 152, 146, 0.12);
+    --sect-bloom: rgba(133, 222, 206, 0.1);
+    --sect-orb-mint: rgba(169, 225, 211, 0.1);
+    --sect-orb-teal: rgba(30, 158, 147, 0.15);
+    --sect-orb-deep: rgba(11, 122, 115, 0.14);
+    --sect-orb-brand: rgba(86, 152, 146, 0.12);
   }
 }

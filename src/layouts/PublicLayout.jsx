@@ -29,21 +29,20 @@ import AutoReveal from '@components/motion/AutoReveal.jsx';
  * subtree that Framer already animates — see that component's header.
  *
  * The whole page shares ONE background: `bg-app` plus `.page-ambient`
- * (animations.css), every soft glow on the site painted as gradients
- * on THIS element, whose box is the full height of the document.
- * Individual sections paint nothing of their own — `.surface-dark`,
- * `.section-wash` and `.section-glow-layer` are all transparent or off
- * in dark — so the page reads as one continuous lit canvas with cards
- * floating on it instead of a stack of separately-coloured bands.
+ * (animations.css), a very diffuse field painted as gradients on THIS
+ * element, whose box is the full height of the document. It is the
+ * FLOOR — it keeps every stretch of the page lifted off raw near-black
+ * so the site reads as one continuous surface, and individual sections
+ * paint no colour of their own (`.surface-dark`, `.section-wash` and
+ * `.section-glow-layer` are all transparent or off in dark) instead of
+ * stacking as separately-coloured bands.
  *
- * The glows belong to the DOCUMENT, not to the viewport, and that is
- * the point of this pass: the fixed layer that used to live here pinned
- * three glows to the screen, so scrolling 9,000px moved the content
- * past lighting that never changed. (It also never rendered at all —
- * see the stacking-context note in `.page-ambient`, which is why the
- * site read as one lit hero above eight flat bands.) Sized to the
- * document, the light drifts from one side to the other as you read
- * down the page and no two sections are lit alike.
+ * The lighting you actually SEE is composed per band, by `<Section>`'s
+ * own `.section-ambient-layer`: a bloom over the heading and round orbs
+ * entering from the edges, different in every section. It used to be
+ * two page-tall aurora columns mounted here, which the client rejected
+ * — one unchanging shape from the first pixel to the last is a rail,
+ * not lighting. See the note on `.section-ambient-layer`.
  */
 export default function PublicLayout() {
   const { pathname } = useLocation();
@@ -58,20 +57,6 @@ export default function PublicLayout() {
       className="public-site page-ambient relative flex min-h-dvh flex-col bg-app"
     >
       <AutoReveal />
-
-      {/* Page aurora: three slowly-drifting layers of teal light — a
-          varied organic field (columns, highlights, corner blooms), not
-          just side bars (the threems.co.uk reference, in brand palette).
-          Real layers rather than a background so each can drift on its
-          own transform path; clipped and z-index -1, so it is contained
-          (no scroll width, sticky still pins) and paints behind all
-          content and between every section seam. See `.page-aurora` in
-          animations.css. */}
-      <div aria-hidden="true" className="page-aurora">
-        <span />
-        <span />
-        <span />
-      </div>
 
       <Navbar />
 
