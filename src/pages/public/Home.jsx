@@ -214,6 +214,8 @@ export default function Home() {
         </div>
       </Section>
 
+      <SectionSeam />
+
       {/* ── 3 · The figures ───────────────────────────────────────
              One ruled row, no tiles and no heading — see the note at
              the top of this file. `size="sm"` because the band is a
@@ -326,6 +328,8 @@ export default function Home() {
         </Stagger>
       </Section>
 
+      <SectionSeam />
+
       {/* ── 5 · Target audience ───────────────────────────────────
              The reference numbers this band 01–04 and hides three of
              its four paragraphs behind an accordion. The numbering
@@ -348,6 +352,8 @@ export default function Home() {
           <NumberedList items={home.audience.items} />
         </StickySplit>
       </Section>
+
+      <SectionSeam />
 
       {/* ── 6 · Latest programs ───────────────────────────────────
              The reference's `title-section-bottom`: title one side,
@@ -415,6 +421,8 @@ export default function Home() {
         ) : null}
       </Section>
 
+      <SectionSeam />
+
       {/* ── 7 · Expert testimonials ───────────────────────────────
              The reference's third collection band, same split header
              as the programs band above it so the two listings on the
@@ -431,6 +439,8 @@ export default function Home() {
           <TestimonialsCarousel items={testimonials} />
         </Reveal>
       </Section>
+
+      <SectionSeam />
 
       {/* ── 8 · FAQ ───────────────────────────────────────────────
              Heading pinned on one side, the questions on the other. A

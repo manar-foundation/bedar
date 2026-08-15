@@ -116,11 +116,23 @@ export function SectionHeading({
 
       {title ? (
         <Reveal delay={eyebrow ? 1 : 0}>
-          <Tag
-            className={cn(titleSizes[size] ?? titleSizes.base, inverse ? 'text-white' : 'text-ink')}
-          >
-            {title}
-          </Tag>
+          {/* The title lives in a wrapper that hugs its own width, so a
+              soft radial spotlight (`.section-title-glow`, animations
+              .css) can pool behind the words — centred in both
+              directions — and the type always paints on top of it. The
+              glow is decorative, hence aria-hidden. */}
+          <div className="section-title-wrap">
+            <span aria-hidden="true" className="section-title-glow" />
+            <Tag
+              className={cn(
+                'relative z-[1]',
+                titleSizes[size] ?? titleSizes.base,
+                inverse ? 'text-white' : 'text-ink',
+              )}
+            >
+              {title}
+            </Tag>
+          </div>
         </Reveal>
       ) : null}
 

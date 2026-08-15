@@ -563,6 +563,78 @@
     background: var(--section-glow-a);
   }
 
+  /* ── Headline spotlight — a soft radial ambient glow pooled behind
+        a section TITLE (not the whole header), so each SectionHeading
+        lifts off the unified dark canvas and the section's visual
+        hierarchy reads at a glance. Unlike `.section-glow`, which is
+        two corner blobs behind a whole band, this one is anchored to
+        the words themselves.
+
+        Same alpha discipline as the aurora — "felt, not seen": the
+        core is `--headline-glow` at low alpha and the gradient reaches
+        transparent well inside its own box, so nothing behind the type
+        is dense enough to touch its contrast.
+
+        WHY THE WRAPPER HUGS THE TITLE. `width: fit-content` makes the
+        box track the title's own width, so the glow can be centred on
+        the words with a single `at 50% 50%` in BOTH directions — no
+        `rtl:` variant — and `isolation` keeps the whole thing a
+        self-contained stacking context (the title paints on top, the
+        glow never bleeds into a neighbouring element's z-order).
+
+        WHY IT CANNOT SCROLL THE PAGE. The box never exceeds the
+        wrapper on the inline axis (`inset-inline: 0`); its soft
+        sideways spread is the `blur()`, which is a paint effect and
+        adds nothing to the document's scroll width. Only the block
+        axis is extended, and the section's own vertical padding
+        absorbs that. This is the same reason the section glows moved
+        to a clipped sibling layer — never reach for a negative
+        `inset-inline` here. */
+  .section-title-wrap {
+    position: relative;
+    isolation: isolate;
+    width: fit-content;
+    max-width: 100%;
+  }
+  .section-title-glow {
+    position: absolute;
+    inset-block: -1.25rem;
+    inset-inline: 0;
+    pointer-events: none;
+    border-radius: 9999px;
+    background: radial-gradient(70% 96% at 50% 50%, var(--headline-glow), transparent 70%);
+    filter: blur(22px);
+  }
+
+  /* ── Section ambient frame — the light the client asked to come from
+        the HEAD of a band and from its EDGES, not only from behind the
+        title. One layer per `<Section>`, painted at z-index -1 under
+        the content: the band `isolation`s, so the layer sits above the
+        band's own surface — including the opaque `.surface-dark`
+        bands — and below the copy.
+
+        It is pure `background-image`: a radial pooled at the top
+        centre (`50% -4%`, so only its lower half spills into the band
+        and reads as light spilling down from the seam above) plus a
+        rim on each inline edge. Backgrounds paint inside the box and
+        cannot extend the document's scroll width, so — unlike a
+        blurred span — this needs neither a clip nor a blur, and there
+        is no RTL variant: the two edges are symmetric. */
+  .section-band {
+    position: relative;
+    isolation: isolate;
+  }
+  .section-ambient-layer {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+      radial-gradient(120% 70% at 50% -22%, var(--section-top-glow), transparent 82%),
+      radial-gradient(34% 96% at -4% 45%, var(--section-edge-glow), transparent 80%),
+      radial-gradient(34% 96% at 104% 45%, var(--section-edge-glow), transparent 80%);
+  }
+
   /* ── Section wash — replaces a flat `bg-sunken` grey with a warm
         gradient in the same hue family. Still light enough that
         `text-ink-secondary` keeps its AA contrast; this is warmth,

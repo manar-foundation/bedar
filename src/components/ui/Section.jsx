@@ -59,7 +59,17 @@ export function Section({
   const glowing = tone === 'glow' || tone === 'glow-alt';
 
   return (
-    <Tag className={cn('relative', tones[tone] ?? tones.plain, className)} {...rest}>
+    <Tag className={cn('section-band relative', tones[tone] ?? tones.plain, className)} {...rest}>
+      {/* Ambient section lighting: a soft spotlight pooled at the HEAD
+          of the band and two rim glows bleeding in from the inline
+          EDGES, so every section is framed by light rather than only
+          lit behind its title (client, Aug 2026). Painted on a sibling
+          layer at z-index -1 (`.section-band` isolates, so it sits over
+          the band's own surface but under the content) and is
+          background-image only, so it can never add to the document's
+          scroll width. See `.section-ambient-layer` in animations.css. */}
+      <div aria-hidden="true" className="section-ambient-layer" />
+
       {/* The glow's clipping layer is a SIBLING of the content, never
           an ancestor of it. It has to be `overflow: hidden` (a
           `clip-path` would leave the blurred circles in the page's

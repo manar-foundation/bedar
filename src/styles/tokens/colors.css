@@ -188,6 +188,20 @@
   --section-wash-to: var(--brand-50);
   --dot-grid-color: rgba(64, 116, 121, 0.09);
 
+  /* Headline spotlight — the soft radial glow anchored behind each
+     SectionHeading title (`.section-title-glow`, animations.css). A
+     faint teal here so a light dashboard render is not a landmine; the
+     public site is dark-only, where the dark value below does the
+     real work. Same "felt, not seen" alpha discipline as the aurora. */
+  --headline-glow: rgba(11, 122, 115, 0.1);
+
+  /* Ambient section framing — the soft spotlight at a band's head and
+     the rim light on its inline edges (`.section-ambient-layer`,
+     animations.css). Faint on the light surface; the dark values do
+     the real work, same as the page ambience above. */
+  --section-top-glow: rgba(11, 122, 115, 0.06);
+  --section-edge-glow: rgba(64, 116, 121, 0.05);
+
   /* Page ambience — the glows that light the WHOLE document as one
      canvas (`.page-ambient`, animations.css) rather than one band at a
      time. Four hues, so a reader scrolling a long page never passes
@@ -306,6 +320,18 @@
   --section-wash-via: #0d2729;
   --section-wash-to: var(--bg-sunken);
   --dot-grid-color: rgba(169, 225, 211, 0.05);
+  /* The mint spotlight behind every section title on the unified dark
+     canvas — clearly felt but low enough that it never touches the
+     contrast of the (near-white) type sitting on top of it. */
+  --headline-glow: rgba(133, 222, 206, 0.22);
+  /* A whisper of light from the HEAD of each band (mint) and its
+     inline EDGES (teal) — enough to lift a section, but low enough
+     that it blends into the continuous page field instead of reading
+     as a differently-coloured block. Kept faint on purpose: the step
+     between one band and the next has to disappear (client, Aug 2026
+     — "متناسق، ليس لون مختلف"). */
+  --section-top-glow: rgba(169, 225, 211, 0.06);
+  --section-edge-glow: rgba(56, 178, 166, 0.05);
 
   /* The lit canvas the whole public site sits on — these five alphas
      decide how bright the site is, and they are the only knob worth

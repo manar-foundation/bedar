@@ -102,12 +102,15 @@ export default function About() {
         </StickySplit>
       </Section>
 
+      <SectionSeam />
+
       {/* Impact numbers, as the reference's achievements band: one
           ruled row, no tiles and no heading of its own — the figures
-          are the heading. It follows the intro with no seam between
-          them, because the numbers are the evidence for the paragraph
-          above and a divider would break that pairing. Digits stay
-          Western via formatNumber (inside StatRow). */}
+          are the heading. A SectionSeam now sits on BOTH sides of it:
+          the client asked for the divider between every section without
+          exception (Aug 2026), so the old intro→figures pairing gives
+          way to the uniform boundary the rest of the site keeps. Digits
+          stay Western via formatNumber (inside StatRow). */}
       <Section size="sm">
         <StatRow stats={about.stats} />
       </Section>
