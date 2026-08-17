@@ -370,31 +370,117 @@
     display: none;
   }
 
-  /* ── SECTION LIGHTING — SHAPES, NOT A RAIL ──────────────────────────
-        The light on the public site is COMPOSED PER BAND: a soft bloom
-        rising at the head of the section, above its heading, and round
-        orbs pushing in from the inline edges at a different height, a
-        different size and a different hue in every band.
+  /* ── SECTION LIGHTING — SEVEN SCENES, NOT ONE SHAPE REPEATED ────────
+        The light on the public site is COMPOSED PER BAND, and what a
+        band gets is a whole LIGHTING SCENE — how many sources there
+        are, where their weight sits, which way the composition leans —
+        not the same three shapes with different numbers in them.
 
-        WHY IT IS NOT ONE CONTINUOUS COLUMN ANY MORE. The previous pass
-        lit the document with two page-tall aurora columns down the
-        outer edges. Sized to the document, they are the same two shapes
-        from the hero to the footer, so the eye reads them as two strips
-        of light bolted onto the page rather than as lighting — and once
+        WHY IT IS NOT ONE CONTINUOUS COLUMN. The pass before last lit
+        the document with two page-tall aurora columns down the outer
+        edges. Sized to the document, they are the same two shapes from
+        the hero to the footer, so the eye reads them as two strips of
+        light bolted onto the page rather than as lighting — and once
         you have seen them you cannot unsee them, because nothing about
         them ever changes as you scroll 9,000px. The client's verdict
         (Aug 2026): "خط ضوء من بداية الموقع الى اخره — خيار سيء".
 
-        A composition that CHANGES at every band cannot do that. Each
-        `<Section>` gets its own light, the shapes are round and clearly
-        bounded rather than infinite, and the four-step cycle below
-        alternates which side they enter from — so scrolling the page is
-        a sequence of different rooms, not one corridor.
+        WHY THE FOUR-STEP CYCLE THAT REPLACED IT WAS NOT ENOUGH. That
+        pass gave every band the identical composition — a bloom over
+        the heading, plus one orb at each inline edge, one high and one
+        low — and varied only which side each orb entered from and its
+        radius by a few rem. The bloom never left the 58–74% band. So
+        the ARCHETYPE never changed: three sources, same roles, same
+        places, section after section. Two bands in, the eye has the
+        pattern, and the page reads as predictable rather than lit
+        (client, Aug 2026 — the light is "ثابت ومتكرر").
 
-        THE GEOMETRY IS CUSTOM PROPERTIES, DECLARED ONCE. The three
-        gradients are written a single time, in `.section-ambient-layer`;
-        each variant only re-states numbers. Adding a fifth variant is
-        one block of eight values, not another copy of the gradients.
+        Variety has to be structural, and the first cut of THAT was
+        still wrong: seven scenes, but every one of them lit. A page
+        where every band carries light has no lighting in it — only a
+        tint. Nothing reads as deliberate, because nothing was chosen
+        over anything else (client, Aug 2026: the light should be
+        "موزعة بشكل احترافي"، and "ليس من الضروري ان تتم اضافة اضائة
+        في كل قسم").
+
+        So the cycle now has DARK BANDS IN IT. Of every seven, two
+        carry no light of their own and a third carries only a very
+        faint wash — and the four that are lit are what the eye
+        actually notices, because they arrive after something quieter.
+        A dark band is not a black band: `.page-ambient` is still under
+        it, so it keeps the site's tone and only loses its own local
+        shaping.
+
+        The rhythm is deliberately NOT alternating. Lit, dark, lit,
+        lit, dark, whisper, lit — strict lit/dark/lit/dark is just a
+        second pattern to learn, one step up from the one this
+        replaced. Two lit bands in a row is what breaks the metre, and
+        those two (grounded then crown) are the pair with the most
+        opposed compositions in the set, so the run reads as variety
+        rather than as repetition.
+
+        The lit scenes carry TWO sources each, not three. Three was the
+        old archetype's count and it is what made every band a soft
+        blob field; two is a key and a counterweight, which is a
+        composition. Scrolling is then a sequence of different rooms
+        with hallways between them, and no reading of two consecutive
+        bands finds the same shape twice.
+
+        EVERY SOURCE IS LARGE AND ELLIPTICAL. NONE IS A CIRCLE.
+        ------------------------------------------------------------
+        There used to be a third slot here — `accent`, a 7–11rem spark
+        meant to give a scene a second focal point — and one scene's
+        key was a 19rem circle. They are gone, and the rule that
+        replaced them is the important part: a source whose two radii
+        are equal, or whose radius is small against its band, keeps a
+        findable centre and reads as a BALL of light stuck to the edge
+        of the section rather than as light falling across it. On the
+        الأرقام band (1,856px tall) the 19rem circle was a bright disc
+        in the top corner, which is what the client rejected (Aug 2026:
+        "دوائر صغيرة … شكلها سيء").
+
+        So every remaining source is either a tall rem ellipse (a dome,
+        a sliver) or a large percentage ellipse, and every one of them
+        is big enough relative to its band that the falloff, not the
+        core, is what you see. Do not add a circular source back, and
+        do not shrink one of these until its centre becomes visible.
+
+        TWO SLOTS, AND THEIR SIZES COME FROM DIFFERENT PLACES
+        ------------------------------------------------------------
+        `key`    the shaped source — a dome over a heading, a light
+                 rising from the foot, a tall sliver on one edge. Sized
+                 in REM and anchored in rem to the band's top or bottom
+                 edge, because it lights a piece of CONTENT (a title, a
+                 closing row) and content is a fixed-size thing. Its
+                 vertical radius is always the LARGER of the two.
+        `fill`   the atmosphere. Sized and placed in PERCENT, so it
+                 scales with the band. This is the slot that fixes the
+                 real defect in the old cycle: band heights on one page
+                 run 271px to 1,856px, and a fixed 19rem orb at `y:
+                 20%` is a wash on the short band and two isolated
+                 pools 600px apart on the tall one.
+
+        A scene turns a slot OFF by setting its colour to `transparent`
+        — that is what makes a one-source scene, and a dark band,
+        possible without a second copy of the gradient stack.
+        `--l*-str` scales a slot's alpha (via `color-mix`, which leaves
+        the hue alone), because a source covering half a 1,856px band
+        cannot carry the same alpha as a dome over one heading.
+
+        Both gradients are written ONCE. A scene is a block of numbers;
+        adding an eighth is not another copy of the stack.
+
+        WHAT THE RADII MAY AND MAY NOT BE
+        ------------------------------------------------------------
+        In a radial-gradient RADIUS a percentage cannot be combined
+        with a length in any math function — `clamp(14rem, 42%, 30rem)`
+        and `min(30%, 20rem)` both fail to parse, and because these are
+        custom properties the failure lands at substitution time and
+        takes the WHOLE `background-image` with it (the band goes
+        unlit, silently). Only a bare percentage, or a pure length
+        expression such as `min(25rem, 58vw)`, is allowed. The POSITION
+        has no such limit: `calc(100% - 10rem)` is valid, and it is
+        what anchors a scene's light to the FOOT of a band.
 
         WHY IT STILL CANNOT ADD SCROLL OR SEAMS
         ------------------------------------------------------------
@@ -408,121 +494,259 @@
         • the `mask` fades the whole layer out over the first and last
           4.5rem of the band. That distance is in rem, not %, so it is
           the same on a 400px band and a 2,000px one: the light never
-          exists AT a `SectionSeam` — it emerges just after the divider,
-          blooms over the heading, and is gone again before the next.
-        • both orb cores sit at ≤4% / ≥96% of the width, i.e. in the
-          outer margin, so only the tail of the falloff reaches the
-          centred reading measure. Move a core inward and you are
-          spending body-copy contrast — re-measure if you do.
-        • every radius is capped in `vw` (`46vw` / `40vw` for the orbs,
-          `62vw` for the bloom's width). On a phone the container runs
-          edge to edge and a rem radius tuned for 1280px would cover the
-          whole screen — which is how the head bloom turns back into the
-          horizontal band this pass exists to remove. The alphas are
-          damped under 768px as well (colors.css).
+          exists AT a `SectionSeam` — it emerges just after the divider
+          and is gone again before the next. It is also what lets a
+          scene light the FOOT of a band (S3, S4, S7) without drawing a
+          bright edge onto the join below it.
+        • every rem radius is capped in `vw` (58vw for a key, 34vw for
+          an accent). On a phone the container runs edge to edge and a
+          rem radius tuned for 1280px would cover the whole screen —
+          which is how a head light turns back into the horizontal band
+          this whole line of work exists to remove. The `fill` slot
+          needs no cap: a percentage radius is already relative to the
+          band. The alphas are damped under 768px as well (colors.css).
+        • no core sits between 30% and 70% of the width. That is the
+          centred reading measure, and `--layout-xl` is 1280px, so at a
+          1280px viewport the measure IS the viewport — the outer
+          margin the old comment relied on only exists above that. What
+          protects body copy at every width is that the bright part of
+          every source is outside the middle two fifths and only the far
+          tail of the falloff reaches the type.
 
-        NO RTL VARIANT, BUT THE BLOOM IS NOT CENTRED. Percentages here
-        are physical, and the public site is `dir="rtl"` always, so a
-        bloom past 50% is a bloom over the START of the heading. Every
-        variant keeps it in the 58–74% band for that reason: the shape
-        moves for variety, but never so far that it stops being the
-        light above the title. The orbs are the pair that swaps sides. */
+        NO RTL VARIANT, AND `dir` IS WHAT THE PERCENTAGES MEAN. These
+        are physical percentages and the public site is `dir="rtl"`
+        always, so >50% is the START side — where a heading begins —
+        and <50% is the END side, where its lines run out. The scenes
+        are written in those terms: "start" below always means the
+        right of the screen. Nothing here needs to flip, because each
+        scene is a composition in its own right rather than a mirrored
+        copy of another one. ─────────────────────────────────────── */
+
+  /* SCENE 1 — HEAD DOME (lit). Light arrives from over the start of
+     the heading and the band falls away along a diagonal to a broad,
+     low pool at the end edge.
+
+     THE KEY'S ASPECT RATIO IS THE WHOLE POINT, and it is the rule the
+     whole set now follows. The first cut of this was wide and shallow
+     (44rem × 20rem centred exactly on the top edge) and the mask left
+     a sliver of it perhaps 100px tall and 900px wide — a horizontal
+     STREAK sitting just under the divider, i.e. the same "خط ضوء" the
+     page-tall columns were rejected for, turned ninety degrees.
+     Keeping the vertical radius LARGER than the horizontal one, and
+     the centre off the top of the box, is what makes the visible part
+     read as a dome (~2.5:1) instead of a bar. Equal radii are the
+     other failure — that is a disc. Do not widen a head light past
+     ~28rem, and never let its two radii meet. */
   [data-theme='dark'] .section-band {
-    /* Head bloom — a TALL ellipse whose centre sits above the band, so
-       what lands inside it is the lower dome of a pool: light arriving
-       from over the heading.
+    --lk-x: 72%;
+    --lk-y: -5rem;
+    --lk-rx: 24rem;
+    --lk-ry: 33rem;
+    --lk-c: var(--sect-bloom);
+    --lk-str: 100%;
 
-       THE ASPECT RATIO IS THE WHOLE POINT. The first cut of this was
-       wide and shallow (44rem × 20rem centred exactly on the top edge)
-       and the mask left a sliver of it perhaps 100px tall and 900px
-       wide — which is a horizontal STREAK sitting just under the
-       divider, i.e. the same "خط ضوء" the page-tall columns were
-       rejected for, turned ninety degrees. Keeping the vertical radius
-       LARGER than the horizontal one, and the centre off the top of the
-       box, is what makes the visible part read as a dome (~2.5:1)
-       instead of a bar. Do not widen these past ~28rem. */
-    --band-bloom-x: 70%;
-    --band-bloom-w: 25rem;
-    --band-bloom-h: 34rem;
-    --band-bloom-c: var(--sect-bloom);
-    /* the two orbs — true circles, one per inline edge */
-    --band-orb-a-x: 97%;
-    --band-orb-a-y: 30%;
-    --band-orb-a-r: 19rem;
-    --band-orb-a-c: var(--sect-orb-teal);
-    --band-orb-b-x: 3%;
-    --band-orb-b-y: 68%;
-    --band-orb-b-r: 14rem;
-    --band-orb-b-c: var(--sect-orb-deep);
+    --lf-x: 1%;
+    --lf-y: 76%;
+    --lf-rx: 34%;
+    --lf-ry: 42%;
+    --lf-c: var(--sect-orb-teal);
+    --lf-str: 58%;
   }
-  /* Four bands per cycle, and no two adjacent ones share a side, a
-     height or a hue. `nth-of-type` counts `<section>` siblings, so the
-     `SectionSeam` divs between them do not shift the count. */
-  [data-theme='dark'] .section-band:nth-of-type(4n + 2) {
-    --band-bloom-x: 58%;
-    --band-bloom-w: 28rem;
-    --band-bloom-h: 30rem;
-    --band-orb-a-x: 2%;
-    --band-orb-a-y: 24%;
-    --band-orb-a-r: 16rem;
-    --band-orb-a-c: var(--sect-orb-mint);
-    --band-orb-b-x: 98%;
-    --band-orb-b-y: 66%;
-    --band-orb-b-r: 21rem;
-    --band-orb-b-c: var(--sect-orb-brand);
+
+  /* Seven bands per cycle — four lit, two dark, one a whisper.
+     `nth-of-type` counts `<section>` siblings, so the `SectionSeam`
+     divs between bands do not shift the count, but `Hero`, `PageHero`,
+     `StatBand` and `CtaBand` are `<section>` too and they DO. That is
+     deliberate: it is why two pages with the same number of bands do
+     not light them in the same order, and why the dark bands do not
+     land on the same positions site-wide.
+
+     Seven is longer than the band count of every page in the site, so
+     within one page nothing repeats at all. */
+
+  /* SCENE 2 — DARK. No section light. The band keeps the page field
+     underneath it and nothing else, which is what gives the head dome
+     above it and the foot rise below it somewhere to be seen from.
+     Do not "fix" this by adding a source to it. */
+  [data-theme='dark'] .section-band:nth-of-type(7n + 2) {
+    --lk-c: transparent;
+    --lf-c: transparent;
   }
-  [data-theme='dark'] .section-band:nth-of-type(4n + 3) {
-    --band-bloom-x: 74%;
-    --band-bloom-w: 22rem;
-    --band-bloom-h: 36rem;
-    --band-orb-a-x: 99%;
-    --band-orb-a-y: 60%;
-    --band-orb-a-r: 23rem;
-    --band-orb-a-c: var(--sect-orb-deep);
-    --band-orb-b-x: 4%;
-    --band-orb-b-y: 34%;
-    --band-orb-b-r: 12rem;
-    --band-orb-b-c: var(--sect-orb-mint);
+
+  /* SCENE 3 — GROUNDED (lit). The key is a dome centred BELOW the
+     band's bottom edge on the start side, so the light rises into the
+     band from underneath instead of falling onto it — the band darkens
+     toward its heading and lifts under its content. Its counterweight
+     is a broad wash high on the end edge, the far corner from the key.
+
+     That counterweight used to be a 10rem spark. It is a large ellipse
+     now for the same reason the crown's disc is gone: at that size a
+     source has a centre, and a centre on the edge of a band is a ball
+     of light, not lighting. */
+  [data-theme='dark'] .section-band:nth-of-type(7n + 3) {
+    --lk-x: 82%;
+    --lk-y: calc(100% + 4rem);
+    --lk-rx: 23rem;
+    --lk-ry: 28rem;
+    --lk-c: var(--sect-orb-deep);
+    --lk-str: 100%;
+
+    --lf-x: 3%;
+    --lf-y: 20%;
+    --lf-rx: 30%;
+    --lf-ry: 34%;
+    --lf-c: var(--sect-orb-mint);
+    --lf-str: 44%;
   }
-  [data-theme='dark'] .section-band:nth-of-type(4n + 4) {
-    --band-bloom-x: 62%;
-    --band-bloom-w: 26rem;
-    --band-bloom-h: 32rem;
-    --band-orb-a-x: 1%;
-    --band-orb-a-y: 56%;
-    --band-orb-a-r: 20rem;
-    --band-orb-a-c: var(--sect-orb-brand);
-    --band-orb-b-x: 96%;
-    --band-orb-b-y: 20%;
-    --band-orb-b-r: 13rem;
-    --band-orb-b-c: var(--sect-orb-teal);
+
+  /* SCENE 4 — CROWN (lit). Both sources sit HIGH, one at each edge,
+     and the band falls away below them. It follows the grounded scene
+     directly, and that is the point: light from above answering light
+     from below is the most opposed pair in the set, which is what
+     lets two lit bands run back to back without reading as a repeat.
+
+     THIS IS THE ONE THE CLIENT CAUGHT. Its key was `19rem 19rem` — a
+     true circle — and on the الأرقام band, which is 1,856px tall, that
+     is a small bright disc pinned to the top corner. It is a wide,
+     tall ellipse now, big enough that only its falloff is ever inside
+     the band. Nothing in this file may go back to equal radii. */
+  [data-theme='dark'] .section-band:nth-of-type(7n + 4) {
+    --lk-x: 97%;
+    --lk-y: -1rem;
+    --lk-rx: 27rem;
+    --lk-ry: 34rem;
+    --lk-c: var(--sect-orb-mint);
+    --lk-str: 50%;
+
+    --lf-x: 1%;
+    --lf-y: 13%;
+    --lf-rx: 35%;
+    --lf-ry: 30%;
+    --lf-c: var(--sect-orb-deep);
+    --lf-str: 70%;
   }
+
+  /* SCENE 5 — DARK. The second unlit band, and the one that matters
+     most: it sits between the crown above and the whisper below, so
+     the page has a genuinely quiet stretch in its lower half rather
+     than tapering off. */
+  [data-theme='dark'] .section-band:nth-of-type(7n + 5) {
+    --lk-c: transparent;
+    --lf-c: transparent;
+  }
+
+  /* SCENE 6 — WHISPER. One broad, very faint wash on the end edge and
+     nothing else — the quietest lit thing in the cycle, barely a step
+     above the dark bands. It exists so the run of quiet does not
+     become a run of NOTHING: the eye needs one point of interest
+     across three bands, and this is it. Faint and LARGE, not small: a
+     9rem spark was what used to sit here, and a spark is exactly the
+     shape this pass removed. */
+  [data-theme='dark'] .section-band:nth-of-type(7n + 6) {
+    --lk-c: transparent;
+
+    --lf-x: -2%;
+    --lf-y: 52%;
+    --lf-rx: 38%;
+    --lf-ry: 44%;
+    --lf-c: var(--sect-orb-brand);
+    --lf-str: 60%;
+  }
+
+  /* SCENE 7 — VERTICAL (lit). The key is a tall, narrow sliver hugging
+     the START edge across most of the band's height: the only scene
+     whose composition runs down rather than across, and the one that
+     re-opens the page after the quiet stretch. Its radii are the most
+     unequal in the set (1:3), which is precisely why it reads as a lit
+     edge and never as a blob. It is BOUNDED — 36rem tall, inside one
+     band, faded at both ends by the mask — so it is a lit edge to this
+     section, not the page-tall rail the client rejected. Do not lift
+     its height toward a page height. */
+  [data-theme='dark'] .section-band:nth-of-type(7n + 7) {
+    --lk-x: 100%;
+    --lk-y: 46%;
+    --lk-rx: 12rem;
+    --lk-ry: 36rem;
+    --lk-c: var(--sect-orb-deep);
+    --lk-str: 100%;
+
+    --lf-x: 6%;
+    --lf-y: 15%;
+    --lf-rx: 28%;
+    --lf-ry: 29%;
+    --lf-c: var(--sect-orb-mint);
+    --lf-str: 50%;
+  }
+
+  /* `<Section light="…">` adjusts a band's lighting where the cycle
+     cannot know better — a band whose content makes its scene wrong,
+     or a run of bands that needs one of them to step back.
+
+     Neither of these RE-POSITIONS anything, and that is deliberate.
+     An earlier cut of this gave each pin a full copy of one scene's
+     geometry, which is two sources of truth for the same numbers: the
+     copy drifts the moment a scene is retuned, and — worse — pinning
+     two neighbours to compositions that lean the same way is exactly
+     how the repetition this pass removed gets back in. These only
+     scale what the band already has.
+
+     Same specificity as the `nth-of-type` rules, so they have to stay
+     AFTER them. For a genuinely bespoke band, set the slot variables
+     inline (`style={{ '--lk-x': '20%' }}`) — they are custom
+     properties, so an inline value wins over every rule here without
+     a new class existing for it. */
+  [data-theme='dark'] .section-band.band-light-quiet {
+    --lk-str: 40%;
+    --lf-str: 34%;
+  }
+  [data-theme='dark'] .section-band.band-light-none {
+    --lk-c: transparent;
+    --lf-c: transparent;
+  }
+
   [data-theme='dark'] .section-ambient-layer {
+    /* `--l*-str` scales a slot's alpha and leaves its hue alone, so a
+       scene can reuse a token at a level its own geometry needs
+       without a second token existing for it. `transparent` here is
+       `rgba(0,0,0,0)`, so a slot switched off contributes nothing to a
+       `screen` blend — it is genuinely absent, not black. */
+    --_key: color-mix(in srgb, var(--lk-c) var(--lk-str, 100%), transparent);
+    --_fill: color-mix(in srgb, var(--lf-c) var(--lf-str, 100%), transparent);
+
     /* Each shape carries a MID STOP at ~45% of its own alpha, which is
        what makes it read as light rather than as a shape. Two stops
        ramp straight to zero, and a straight ramp has a kink in its
        slope where it lands — the eye finds that boundary (a Mach band)
        and the glow acquires a visible rim. The mid stop bends the
        falloff into something closer to a gaussian, so the shape has no
-       findable edge at all. `color-mix` with `transparent` scales alpha
-       and leaves the hue alone, so the token stays the only knob. */
+       findable edge at all.
+
+       The key is painted OVER the fill, because these compose
+       source-over inside the layer before the layer screens onto the
+       page: the shaped source is what the scene is about and the fill
+       is the atmosphere behind it.
+
+       EVERY GEOMETRY `var()` CARRIES A FALLBACK, and they are load-
+       bearing. A scene that switches a slot off states only
+       `--l*-c: transparent` and gives that slot no position or radius —
+       there is no reason it should have to. Without a fallback the
+       missing radius substitutes to nothing, `min(, 34vw)` fails to
+       parse, and an invalid value at substitution time takes the WHOLE
+       `background-image` with it: the band's OTHER two sources vanish
+       as well, and nothing anywhere reports it. That is exactly how the
+       dark-band pass first shipped three lit scenes rendering unlit. */
     background-image:
       radial-gradient(
-        min(var(--band-bloom-w), 62vw) var(--band-bloom-h) at var(--band-bloom-x) -5rem,
-        var(--band-bloom-c),
-        color-mix(in srgb, var(--band-bloom-c) 45%, transparent) 46%,
+        min(var(--lk-rx, 20rem), 58vw) var(--lk-ry, 20rem) at var(--lk-x, 50%)
+          var(--lk-y, 50%),
+        var(--_key),
+        color-mix(in srgb, var(--_key) 45%, transparent) 46%,
         transparent 78%
       ),
       radial-gradient(
-        circle min(var(--band-orb-a-r), 46vw) at var(--band-orb-a-x) var(--band-orb-a-y),
-        var(--band-orb-a-c),
-        color-mix(in srgb, var(--band-orb-a-c) 45%, transparent) 44%,
-        transparent 76%
-      ),
-      radial-gradient(
-        circle min(var(--band-orb-b-r), 40vw) at var(--band-orb-b-x) var(--band-orb-b-y),
-        var(--band-orb-b-c),
-        color-mix(in srgb, var(--band-orb-b-c) 45%, transparent) 44%,
+        var(--lf-rx, 30%) var(--lf-ry, 30%) at var(--lf-x, 50%) var(--lf-y, 50%),
+        var(--_fill),
+        color-mix(in srgb, var(--_fill) 45%, transparent) 44%,
         transparent 76%
       );
     -webkit-mask-image: linear-gradient(

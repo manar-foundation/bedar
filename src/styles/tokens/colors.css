@@ -347,27 +347,50 @@
      per band rather than run down the page as two columns (see
      `.section-ambient-layer`, animations.css, for why that changed).
 
-     `bloom` is the wide, shallow light over a section's heading; the
-     four `orb` hues are the round shapes that push in from the inline
-     edges, and a band picks two of them so no two neighbours light the
-     same colour. These alphas sit well above the near-invisible page
-     field below, because each one now covers a bounded patch of one
-     section instead of the whole document.
+     `bloom` is the mint dome a scene puts over a section's heading;
+     the four `orb` hues are every other source — the domes, the
+     slivers, the broad fills. A LIT scene picks two of them and
+     consecutive scenes never lead with the same one, so no two
+     neighbouring bands light the same colour; two scenes in seven pick
+     none at all and stay dark. These alphas sit well above the
+     near-invisible page field below, because each one covers a bounded
+     patch of one section instead of the whole document.
 
-     The safety is spatial, not faint: every orb core is at ≤4% / ≥96%
-     of the width, so its saturated part lives in the outer margin and
-     only the far tail reaches the centred reading measure. Combined
-     with `mix-blend-mode: screen` (which only ever lightens), they add
-     depth at no cost to body-copy contrast. These are the brightness
-     knob — raise them to make the lighting bolder; if you move a core
-     inward instead, re-measure AA. */
-  /* The head light is the one source that sits INSIDE the reading
-     measure, so it is the one with a contrast budget rather than a
-     spatial safety. Measured over the composed field, its brightest
-     point in the centred measure is #193b3b: 10.56:1 for
-     `--text-primary` (the heading it lights) and 5.67:1 for
-     `--text-secondary`, both clear of AA. 0.17 was 5.44:1 — still
-     passing, but with less room than the rest of the site keeps. */
+     Nothing these paint is a circle any more, and nothing is small —
+     see the note in `.section-ambient-layer`. A source with equal
+     radii keeps a findable centre and reads as a disc stuck to the
+     band's edge, which is what the client rejected on الأرقام.
+
+     THESE ARE THE FULL-STRENGTH VALUES, AND ALMOST NOTHING USES THEM
+     AT FULL STRENGTH. Each scene scales the token it picks with its
+     own `--l*-str` (animations.css), because a source covering half a
+     1,856px band cannot carry the same alpha as a 9rem spark. Those
+     percentages, not these alphas, are where an individual band's
+     brightness was tuned — but raising a token here raises the whole
+     site's section light at once, which is the knob to reach for if
+     the client wants more or less of it overall.
+
+     The safety is spatial first: no source's core sits between 30% and
+     70% of the width, i.e. never in the middle of the reading measure,
+     and combined with `mix-blend-mode: screen` (which only ever
+     lightens) the type gets the far tail of a falloff rather than any
+     core. It is not only spatial, though — `--layout-xl` is 1280px, so
+     at a 1280px viewport the container IS the viewport and there is no
+     outer margin left to hide a core in.
+
+     So the levels are measured, not assumed. Sampling the composed
+     field (page canvas + scene layer, screen-blended) across every
+     band of six public routes, and taking the brightest pixel that
+     falls under real text on each: the lit bands run 5.45–6.00:1 for
+     `--text-secondary`, the one to watch, with the worst at #103f3d
+     (10.15:1 for `--text-primary`). The two unlit scenes measure
+     6.74–6.89:1, and that gap IS the design: it is the step between a
+     lit band and a quiet one, and it is what the eye reads as lighting
+     rather than as tint.
+
+     Move a core inward, raise a `--l*-str`, or raise an alpha here,
+     and re-measure: two scenes were once written a point brighter than
+     this and came back at 4.52:1. */
   --sect-bloom: rgba(133, 222, 206, 0.15); /* mint — head light */
   --sect-orb-mint: rgba(169, 225, 211, 0.16); /* mint — highlight */
   --sect-orb-teal: rgba(30, 158, 147, 0.26); /* accent-400 — body */
@@ -406,9 +429,13 @@
    the way it is on the centred desktop measure. The desktop contrast
    argument — the core sits in the outer margin and the copy only ever
    gets the tail — does not hold when the text reaches the very edges, so
-   the section light is damped here. Same hues, lower alpha; the geometry
-   in `.section-ambient-layer` is unchanged (its `min(…, 46vw)` radius
-   cap is the other half of this). */
+   the section light is damped here. Same hues, lower alpha; the scene
+   geometry in `.section-ambient-layer` is unchanged (the `min(…, 58vw)`
+   cap on a key's horizontal rem radius is the other half of this, and a
+   scene's percentage-sized `fill` needs no cap because it is already
+   relative to the band). Measured at 375px, the worst lit band under
+   real text is 5.96:1 for `--text-secondary` — better than the desktop
+   worst of 5.45:1, which is what this damping buys. */
 @media (max-width: 768px) {
   [data-theme='dark'] {
     --sect-bloom: rgba(133, 222, 206, 0.1);

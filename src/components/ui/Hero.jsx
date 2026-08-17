@@ -158,10 +158,27 @@ export function Hero({
             split && 'lg:grid-cols-[1.05fr_0.95fr] lg:gap-16',
           )}
         >
-          {/* ── Copy — first in the DOM, always ─────────────── */}
+          {/* ── Copy — first in the DOM, always ───────────────
+
+                `relative z-[1]` is what keeps the headline ON TOP of
+                the artwork's arcs. `HeroArtwork` draws them into a box
+                178% as wide as its own column that bleeds far past its
+                inline start — on the homepage it reaches x=782 while
+                the h1 starts at x=644, so the bright accent arc crosses
+                the last word of the title ("المجتمعية"). Being first in
+                the DOM does not save the copy: the artwork column is
+                `position: relative`, so it paints in the positioned
+                step, above static inline text no matter what order the
+                two are written in. Making the copy positioned too, one
+                step up, puts the arc back BEHIND the letters where it
+                reads as depth instead of as a line struck through the
+                title.
+
+                `z-[1]` and not `z-10`: the `SpiralDivider` above sits
+                at `z-10` and has to stay over this. ──────────────── */}
           <div
             className={cn(
-              'flex flex-col',
+              'relative z-[1] flex flex-col',
               centered ? 'mx-auto max-w-3xl items-center text-center' : 'text-start',
             )}
           >

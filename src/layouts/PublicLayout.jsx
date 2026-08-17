@@ -38,11 +38,16 @@ import AutoReveal from '@components/motion/AutoReveal.jsx';
  * stacking as separately-coloured bands.
  *
  * The lighting you actually SEE is composed per band, by `<Section>`'s
- * own `.section-ambient-layer`: a bloom over the heading and round orbs
- * entering from the edges, different in every section. It used to be
- * two page-tall aurora columns mounted here, which the client rejected
- * — one unchanging shape from the first pixel to the last is a rail,
- * not lighting. See the note on `.section-ambient-layer`.
+ * own `.section-ambient-layer`, which draws one of seven lighting
+ * scenes — four lit and three not. They differ in how many sources
+ * they have, where the weight sits and which axis the composition runs
+ * along, so no two consecutive bands are lit the same shape, and the
+ * unlit ones are what make the lit ones read as chosen. This field is
+ * why an unlit band still has tone: it is the floor under all of them.
+ * The lighting used to be two page-tall aurora columns mounted here,
+ * which the client rejected — one unchanging shape from the first
+ * pixel to the last is a rail, not lighting. See the note on
+ * `.section-ambient-layer`.
  */
 export default function PublicLayout() {
   const { pathname } = useLocation();

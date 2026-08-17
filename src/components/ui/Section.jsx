@@ -26,6 +26,17 @@ import { cn } from '@utils/cn.js';
             close a run and need to breathe differently.
    `bleed`  drop the container, for a band whose content is a panel
             that manages its own width.
+   `light`  adjust the band's ambient lighting. Which of the seven
+            lighting scenes a band gets is decided by its position in
+            the page (`nth-of-type`, animations.css) — that is what
+            keeps the site from lighting every band the same way, so
+            this is an escape hatch, not a normal prop. `quiet` dims
+            whatever scene the band has, for one that should recede
+            between two bright neighbours; `none` switches the band's
+            own light off entirely (the page-wide field underneath
+            still lights it). Neither re-positions anything: for a
+            genuinely bespoke band, set the slot custom properties
+            inline instead (`style={{ '--lk-x': '20%' }}`).
 
    `innerClassName` reaches the container, which is what a section
    needs when its content is a grid that has to align with the
@@ -46,11 +57,17 @@ const sizes = {
   lg: 'section-y-lg',
 };
 
+const lights = {
+  quiet: 'band-light-quiet',
+  none: 'band-light-none',
+};
+
 export function Section({
   as: Tag = 'section',
   tone = 'plain',
   size = 'base',
   bleed = false,
+  light,
   className,
   innerClassName,
   children,
@@ -59,15 +76,29 @@ export function Section({
   const glowing = tone === 'glow' || tone === 'glow-alt';
 
   return (
-    <Tag className={cn('section-band relative', tones[tone] ?? tones.plain, className)} {...rest}>
-      {/* Ambient section lighting, and on the dark public site the only
-          lighting a reader really sees: a bloom rising at the HEAD of
-          the band, over its heading, plus round orbs pushing in from the
-          inline EDGES at a height, size and hue that change from one
-          band to the next (a four-step cycle keyed off `nth-of-type`).
-          That variation is the point — the page-tall light columns this
-          replaced were one unchanging shape for the whole document, and
-          the client read them as a rail rather than as lighting.
+    <Tag
+      className={cn('section-band relative', tones[tone] ?? tones.plain, lights[light], className)}
+      {...rest}
+    >
+          {/* Ambient section lighting, and on the dark public site the only
+          lighting a reader really sees. A band gets one of seven
+          LIGHTING SCENES from a cycle keyed off `nth-of-type` — and
+          three of those seven carry no light at all. Not every section
+          is lit, on purpose: a page where every band glows has no
+          lighting in it, only a tint, and the four lit scenes read as
+          deliberate precisely because they arrive after a quiet one.
+
+          That is the second thing this replaced. Before it there were
+          seven scenes but all of them lit; before THAT, a four-step
+          cycle that gave every band the identical composition and
+          varied only which side each orb entered from — which the eye
+          learns in two sections. And before that, page-tall light
+          columns, one unchanging shape for the whole document, which
+          the client read as a rail rather than as lighting.
+
+          A dark band is not a black band: `.page-ambient` on the shell
+          is still under it, so it keeps the site's tone and only loses
+          its own local shaping.
 
           Painted on a sibling layer at z-index -1 (`.section-band`
           isolates, so it sits over the band's own surface but under the
