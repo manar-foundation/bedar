@@ -8,9 +8,9 @@ import {
   TestimonialsCarousel,
 } from '@components/ui';
 import { Reveal } from '@components/motion/Reveal.jsx';
-import { useContent } from '@context/ContentContext.jsx';
+import { useContent, usePage } from '@context/ContentContext.jsx';
 import { useSeo } from '@hooks/useSeo.js';
-import { servicesPage, services } from '@content/pages.js';
+import { services } from '@content/pages.js';
 import { pageBanners } from '@content/page-banners.js';
 import { breadcrumbsFor } from '@content/site.js';
 
@@ -38,6 +38,7 @@ const SERVICE_PHOTOS = {
 
 /** الخدمات — the seven services, plus the expert quotes. */
 export default function Services() {
+  const servicesPage = usePage('servicesPage');
   // Same carousel as the homepage, same live testimonials source.
   const { testimonials } = useContent();
   useSeo(servicesPage.seo);

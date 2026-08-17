@@ -8,7 +8,6 @@ import { Button } from '@components/ui/Button.jsx';
 import { SocialIcon } from '@components/ui/SocialIcon.jsx';
 import { NavDropdown } from './NavDropdown.jsx';
 import { useContent } from '@context/ContentContext.jsx';
-import { headerCta } from '@content/site.js';
 import { cn } from '@utils/cn.js';
 
 /* ================================================================
@@ -76,7 +75,7 @@ function isBranchActive(item, pathname) {
 }
 
 export default function Navbar() {
-  const { navigation, settings } = useContent();
+  const { navigation, settings, headerCta } = useContent();
   const [open, setOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState(() => new Set());
   const [scrolled, setScrolled] = useState(false);

@@ -172,4 +172,180 @@ export async function fetchItemBody(collection, slug) {
   return Array.isArray(body) && body.length > 0 ? body : null;
 }
 
+/* ================================================================
+   PAGE CONTENT — the fields the dashboard's page editor writes.
+
+   This is the read that was missing. `page_fields` is a FLAT table
+   of dotted keys ('hero.title', 'audience.items') carrying jsonb
+   values, produced by walking the nested page objects in
+   `content/pages.js` (see `scripts/seed-supabase.mjs`). Reading it
+   back means walking that flattening in reverse.
+
+   `pages.key` is the discriminator and matches the export name in
+   `content/pages.js` only loosely — the table uses the URL-ish key
+   ('contact-us', 'social-entrepreneurship') while the module uses a
+   JS identifier ('contact', 'socialEntrepreneurship'). PAGE_KEYS
+   below is that mapping, and it is the same list the seed script
+   writes from.
+   ================================================================ */
+
+/** `pages.key` → the export name in `content/pages.js`. */
+export const PAGE_KEYS = {
+  home: 'home',
+  about: 'about',
+  'social-entrepreneurship': 'socialEntrepreneurship',
+  services: 'servicesPage',
+  programs: 'programsPage',
+  blog: 'blogPage',
+  news: 'newsPage',
+  'contact-us': 'contact',
+};
+
+/**
+ * Set `object.a.b.c = value`, creating the intermediate objects.
+ *
+ * Only ever called with keys this codebase generated, but it still
+ * refuses `__proto__` / `constructor` / `prototype`: the keys arrive
+ * over the network from a table editors can write to, and walking a
+ * dotted path into an object is the textbook prototype-pollution
+ * sink. A poisoned `Object.prototype` here would corrupt every
+ * object in the running app, not just the page content.
+ */
+const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
+function setPath(target, dottedKey, value) {
+  const parts = dottedKey.split('.');
+  if (parts.some((part) => !part || UNSAFE_KEYS.has(part))) return;
+
+  let node = target;
+  for (const part of parts.slice(0, -1)) {
+    if (typeof node[part] !== 'object' || node[part] === null || Array.isArray(node[part])) {
+      node[part] = {};
+    }
+    node = node[part];
+  }
+  node[parts.at(-1)] = value;
+}
+
+/**
+ * Published page content, as `{ [contentExportName]: nestedObject }`.
+ *
+ * The returned objects are SPARSE — only the fields the database
+ * actually has. `ContentContext` deep-merges them over the static
+ * seed, so a page field the dashboard has never been told about
+ * still renders its seeded value rather than `undefined`.
+ *
+ * `page_fields(...)` is a PostgREST embed over the `page_id` foreign
+ * key, so this is one round trip rather than one per page. Draft
+ * pages are excluded twice — by the filter and by RLS.
+ */
+export async function fetchPages() {
+  const rows = await rest(
+    'pages?state=eq.published&select=key,renders_faq,seo_title,seo_description,' +
+      'page_fields(key,type,value,alt_text,media(bucket,path,alt_text))',
+  );
+
+  const pages = {};
+  for (const row of rows) {
+    const name = PAGE_KEYS[row.key];
+    if (!name) continue; // A page row with no component behind it.
+
+    const content = {};
+
+    /* SEO is COLUMNS on `pages`, not rows in `page_fields` — the seed
+       script skips the `seo` branch when it flattens for exactly that
+       reason. Folding it back under the same `seo` key the seed uses
+       is what lets `useSeo(page.seo)` stay unchanged in every route.
+       Blank columns are left out so the merge keeps the seeded title
+       rather than overwriting it with ''. */
+    const seo = {};
+    if (row.seo_title) seo.title = row.seo_title;
+    if (row.seo_description) seo.description = row.seo_description;
+    if (Object.keys(seo).length) content.seo = seo;
+
+    for (const field of row.page_fields ?? []) {
+      // An image field stores the resolved media row, not the value
+      // column — mirroring how a collection cover is read above.
+      const value = field.media
+        ? { src: storageUrl(field.media), alt: field.alt_text ?? field.media.alt_text ?? '' }
+        : field.value;
+      if (value !== null && value !== undefined) setPath(content, field.key, value);
+    }
+    pages[name] = content;
+  }
+  return pages;
+}
+
+/* ================================================================
+   NAVIGATION — header menu and footer columns.
+
+   One flat table with a self-referencing `parent_id`; a row with no
+   `href` is a group (a header dropdown or a footer column). Rebuilt
+   here into the exact shapes `Navbar` and `Footer` already consume
+   from `content/site.js`, so neither component changes.
+   ================================================================ */
+
+/**
+ * `{ header: [...], footer: [...] }` in the `content/site.js` shape,
+ * or `null` when the table has no visible rows.
+ *
+ * Invisible rows are filtered twice, same belt-and-braces as the
+ * publish state: the query asks for `is_visible`, and the RLS policy
+ * `navigation_items: public read visible` only exposes those to anon.
+ */
+export async function fetchNavigation() {
+  const rows = await rest(
+    'navigation_items?is_visible=is.true' +
+      '&select=id,location,key,parent_id,label,href,position,opens_in_new_tab' +
+      '&order=position.asc',
+  );
+  if (!rows.length) return null;
+
+  const childrenOf = new Map();
+  for (const row of rows) {
+    if (!row.parent_id) continue;
+    if (!childrenOf.has(row.parent_id)) childrenOf.set(row.parent_id, []);
+    childrenOf.get(row.parent_id).push(row);
+  }
+
+  const toItem = (row) => {
+    const children = childrenOf.get(row.id);
+    return {
+      id: row.key,
+      label: row.label,
+      ...(row.href ? { href: row.href } : {}),
+      ...(row.opens_in_new_tab ? { external: true } : {}),
+      // A group is a row with children. Keeping the key absent (not
+      // an empty array) matters: `Navbar` branches on `item.children`
+      // being truthy to decide dropdown vs. plain link.
+      ...(children?.length ? { children: children.map(toItem) } : {}),
+    };
+  };
+
+  const roots = (location) => rows.filter((row) => !row.parent_id && row.location === location);
+
+  return {
+    header: roots('header').map(toItem),
+    // The footer wants `{ id, title, links }`, not `{ id, label, children }`.
+    footer: roots('footer').map((row) => ({
+      id: row.key,
+      title: row.label,
+      links: (childrenOf.get(row.id) ?? []).map(toItem),
+    })),
+  };
+}
+
+/**
+ * Public settings blobs, keyed as in `site_settings` —
+ * `organization`, `social`, `header_cta`, `footer`, `integrations`,
+ * `captcha`, `consent`.
+ *
+ * `forms` is deliberately unreachable here: it is the only row
+ * seeded with `is_public = false`, so RLS withholds it from anon.
+ */
+export async function fetchSettings() {
+  const rows = await rest('site_settings?is_public=is.true&select=key,value');
+  return Object.fromEntries(rows.map((row) => [row.key, row.value]));
+}
+
 export { hasSupabase };

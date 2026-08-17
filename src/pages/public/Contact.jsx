@@ -3,9 +3,8 @@ import { Mail, Phone } from 'lucide-react';
 import { PageHero, Section, SectionHeading } from '@components/ui';
 import { ContactForm } from '@components/layout/ContactForm.jsx';
 import { Reveal } from '@components/motion/Reveal.jsx';
-import { useContent } from '@context/ContentContext.jsx';
+import { useContent, usePage } from '@context/ContentContext.jsx';
 import { useSeo } from '@hooks/useSeo.js';
-import { contact } from '@content/pages.js';
 import { pageBanners } from '@content/page-banners.js';
 import { breadcrumbsFor } from '@content/site.js';
 
@@ -23,6 +22,7 @@ import { breadcrumbsFor } from '@content/site.js';
  * element in the section — and therefore reads as the thing to do.
  */
 export default function Contact() {
+  const contact = usePage('contact');
   const { settings } = useContent();
   useSeo(contact.seo);
 

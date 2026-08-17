@@ -14,8 +14,8 @@ import {
   StickySplit,
 } from '@components/ui';
 import { Reveal, Stagger, StaggerItem } from '@components/motion/Reveal.jsx';
+import { usePage } from '@context/ContentContext.jsx';
 import { useSeo } from '@hooks/useSeo.js';
-import { about } from '@content/pages.js';
 import { pageBanners } from '@content/page-banners.js';
 import { breadcrumbsFor } from '@content/site.js';
 import { cn } from '@utils/cn.js';
@@ -61,6 +61,7 @@ const VALUE_ICONS = {
  * always describing.
  */
 export default function About() {
+  const about = usePage('about');
   useSeo(about.seo);
 
   return (

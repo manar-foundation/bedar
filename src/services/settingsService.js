@@ -12,7 +12,7 @@
    than let a save fail.
    ================================================================ */
 
-import { db, unwrap, withActor } from './db.js';
+import { db, mutate, unwrap, withActor } from './db.js';
 import { ROLES, TABLES } from '@utils/constants.js';
 
 const SETTING_COLUMNS = 'key, value, description, is_public, min_role, updated_at';
@@ -24,8 +24,9 @@ export async function listSettings(keys) {
 }
 
 export async function updateSetting(key, value) {
-  return unwrap(
-    await db()
+  return mutate(
+    TABLES.SETTINGS,
+    db()
       .from(TABLES.SETTINGS)
       .update(await withActor({ value }))
       .eq('key', key)

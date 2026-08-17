@@ -27,9 +27,9 @@ import {
   WordOrbit,
 } from '@components/ui';
 import { Reveal, Stagger, StaggerItem } from '@components/motion/Reveal.jsx';
-import { useContent } from '@context/ContentContext.jsx';
+import { useContent, usePage } from '@context/ContentContext.jsx';
 import { useSeo } from '@hooks/useSeo.js';
-import { home, services, about, contactCta } from '@content/pages.js';
+import { services, contactCta } from '@content/pages.js';
 import { cn } from '@utils/cn.js';
 
 /* Clean single-line marks, one per service (keyed by id). */
@@ -86,6 +86,8 @@ const SERVICE_ICONS = {
  * figures carry it exactly as they do in the reference.
  */
 export default function Home() {
+  const home = usePage('home');
+  const about = usePage('about');
   // testimonials + faq come from context so a dashboard-published one
   // reaches the homepage; the context falls back to the seed when the
   // database has none. `services` stays a static import — it is a page

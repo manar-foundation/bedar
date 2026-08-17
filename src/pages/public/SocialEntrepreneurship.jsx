@@ -29,8 +29,8 @@ import {
 } from '@components/ui';
 import { Reveal, Stagger, StaggerItem } from '@components/motion/Reveal.jsx';
 import { useIsMobile } from '@hooks/useMediaQuery.js';
+import { usePage } from '@context/ContentContext.jsx';
 import { useSeo } from '@hooks/useSeo.js';
-import { socialEntrepreneurship as page } from '@content/pages.js';
 import { pageBanners } from '@content/page-banners.js';
 import { breadcrumbsFor } from '@content/site.js';
 
@@ -76,6 +76,7 @@ const impactIcon = {
  * in the source text ("وتتضمن العناصر التالية").
  */
 export default function SocialEntrepreneurship() {
+  const page = usePage('socialEntrepreneurship');
   useSeo(page.seo);
   // The impact cards' entrance is horizontal, and a horizontal
   // entrance only works while they sit side by side. Below `md` they

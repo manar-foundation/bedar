@@ -10,6 +10,7 @@
    ================================================================ */
 
 import { requireSupabase } from './supabaseClient.js';
+import { publish } from './contentSync.js';
 
 /** The client, or a clear Arabic error instead of a null dereference. */
 export function db() {
@@ -66,6 +67,31 @@ export function toAppError(error) {
 /** `{ data, error }` → data, or throw. Every service call goes through this. */
 export function unwrap({ data, error }) {
   if (error) throw toAppError(error);
+  return data;
+}
+
+/**
+ * `unwrap`, plus "tell the site something changed".
+ *
+ * EVERY WRITE GOES THROUGH THIS, reads do not. The public site holds
+ * its rendered copy of the content in `ContentContext`; without this
+ * announcement a save updated the database and nothing else, and the
+ * change only surfaced when the reader happened to blur and refocus
+ * the tab. That is the stale-content bug.
+ *
+ * `table` names what changed so the context can re-read a third of
+ * itself rather than all of it — `contentSync.scopesForTable` owns
+ * that mapping.
+ *
+ * Announced only AFTER a successful write: a refetch triggered by a
+ * write that RLS refused would re-read the unchanged rows and make
+ * the failure look like a save that silently did nothing.
+ *
+ *   return mutate(TABLES.PAGES, db().from(TABLES.PAGES).update(…).select().single());
+ */
+export async function mutate(table, query) {
+  const data = unwrap(await query);
+  publish(table);
   return data;
 }
 

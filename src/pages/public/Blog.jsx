@@ -1,8 +1,7 @@
 import { PageHero } from '@components/ui';
 import { CollectionListing } from '@components/layout/CollectionListing.jsx';
-import { useContent } from '@context/ContentContext.jsx';
+import { useContent, usePage } from '@context/ContentContext.jsx';
 import { useSeo } from '@hooks/useSeo.js';
-import { blogPage } from '@content/pages.js';
 import { pageBanners } from '@content/page-banners.js';
 import { breadcrumbsFor } from '@content/site.js';
 
@@ -12,6 +11,7 @@ import { breadcrumbsFor } from '@content/site.js';
  * article leads at full width, the rest follow in a grid.
  */
 export default function Blog() {
+  const blogPage = usePage('blogPage');
   const { collections } = useContent();
   useSeo(blogPage.seo);
 

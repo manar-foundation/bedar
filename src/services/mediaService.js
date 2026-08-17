@@ -10,7 +10,7 @@
    what makes "where is this file used" a query instead of a guess.
    ================================================================ */
 
-import { db, unwrap, withActor, currentUserId, toAppError } from './db.js';
+import { db, mutate, unwrap, withActor, currentUserId, toAppError } from './db.js';
 import { MEDIA_BUCKET, TABLES } from '@utils/constants.js';
 
 const MEDIA_COLUMNS =
@@ -134,13 +134,9 @@ export async function uploadMedia(file, { altText = '' } = {}) {
 }
 
 export async function updateMedia(id, patch) {
-  return unwrap(
-    await db()
-      .from(TABLES.MEDIA)
-      .update(await withActor(patch))
-      .eq('id', id)
-      .select(MEDIA_COLUMNS)
-      .single(),
+  return mutate(
+    TABLES.MEDIA,
+    db().from(TABLES.MEDIA).update(await withActor(patch)).eq('id', id).select(MEDIA_COLUMNS).single(),
   );
 }
 
@@ -158,7 +154,7 @@ export async function deleteMedia(media) {
   const { error } = await client.storage.from(media.bucket || MEDIA_BUCKET).remove([media.path]);
   if (error) throw toAppError(error);
 
-  unwrap(await client.from(TABLES.MEDIA).delete().eq('id', media.id).select('id'));
+  await mutate(TABLES.MEDIA, client.from(TABLES.MEDIA).delete().eq('id', media.id).select('id'));
 }
 
 /**

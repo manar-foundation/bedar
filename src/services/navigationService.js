@@ -10,7 +10,8 @@
    and not a code change.
    ================================================================ */
 
-import { db, unwrap, withActor } from './db.js';
+import { db, mutate, unwrap, withActor } from './db.js';
+import { publish } from './contentSync.js';
 import { TABLES } from '@utils/constants.js';
 import { slugify } from '@utils/format.js';
 
@@ -55,34 +56,29 @@ export function proposeKey(label, existingKeys = []) {
 }
 
 export async function createNavItem(patch) {
-  return unwrap(
-    await db()
-      .from(TABLES.NAVIGATION)
-      .insert(await withActor(patch))
-      .select(NAV_COLUMNS)
-      .single(),
+  return mutate(
+    TABLES.NAVIGATION,
+    db().from(TABLES.NAVIGATION).insert(await withActor(patch)).select(NAV_COLUMNS).single(),
   );
 }
 
 export async function updateNavItem(id, patch) {
-  return unwrap(
-    await db()
-      .from(TABLES.NAVIGATION)
-      .update(await withActor(patch))
-      .eq('id', id)
-      .select(NAV_COLUMNS)
-      .single(),
+  return mutate(
+    TABLES.NAVIGATION,
+    db().from(TABLES.NAVIGATION).update(await withActor(patch)).eq('id', id).select(NAV_COLUMNS).single(),
   );
 }
 
 /** Children cascade — the foreign key is `on delete cascade`. */
 export async function deleteNavItem(id) {
-  unwrap(await db().from(TABLES.NAVIGATION).delete().eq('id', id).select('id'));
+  await mutate(TABLES.NAVIGATION, db().from(TABLES.NAVIGATION).delete().eq('id', id).select('id'));
 }
 
 /** Move one item within its own level. Positions are rewritten dense. */
 export async function saveOrder(rows) {
   const client = db();
+  let moved = 0;
+
   for (const [index, row] of rows.entries()) {
     if (row.position === index) continue;
     unwrap(
@@ -92,5 +88,10 @@ export async function saveOrder(rows) {
         .eq('id', row.id)
         .select('id'),
     );
+    moved += 1;
   }
+
+  // One announcement for the whole reorder rather than one per row —
+  // the site re-reads the navigation once, not once per moved item.
+  if (moved) publish(TABLES.NAVIGATION);
 }

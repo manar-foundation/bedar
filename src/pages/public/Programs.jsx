@@ -1,8 +1,7 @@
 import { PageHero } from '@components/ui';
 import { CollectionListing } from '@components/layout/CollectionListing.jsx';
-import { useContent } from '@context/ContentContext.jsx';
+import { useContent, usePage } from '@context/ContentContext.jsx';
 import { useSeo } from '@hooks/useSeo.js';
-import { programsPage } from '@content/pages.js';
 import { pageBanners } from '@content/page-banners.js';
 import { breadcrumbsFor } from '@content/site.js';
 import { PUBLISH_STATE } from '@utils/constants.js';
@@ -20,6 +19,7 @@ import { PUBLISH_STATE } from '@utils/constants.js';
  * /news: newest item full width, the rest in a grid.
  */
 export default function Programs() {
+  const programsPage = usePage('programsPage');
   const { collections } = useContent();
   useSeo(programsPage.seo);
 

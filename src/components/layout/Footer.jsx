@@ -6,7 +6,6 @@ import { Button } from '@components/ui/Button.jsx';
 import { SocialIcon } from '@components/ui/SocialIcon.jsx';
 import { NewsletterForm } from './NewsletterForm.jsx';
 import { useContent } from '@context/ContentContext.jsx';
-import { headerCta } from '@content/site.js';
 import { cn } from '@utils/cn.js';
 
 /* ================================================================
@@ -88,7 +87,7 @@ function ColumnTitle({ children }) {
 }
 
 export default function Footer() {
-  const { footer, settings } = useContent();
+  const { footer, settings, headerCta } = useContent();
   const year = new Date().getFullYear();
 
   // `legal` is stored with a {year} placeholder so the dashboard can

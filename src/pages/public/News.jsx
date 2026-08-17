@@ -1,8 +1,7 @@
 import { PageHero } from '@components/ui';
 import { CollectionListing } from '@components/layout/CollectionListing.jsx';
-import { useContent } from '@context/ContentContext.jsx';
+import { useContent, usePage } from '@context/ContentContext.jsx';
 import { useSeo } from '@hooks/useSeo.js';
-import { newsPage } from '@content/pages.js';
 import { pageBanners } from '@content/page-banners.js';
 import { breadcrumbsFor } from '@content/site.js';
 
@@ -14,6 +13,7 @@ import { breadcrumbsFor } from '@content/site.js';
  * live site carry no excerpt, so the card falls back to title + date.
  */
 export default function News() {
+  const newsPage = usePage('newsPage');
   const { collections } = useContent();
   useSeo(newsPage.seo);
 

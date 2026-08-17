@@ -12,7 +12,8 @@
    client-side swap gets wrong.
    ================================================================ */
 
-import { db, unwrap, withActor, currentUserId } from './db.js';
+import { db, mutate, unwrap, withActor, currentUserId } from './db.js';
+import { publish } from './contentSync.js';
 import { COLLECTIONS, TABLES } from '@utils/constants.js';
 
 const ITEM_LIST_COLUMNS =
@@ -50,8 +51,9 @@ export async function getItem(id) {
 
 export async function createItem(collection, patch) {
   const created_by = await currentUserId();
-  return unwrap(
-    await db()
+  return mutate(
+    TABLES.COLLECTION_ITEMS,
+    db()
       .from(TABLES.COLLECTION_ITEMS)
       .insert({
         collection,
@@ -65,8 +67,9 @@ export async function createItem(collection, patch) {
 }
 
 export async function updateItem(id, patch) {
-  return unwrap(
-    await db()
+  return mutate(
+    TABLES.COLLECTION_ITEMS,
+    db()
       .from(TABLES.COLLECTION_ITEMS)
       .update(await withActor(patch))
       .eq('id', id)
@@ -76,7 +79,7 @@ export async function updateItem(id, patch) {
 }
 
 export async function deleteItem(id) {
-  unwrap(await db().from(TABLES.COLLECTION_ITEMS).delete().eq('id', id).select('id'));
+  await mutate(TABLES.COLLECTION_ITEMS, db().from(TABLES.COLLECTION_ITEMS).delete().eq('id', id).select('id'));
 }
 
 /* ── Testimonials ───────────────────────────────────────────── */
@@ -94,18 +97,16 @@ export async function listTestimonials() {
 }
 
 export async function createTestimonial(patch) {
-  return unwrap(
-    await db()
-      .from(TABLES.TESTIMONIALS)
-      .insert(await withActor(patch))
-      .select(TESTIMONIAL_COLUMNS)
-      .single(),
+  return mutate(
+    TABLES.TESTIMONIALS,
+    db().from(TABLES.TESTIMONIALS).insert(await withActor(patch)).select(TESTIMONIAL_COLUMNS).single(),
   );
 }
 
 export async function updateTestimonial(id, patch) {
-  return unwrap(
-    await db()
+  return mutate(
+    TABLES.TESTIMONIALS,
+    db()
       .from(TABLES.TESTIMONIALS)
       .update(await withActor(patch))
       .eq('id', id)
@@ -115,7 +116,7 @@ export async function updateTestimonial(id, patch) {
 }
 
 export async function deleteTestimonial(id) {
-  unwrap(await db().from(TABLES.TESTIMONIALS).delete().eq('id', id).select('id'));
+  await mutate(TABLES.TESTIMONIALS, db().from(TABLES.TESTIMONIALS).delete().eq('id', id).select('id'));
 }
 
 /* ── FAQ ────────────────────────────────────────────────────── */
@@ -129,28 +130,21 @@ export async function listFaq() {
 }
 
 export async function createFaq(patch) {
-  return unwrap(
-    await db()
-      .from(TABLES.FAQ_ITEMS)
-      .insert(await withActor(patch))
-      .select(FAQ_COLUMNS)
-      .single(),
+  return mutate(
+    TABLES.FAQ_ITEMS,
+    db().from(TABLES.FAQ_ITEMS).insert(await withActor(patch)).select(FAQ_COLUMNS).single(),
   );
 }
 
 export async function updateFaq(id, patch) {
-  return unwrap(
-    await db()
-      .from(TABLES.FAQ_ITEMS)
-      .update(await withActor(patch))
-      .eq('id', id)
-      .select(FAQ_COLUMNS)
-      .single(),
+  return mutate(
+    TABLES.FAQ_ITEMS,
+    db().from(TABLES.FAQ_ITEMS).update(await withActor(patch)).eq('id', id).select(FAQ_COLUMNS).single(),
   );
 }
 
 export async function deleteFaq(id) {
-  unwrap(await db().from(TABLES.FAQ_ITEMS).delete().eq('id', id).select('id'));
+  await mutate(TABLES.FAQ_ITEMS, db().from(TABLES.FAQ_ITEMS).delete().eq('id', id).select('id'));
 }
 
 /**
@@ -167,9 +161,16 @@ export async function deleteFaq(id) {
 export async function reorder(table, orderedIds, previous = []) {
   const client = db();
   const before = new Map(previous.map((row) => [row.id, row.position]));
+  let moved = 0;
 
   for (const [index, id] of orderedIds.entries()) {
     if (before.get(id) === index) continue;
     unwrap(await client.from(table).update({ position: index }).eq('id', id).select('id'));
+    moved += 1;
   }
+
+  // One announcement for the whole reorder, not one per row: a
+  // twenty-row drag would otherwise fire twenty refetches of the same
+  // list. `mutate` is deliberately not used above for that reason.
+  if (moved) publish(table);
 }

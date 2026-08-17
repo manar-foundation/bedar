@@ -13,7 +13,7 @@
    publish state.
    ================================================================ */
 
-import { db, unwrap, withActor } from './db.js';
+import { db, mutate, unwrap, withActor } from './db.js';
 import { TABLES } from '@utils/constants.js';
 
 const PAGE_COLUMNS =
@@ -52,19 +52,16 @@ export async function listPageFields(pageId) {
 }
 
 export async function updatePage(id, patch) {
-  return unwrap(
-    await db()
-      .from(TABLES.PAGES)
-      .update(await withActor(patch))
-      .eq('id', id)
-      .select(PAGE_COLUMNS)
-      .single(),
+  return mutate(
+    TABLES.PAGES,
+    db().from(TABLES.PAGES).update(await withActor(patch)).eq('id', id).select(PAGE_COLUMNS).single(),
   );
 }
 
 export async function updatePageField(id, patch) {
-  return unwrap(
-    await db()
+  return mutate(
+    TABLES.PAGE_FIELDS,
+    db()
       .from(TABLES.PAGE_FIELDS)
       .update(await withActor(patch))
       .eq('id', id)
