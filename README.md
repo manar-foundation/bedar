@@ -17,7 +17,7 @@ ThreeMS × Manar Foundation. Migrating from `bedar.webflow.io`.
 | Motion  | Framer Motion 12                                 |
 | Icons   | lucide-react                                     |
 | Backend | Supabase (Postgres + Auth + Storage) — _Phase 4_ |
-| Hosting | Netlify, auto-deploy from GitHub `main`          |
+| Hosting | Vercel, auto-deploy from GitHub `main`           |
 
 ---
 
@@ -538,7 +538,7 @@ ui barrel is imported by every public page.
 | 3     | Public pages with verbatim content from bedar.webflow.io        | ✅ Done¹ |
 | 4     | Supabase schema, RLS, Auth + 2FA                                | ✅ Done² |
 | 5     | Admin dashboard (pages, collections, media, SEO, redirects)     | ✅ Done³ |
-| 6     | Publish pipeline: version snapshot → GitHub API → Netlify       | ⏳       |
+| 6     | Publish pipeline: version snapshot → GitHub API → Vercel         | ⏳       |
 | 7     | End-to-end testing, responsive + a11y pass                      | ⏳       |
 
 Routes for every page exist from Phase 1 so navigation, layouts and the 404
@@ -631,21 +631,26 @@ which is a Phase 6 deploy concern.
 
 ## Deployment
 
-Netlify builds from `main` on every push. `netlify.toml` holds the build command,
-the SPA fallback redirect (required — without it a hard refresh on `/programs`
-returns Netlify's own 404), security headers, and immutable caching for
-fingerprinted assets.
+Vercel builds from `main` on every push. Build command and output directory are
+auto-detected from Vite (`npm run build` → `dist`); `.nvmrc` pins the Node major.
+`vercel.json` holds the SPA fallback rewrite (required — without it a hard
+refresh on `/programs` returns a 404), the permanent `/program/*` →
+`/programs/*` redirect, security headers, and immutable caching for
+fingerprinted assets. `netlify.toml` is kept for the previous host and is
+ignored by Vercel.
 
-**Rollback** — two independent safety nets, both free:
+**Environment variables.** Every `VITE_*` key in `.env.example` must be set in
+Project → Settings → Environment Variables, for Production, Preview and
+Development. Vite INLINES them at build time, so changing one needs a redeploy,
+not a restart — and a missing one ships as an empty string rather than failing
+the build. `SUPABASE_SERVICE_ROLE_KEY` belongs to the seed script only and must
+never be added to Vercel.
 
-- _Netlify:_ Deploys tab → "Publish deploy" on any earlier snapshot. Instant,
-  consumes no plan credits.
+**Rollback** — two independent safety nets:
+
+- _Vercel:_ Deployments tab → "Promote to Production" on any earlier build.
+  Instant, no rebuild.
 - _GitHub:_ `git revert` at the code level.
-
-Plan requirements per the infrastructure spec: GitHub Free is sufficient; Netlify
-**Personal ($9/mo)** before public launch — the Free plan's ~20 deploys/month is
-easy to exceed during active editing, and a suspended site is a real risk for a
-donor-facing page.
 
 ---
 
