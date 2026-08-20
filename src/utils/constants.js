@@ -18,6 +18,9 @@ export const COLLECTIONS = {
   PROGRAMS: 'programs',
   TESTIMONIALS: 'testimonials',
   FAQ: 'faq',
+  /** Its own table (migration 0010), not `collection_items` — but it
+   *  is edited as a collection, so it lives on the same screen. */
+  SERVICES: 'services',
 };
 
 /** Arabic labels for the admin sidebar / breadcrumbs. */
@@ -27,6 +30,7 @@ export const COLLECTION_LABELS = {
   [COLLECTIONS.PROGRAMS]: 'البرامج',
   [COLLECTIONS.TESTIMONIALS]: 'آراء وشهادات',
   [COLLECTIONS.FAQ]: 'الأسئلة الشائعة',
+  [COLLECTIONS.SERVICES]: 'الخدمات',
 };
 
 /**

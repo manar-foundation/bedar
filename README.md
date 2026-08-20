@@ -490,8 +490,7 @@ place to forget a policy.
 | لوحة التحكم    | —          | Counts, drafts waiting, recent edits                             |
 | الصفحات        | §2, §5, §6 | Page fields, slug, parent, SEO, publish state                    |
 | الهيدر والفوتر | §3.1       | Navigation tree, header CTA, footer copy                         |
-| المجموعات      | §3.2       | Articles, news, programs, testimonials, FAQ                      |
-| الخدمات        | §3.2       | Title, description, icon, photo, order, publish state            |
+| المجموعات      | §3.2       | Articles, news, programs, **services**, testimonials, FAQ        |
 | مكتبة الوسائط  | §7         | Upload, alt text, usage, delete                                  |
 | إعادة التوجيه  | §8         | Old path → new path, 301/302, enable                             |
 | التكاملات      | §11, §4    | GTM, Search Console, head/footer code, captcha, form destination |
