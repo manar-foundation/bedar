@@ -46,6 +46,9 @@ const PageEditor = lazy(() => import('@pages/admin/PageEditor.jsx'));
 const GlobalContent = lazy(() => import('@pages/admin/GlobalContent.jsx'));
 const CollectionsList = lazy(() => import('@pages/admin/CollectionsList.jsx'));
 const CollectionEditor = lazy(() => import('@pages/admin/CollectionEditor.jsx'));
+/* `AdminServices` and not `Services` — the public services page is
+   already bound to that name a few lines up. */
+const AdminServices = lazy(() => import('@pages/admin/Services.jsx'));
 const MediaLibrary = lazy(() => import('@pages/admin/MediaLibrary.jsx'));
 const Redirects = lazy(() => import('@pages/admin/Redirects.jsx'));
 const Integrations = lazy(() => import('@pages/admin/Integrations.jsx'));
@@ -111,6 +114,7 @@ export default function AppRoutes() {
             />
             <Route path="collections/:collection" element={<CollectionsList />} />
             <Route path="collections/:collection/:id" element={<CollectionEditor />} />
+            <Route path="services" element={<AdminServices />} />
             <Route path="media" element={<MediaLibrary />} />
             <Route path="redirects" element={<Redirects />} />
             <Route path="integrations" element={<Integrations />} />

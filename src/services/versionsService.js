@@ -27,6 +27,7 @@ export const ENTITY_LABELS = {
   collection_items: 'عنصر مجموعة',
   testimonials: 'شهادة',
   faq_items: 'سؤال شائع',
+  services: 'خدمة',
   navigation_items: 'عنصر تنقل',
   site_settings: 'إعداد',
 };
@@ -51,6 +52,7 @@ const RESTORE = {
   collection_items: { pk: 'id', strip: [] },
   testimonials: { pk: 'id', strip: [] },
   faq_items: { pk: 'id', strip: [] },
+  services: { pk: 'id', strip: [] },
   navigation_items: { pk: 'id', strip: ['is_group'] },
   site_settings: { pk: 'key', strip: [] },
 };

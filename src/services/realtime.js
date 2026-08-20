@@ -31,6 +31,7 @@ const WATCHED = [
   'collection_items',
   'testimonials',
   'faq_items',
+  'services',
   'pages',
   'page_fields',
   'navigation_items',

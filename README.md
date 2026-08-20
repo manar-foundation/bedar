@@ -395,6 +395,16 @@ shape of the header. Two things there are easy to get wrong:
 - **`تواصل معنا` is the CTA, not a nav link.** It is the turquoise button
   (`headerCta`), and it must not also appear in the link list.
 
+**The first paint is never the build-time seed.** `src/content/` is the site's
+floor, not its first frame. `ContentContext` holds the page behind the brand
+loader (`ready`) until the first read of the published rows settles, so a reload
+straight after an edit shows the new copy or nothing — never the old copy
+followed by a visible swap, which is what the seed-first render used to do. Two
+things bound the wait: a 2 s deadline, and a versioned `localStorage` snapshot of
+the last content this browser saw, which is what gets painted if the deadline
+passes or the read fails. Neither applies when Supabase is unconfigured — there
+`ready` starts true and the seed *is* the site.
+
 **Supabase never reaches the public bundle.** `@supabase/supabase-js` is ~53 kB
 gzipped and no public visitor authenticates. `AuthProvider` is therefore mounted
 inside the lazily-loaded admin branch (`layouts/AdminShell.jsx`), not at the app
@@ -426,6 +436,7 @@ setup runbook and the full authorisation model. The short version:
 | `pages`, `page_fields`      | per-page content, SEO, publish state, URL               |
 | `collection_items`          | articles, news, programs (one table, one discriminator) |
 | `testimonials`, `faq_items` | the two non-article collections                         |
+| `services`                  | the services band on `/` and on `/services`             |
 | `navigation_items`          | navbar + footer, one ordered tree                       |
 | `site_settings`             | organisation schema, integrations, captcha, consent     |
 | `media`                     | index over the Storage bucket, alt text per file        |
@@ -480,6 +491,7 @@ place to forget a policy.
 | الصفحات        | §2, §5, §6 | Page fields, slug, parent, SEO, publish state                    |
 | الهيدر والفوتر | §3.1       | Navigation tree, header CTA, footer copy                         |
 | المجموعات      | §3.2       | Articles, news, programs, testimonials, FAQ                      |
+| الخدمات        | §3.2       | Title, description, icon, photo, order, publish state            |
 | مكتبة الوسائط  | §7         | Upload, alt text, usage, delete                                  |
 | إعادة التوجيه  | §8         | Old path → new path, 301/302, enable                             |
 | التكاملات      | §11, §4    | GTM, Search Console, head/footer code, captcha, form destination |

@@ -147,6 +147,33 @@ export async function fetchTestimonials() {
   }));
 }
 
+/**
+ * Published services → the shape the homepage band and /services
+ * already render.
+ *
+ * `key` is carried through because it is what the bundled artwork is
+ * keyed by: a row with no uploaded image resolves to the photograph
+ * and the line icon that ship with the build, so introducing this
+ * table did not require re-uploading seven photographs.
+ */
+export async function fetchServices() {
+  const rows = await rest(
+    'services?state=eq.published' +
+      '&select=id,key,title,description,icon,image_alt,' +
+      'image:media!image_media_id(bucket,path,alt_text)' +
+      '&order=position.asc',
+  );
+  return rows.map((row) => ({
+    id: row.id,
+    key: row.key,
+    title: row.title,
+    description: row.description ?? '',
+    icon: row.icon ?? '',
+    image: storageUrl(row.image),
+    imageAlt: row.image_alt || row.image?.alt_text || '',
+  }));
+}
+
 /** Published FAQ → { id, question, answer }. */
 export async function fetchFaq() {
   const rows = await rest(

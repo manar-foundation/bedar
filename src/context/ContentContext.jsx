@@ -1,9 +1,22 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { navigation, footer, headerCta, siteSettings } from '@content/site.js';
 import { programs, articles, news } from '@content/collections.js';
 import * as seedPages from '@content/pages.js';
-import { testimonials as seedTestimonials, faq as seedFaq } from '@content/pages.js';
+import {
+  testimonials as seedTestimonials,
+  faq as seedFaq,
+  services as seedServices,
+} from '@content/pages.js';
+import { DEFAULT_ICON_BY_KEY } from '@content/serviceIcons.js';
 // Imported from `env` rather than `supabaseClient` deliberately: this
 // context is mounted on the public site, and pulling in the Supabase
 // client here would drag ~53 kB gzipped into the public bundle. The
@@ -15,6 +28,7 @@ import {
   fetchFaq,
   fetchNavigation,
   fetchPages,
+  fetchServices,
   fetchSettings,
   fetchTestimonials,
 } from '@services/publicContent.js';
@@ -25,10 +39,82 @@ const ContentContext = createContext(null);
 
 const SEED_COLLECTIONS = { programs, articles, news };
 
+/**
+ * The seeded services, in the shape `fetchServices` returns.
+ *
+ * The seed calls the stable identifier `id`; the table calls it
+ * `key`, because there it sits beside a uuid primary key. Both are
+ * carried so a component can use `key` for artwork and `id` for
+ * React's list key without caring which source it is rendering.
+ */
+const SEED_SERVICES = seedServices.map((service) => ({
+  id: service.id,
+  key: service.id,
+  title: service.title,
+  description: service.description,
+  icon: DEFAULT_ICON_BY_KEY[service.id] ?? '',
+  image: '',
+  imageAlt: '',
+}));
+
 /** How often a visible tab re-reads when the realtime socket is not
  *  available. Only runs while the document is visible, and only until
  *  the socket connects. */
 const POLL_MS = 20_000;
+
+/**
+ * How long the first read may hold the first paint.
+ *
+ * See `ready` below. This is the escape hatch, not the plan: on a
+ * reachable backend the read settles in a fraction of it, and when
+ * it does not, the site renders the last-known-good snapshot rather
+ * than waiting on a network that may never answer.
+ */
+const FIRST_READ_DEADLINE_MS = 2000;
+
+/* ── Last-known-good snapshot ─────────────────────────────────────
+   The published content of the previous visit, kept in
+   `localStorage` so a reload has something CURRENT to paint if the
+   read is slow or fails. Without it the fallback is the seed baked
+   into the bundle at build time, which is the oldest copy in
+   existence — and painting that first is exactly the flash this
+   file's `ready` gate exists to remove.
+
+   Versioned and time-boxed: a deploy that changes the shape bumps
+   `SNAPSHOT_VERSION` and every stored snapshot is ignored, and one
+   older than a week is dropped rather than shown.
+   ──────────────────────────────────────────────────────────────── */
+
+const SNAPSHOT_KEY = 'bedar:content-snapshot';
+const SNAPSHOT_VERSION = 1;
+const SNAPSHOT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
+function readSnapshot() {
+  if (!hasSupabase) return null;
+  try {
+    const raw = localStorage.getItem(SNAPSHOT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed?.v !== SNAPSHOT_VERSION) return null;
+    if (Date.now() - parsed.at > SNAPSHOT_MAX_AGE_MS) return null;
+    return parsed.data ?? null;
+  } catch {
+    // Malformed, or storage is unavailable. Falling back to the seed
+    // is the documented behaviour, so there is nothing to report.
+    return null;
+  }
+}
+
+function writeSnapshot(data) {
+  try {
+    localStorage.setItem(
+      SNAPSHOT_KEY,
+      JSON.stringify({ v: SNAPSHOT_VERSION, at: Date.now(), data }),
+    );
+  } catch {
+    /* private mode or quota — the snapshot is an optimisation */
+  }
+}
 
 /* ── Seed ⊕ database reconciliation ──────────────────────────────
    Three merge strategies, one per content shape, all chosen to make
@@ -52,9 +138,11 @@ const POLL_MS = 20_000;
    replacing means that field keeps rendering its seeded copy instead
    of going blank.
 
-   Testimonials and FAQ: REPLACE the seed once the database has at
-   least one published row. Their ids differ between seed (slug) and
-   database (uuid), so a union would show every curated item twice.
+   Testimonials, FAQ and services: REPLACE the seed once the
+   database has at least one published row. Their ids differ between
+   seed (slug) and database (uuid), so a union would show every
+   curated item twice — and for services the replacement is also
+   what makes unpublishing one of the seven actually remove it.
    ──────────────────────────────────────────────────────────────── */
 
 /**
@@ -122,6 +210,18 @@ function mergeFooter(settings, navColumns) {
   return navColumns?.length ? { ...merged, columns: navColumns } : merged;
 }
 
+/**
+ * The services, database over seed.
+ *
+ * A published row wins outright, exactly like testimonials. Note
+ * that the check is on the ARRAY, not on individual rows: an editor
+ * who unpublishes six of the seven should see one service on the
+ * site, and only an entirely empty table falls back to the seed.
+ */
+function mergeServices(db) {
+  return db?.length ? db : SEED_SERVICES;
+}
+
 function mergeSettings(settings) {
   if (!settings) return siteSettings;
   return deepMerge(siteSettings, {
@@ -135,17 +235,41 @@ function mergeSettings(settings) {
 
 /**
  * Site content — navbar, footer, settings, page copy, collections,
- * testimonials, FAQ.
+ * testimonials, FAQ, services.
  *
  * Infrastructure spec §3 requires nav, footer and article-style
  * content to be DATA, not hardcoded markup, so the dashboard can edit
  * them and a new article can reach the homepage with no code change.
  * This context is the single seam where that data enters the tree.
  *
- * The static seed in `src/content/` renders on the very first paint
- * (and is the whole site when Supabase is not configured). When it is
- * configured, the reads below fetch the published rows and swap them
- * in.
+ * The static seed in `src/content/` is the whole site when Supabase
+ * is not configured, and the floor under every merge when it is.
+ *
+ * FIRST PAINT IS NOT THE SEED (client, Aug 2026)
+ * ----------------------------------------------------------------
+ * It used to be. `live` started at `null`, the seed rendered
+ * immediately, and the published rows swapped in when the read
+ * landed — so every reload showed the BUILD-TIME copy for a beat
+ * before the current one replaced it. Reading it back is what the
+ * client described as the old page flashing under the new one, and
+ * it is worst in the one moment it matters most: straight after a
+ * save, checking the edit.
+ *
+ * Two things fix it, and they are separate:
+ *
+ *   `ready`    the gate. False until the first read settles, and
+ *              `PublicLayout` holds the page behind the brand loader
+ *              while it is. Nothing stale is ever painted, because
+ *              nothing is painted. Bounded by
+ *              FIRST_READ_DEADLINE_MS so an unreachable backend
+ *              costs two seconds, not the site.
+ *
+ *   snapshot   what gets painted if that deadline passes, or if the
+ *              read fails: the last content this browser actually
+ *              saw, instead of the bundle's build-time seed.
+ *
+ * Neither runs when Supabase is unconfigured — there is no fresher
+ * copy to wait for, so `ready` starts true and the seed IS the site.
  *
  * STAYING FRESH. Four signals converge on one `refresh`:
  *
@@ -161,9 +285,27 @@ function mergeSettings(settings) {
  *                 laptop with the site already open.
  */
 export function ContentProvider({ children }) {
-  // `null` = not yet loaded from the database this session. The seed
-  // is always the fallback, so the site is never empty.
-  const [live, setLive] = useState(null);
+  // The last content this browser saw, or `null` on a first visit —
+  // in which case the seed is the fallback, so the site is never
+  // empty. Lazy initialiser: `readSnapshot` touches localStorage and
+  // must not run on every render.
+  const [live, setLive] = useState(readSnapshot);
+
+  // `live` as a plain value, so `refresh` can fold results onto it
+  // without a state updater. The updater would be the obvious place,
+  // but writing the snapshot from inside one makes it impure — and
+  // StrictMode runs it twice.
+  const liveRef = useRef(live);
+
+  /**
+   * Has the first read of this page load settled?
+   *
+   * The gate described in the header. `PublicLayout` waits on it; it
+   * only ever goes false → true, and it goes true on the first
+   * refresh that lands, on the deadline, or immediately when there
+   * is no backend configured to read from.
+   */
+  const [ready, setReady] = useState(!hasSupabase);
 
   // Bumped by every refresh so `useAsyncData`-style consumers and the
   // detail routes can re-run their own reads off one dependency.
@@ -182,6 +324,7 @@ export function ContentProvider({ children }) {
       collections: fetchCollections,
       testimonials: fetchTestimonials,
       faq: fetchFaq,
+      services: fetchServices,
       pages: fetchPages,
       navigation: fetchNavigation,
       settings: fetchSettings,
@@ -214,15 +357,24 @@ export function ContentProvider({ children }) {
 
       if (mine !== generation.current) return;
 
-      setLive((previous) => {
-        const next = { ...previous };
-        for (const [scope, data] of results) {
-          // `undefined` = this read failed; keep what was showing.
-          // `null` is a legitimate "the table is empty" answer.
-          if (data !== undefined) next[scope] = data;
-        }
-        return next;
-      });
+      const next = { ...liveRef.current };
+      for (const [scope, data] of results) {
+        // `undefined` = this read failed; keep what was showing.
+        // `null` is a legitimate "the table is empty" answer.
+        if (data !== undefined) next[scope] = data;
+      }
+
+      liveRef.current = next;
+      setLive(next);
+      // Written on every refresh, not just the first: the value of
+      // the snapshot is that it is the NEWEST thing this browser has
+      // seen, and a save that arrives over the sync bus is newer
+      // than what the page loaded with.
+      writeSnapshot(next);
+
+      // Whatever this read found, the gate has done its job — the
+      // first paint is no longer at risk of being stale.
+      setReady(true);
       setRevision((value) => value + 1);
     },
     [READERS],
@@ -250,6 +402,21 @@ export function ContentProvider({ children }) {
       document.removeEventListener('visibilitychange', revalidate);
     };
   }, [refresh]);
+
+  /* The gate's escape hatch. A backend that is slow, blocked or down
+     must not hold the site behind a loader — after this long the
+     page renders whatever it has (the snapshot, or the seed), and
+     the read swaps its result in whenever it eventually lands.
+
+     `setReady` from a timer, not from the effect body:
+     `react-hooks/set-state-in-effect` forbids the synchronous form,
+     and it is right to — that would open the gate before the read
+     had any chance to win it. */
+  useEffect(() => {
+    if (!hasSupabase) return undefined;
+    const timer = setTimeout(() => setReady(true), FIRST_READ_DEADLINE_MS);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Cross-device. Reports 'failed' when the socket cannot be reached
   // or the tables are not in the `supabase_realtime` publication, and
@@ -284,6 +451,7 @@ export function ContentProvider({ children }) {
       collections,
       testimonials,
       faq,
+      services: mergeServices(live?.services),
 
       /**
        * The footer's "أحدث المقالات" block, resolved from the
@@ -299,7 +467,7 @@ export function ContentProvider({ children }) {
             ...base.latestArticles,
             items: (collections.articles.length
               ? collections.articles
-              : base.latestArticles.seed ?? []
+              : (base.latestArticles.seed ?? [])
             )
               .slice(0, base.latestArticles.limit)
               .map((article) => ({ id: article.id, title: article.title, href: article.href })),
@@ -321,10 +489,19 @@ export function ContentProvider({ children }) {
        *  yet wired up. */
       source: hasSupabase ? 'supabase' : 'local-seed',
       live: realtimeConnected,
-      loading: hasSupabase && live === null,
+
+      /**
+       * The first read has settled (or given up). `PublicLayout`
+       * holds the page behind the brand loader until this is true —
+       * see the "first paint is not the seed" note in the header.
+       */
+      ready,
+
+      /** The inverse, for anything that reads it as a loading flag. */
+      loading: !ready,
       error: null,
     };
-  }, [live, refresh, revision, realtimeConnected]);
+  }, [live, ready, refresh, revision, realtimeConnected]);
 
   return <ContentContext.Provider value={value}>{children}</ContentContext.Provider>;
 }
@@ -343,11 +520,13 @@ export function useContent() {
  * argument is the EXPORT NAME in `content/pages.js`, not the `pages`
  * table key — `publicContent.PAGE_KEYS` maps between the two, and
  * every export is always present because the merge starts from the
- * seed module. A page therefore renders its own words on the first
- * paint and never waits on the network.
+ * seed module. A page therefore always has words to render; what it
+ * waits on is the `ready` gate, once, in `PublicLayout`.
  *
- * Exports with no page row behind them (`services`, `contactCta`,
- * `notFound`) resolve to the seed, which is what they are.
+ * Exports with no page row behind them (`contactCta`, `notFound`)
+ * resolve to the seed, which is what they are. The `services`
+ * export is not a page at all — it is the seed for the `services`
+ * collection, read through `useContent().services`.
  */
 export function usePage(name) {
   const { pages } = useContent();

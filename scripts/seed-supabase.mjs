@@ -244,6 +244,21 @@ const faqRows = pageContent.faq.map((item, index) => ({
   state: 'published',
 }));
 
+/* Services (migration 0010). `icon` is deliberately NOT written: an
+   empty one resolves to the mark the design already pairs with that
+   key (`src/content/serviceIcons.js`), so the site draws the right
+   icon without this script importing the icon library, and the
+   dashboard's picker honestly reads "الأيقونة الافتراضية" until an
+   editor chooses otherwise. Same for the photograph — the bundled
+   one is the default and there is nothing to upload. */
+const serviceRows = pageContent.services.map((service, index) => ({
+  key: service.id,
+  title: service.title,
+  description: service.description,
+  position: index,
+  state: 'published',
+}));
+
 const plan = [
   ['site_settings', Object.keys(SETTINGS).length],
   ['navigation_items', nav.parents.length + nav.children.length],
@@ -252,6 +267,7 @@ const plan = [
   ['collection_items', collections.length],
   ['testimonials', testimonialRows.length],
   ['faq_items', faqRows.length],
+  ['services', serviceRows.length],
 ];
 
 console.log('\nbedar · seed plan');
@@ -360,10 +376,7 @@ const fieldRows = PAGES.flatMap((page) =>
   })),
 ).filter((row) => row.page_id);
 
-check(
-  'page_fields',
-  await db.from('page_fields').upsert(fieldRows, { onConflict: 'page_id,key' }),
-);
+check('page_fields', await db.from('page_fields').upsert(fieldRows, { onConflict: 'page_id,key' }));
 
 check(
   'collection_items',
@@ -381,8 +394,13 @@ check('testimonials', await db.from('testimonials').insert(testimonialRows));
 check('faq_items (clear)', await db.from('faq_items').delete().gte('position', 0));
 check('faq_items', await db.from('faq_items').insert(faqRows));
 
+/* Services DO have a natural key, so they upsert on it rather than
+   being cleared and re-inserted. That is what keeps a re-run from
+   throwing away an uploaded photograph or a chosen icon: neither
+   column is in this payload, so `on conflict do update` leaves both
+   where the editor put them. */
+check('services', await db.from('services').upsert(serviceRows, { onConflict: 'key' }));
+
 console.log(
-  process.exitCode === 1
-    ? '\nانتهى مع أخطاء — راجع الرسائل أعلاه.\n'
-    : '\nتم زرع المحتوى بنجاح.\n',
+  process.exitCode === 1 ? '\nانتهى مع أخطاء — راجع الرسائل أعلاه.\n' : '\nتم زرع المحتوى بنجاح.\n',
 );

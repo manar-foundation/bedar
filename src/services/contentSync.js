@@ -46,17 +46,26 @@ const TABLE_SCOPES = {
   collection_items: 'collections',
   testimonials: 'testimonials',
   faq_items: 'faq',
+  services: 'services',
   pages: 'pages',
   page_fields: 'pages',
   navigation_items: 'navigation',
   site_settings: 'settings',
   // A replaced image changes the row that points at it, not the
-  // bucket — but an alt-text edit touches `media` alone, and covers
-  // are embedded into both of these reads.
-  media: 'collections,pages',
+  // bucket — but an alt-text edit touches `media` alone, and the
+  // image rows are embedded into all three of these reads.
+  media: 'collections,pages,services',
 };
 
-export const ALL_SCOPES = ['collections', 'testimonials', 'faq', 'pages', 'navigation', 'settings'];
+export const ALL_SCOPES = [
+  'collections',
+  'testimonials',
+  'faq',
+  'services',
+  'pages',
+  'navigation',
+  'settings',
+];
 
 /** Table name → the scopes that have to be re-read. Unknown ⇒ everything. */
 export function scopesForTable(table) {

@@ -1,13 +1,4 @@
-import {
-  ArrowLeft,
-  ClipboardCheck,
-  Compass,
-  GraduationCap,
-  HandCoins,
-  Lightbulb,
-  MessagesSquare,
-  Users,
-} from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
 import {
   Accordion,
@@ -29,19 +20,9 @@ import {
 import { Reveal, Stagger, StaggerItem } from '@components/motion/Reveal.jsx';
 import { useContent, usePage } from '@context/ContentContext.jsx';
 import { useSeo } from '@hooks/useSeo.js';
-import { services, contactCta } from '@content/pages.js';
+import { contactCta } from '@content/pages.js';
+import { serviceIcon } from '@content/serviceIcons.js';
 import { cn } from '@utils/cn.js';
-
-/* Clean single-line marks, one per service (keyed by id). */
-const SERVICE_ICONS = {
-  'idea-development': Lightbulb,
-  'feasibility-review': ClipboardCheck,
-  'management-guidance': Compass,
-  'specialist-consulting': MessagesSquare,
-  training: GraduationCap,
-  'expert-network': Users,
-  'investor-network': HandCoins,
-};
 
 /**
  * Homepage. Every string comes from `content/pages.js` — the page
@@ -88,11 +69,12 @@ const SERVICE_ICONS = {
 export default function Home() {
   const home = usePage('home');
   const about = usePage('about');
-  // testimonials + faq come from context so a dashboard-published one
-  // reaches the homepage; the context falls back to the seed when the
-  // database has none. `services` stays a static import — it is a page
-  // (§2/§14), not a dashboard collection.
-  const { collections, testimonials, faq } = useContent();
+  // testimonials, faq and services all come from context so a
+  // dashboard-published one reaches the homepage; the context falls
+  // back to the seed when the database has none. `services` used to
+  // be a static import on the argument that it was page content —
+  // it is a collection, and migration 0010 makes it one.
+  const { collections, testimonials, faq, services } = useContent();
   useSeo(home.seo);
 
   const latestPrograms = collections.programs.slice(0, home.programs.limit);
@@ -307,7 +289,10 @@ export default function Home() {
             even row by row. Same treatment as the /services grid. */}
         <Stagger className="grid auto-rows-fr gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((service, index) => {
-            const Icon = SERVICE_ICONS[service.id];
+            // The mark is `services.icon` resolved against an
+            // allowlist, falling back to the original pairing for the
+            // service's key — see `content/serviceIcons.js`.
+            const Icon = serviceIcon(service);
             const lead = index === 0;
             const last = index === services.length - 1;
             return (

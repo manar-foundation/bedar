@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Mail } from 'lucide-react';
+import { Mail } from 'lucide-react';
 
 import Logo from '@components/ui/Logo.jsx';
-import { Button } from '@components/ui/Button.jsx';
 import { SocialIcon } from '@components/ui/SocialIcon.jsx';
 import { NewsletterForm } from './NewsletterForm.jsx';
 import { useContent } from '@context/ContentContext.jsx';
@@ -30,13 +29,19 @@ import { cn } from '@utils/cn.js';
 
      brand + blurb + social marks   |   link columns
      ────────────────────────────────────────────────
-     © … {year}   ·   design credit          [ CTA ]
+     © … {year}   ·   design credit
 
    Every string still comes from `content/site.js`; nothing here is
-   hardcoded (Infra spec §3). The CTA reuses `headerCta`, the same
-   object the navbar renders, so the site's one call to action reads
-   identically at the top and the bottom of every page and an edit in
-   the dashboard changes both.
+   hardcoded (Infra spec §3).
+
+   THERE IS NO CONTACT BUTTON DOWN HERE (client, Aug 2026)
+   ----------------------------------------------------------------
+   The footer used to close with a "تواصل معنا" button rendered from
+   the same `headerCta` object as the navbar's. The client asked for
+   it to go. The link itself is not lost — "تواصل معنا" is a row in
+   the footer's own link columns, which are dashboard-editable
+   navigation, and the turquoise CTA is still pinned in the header on
+   every page. What is gone is the second, louder copy of it.
 
    THE COLUMN COUNT IS DATA
    ----------------------------------------------------------------
@@ -87,7 +92,7 @@ function ColumnTitle({ children }) {
 }
 
 export default function Footer() {
-  const { footer, settings, headerCta } = useContent();
+  const { footer, settings } = useContent();
   const year = new Date().getFullYear();
 
   // `legal` is stored with a {year} placeholder so the dashboard can
@@ -203,26 +208,6 @@ export default function Footer() {
                   </li>
                 ))}
               </ul>
-
-              {/* The site's one call to action, moved up here under the
-                  latest-articles column (client, Aug 2026) so it sits in
-                  the footer's main region rather than in the legal bar
-                  below. Same `headerCta` object the navbar renders, so
-                  header and footer stay in lock-step. ArrowLeft
-                  unmirrored — in RTL "forward" is leftward. */}
-              <Button
-                variant="inverse"
-                to={headerCta.href}
-                className="group mt-7 self-start"
-                iconEnd={
-                  <ArrowLeft
-                    aria-hidden="true"
-                    className="size-4 transition-transform duration-(--dur-base) ease-(--ease-standard) group-hover:-translate-x-0.5"
-                  />
-                }
-              >
-                {headerCta.label}
-              </Button>
             </nav>
 
             {/* ── Newsletter ─────────────────────────────────── */}
@@ -234,10 +219,8 @@ export default function Footer() {
         </div>
 
         {/* ── Bottom bar ───────────────────────────────────────
-               Legal + design credit only. The call to action moved up
-               into the main link region (above); the reference keeps
-               its footer's closing bar to the fine print, which is what
-               this is now. */}
+               Legal + design credit only, which is what the reference
+               keeps its own closing bar to. */}
         <div className="mt-12 flex flex-col gap-2 border-t border-white/10 pt-8 sm:flex-row sm:items-center sm:justify-between sm:gap-6 lg:mt-16">
           <p className="text-xs text-brand-100/60">
             {legalBefore}

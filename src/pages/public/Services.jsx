@@ -10,7 +10,6 @@ import {
 import { Reveal } from '@components/motion/Reveal.jsx';
 import { useContent, usePage } from '@context/ContentContext.jsx';
 import { useSeo } from '@hooks/useSeo.js';
-import { services } from '@content/pages.js';
 import { pageBanners } from '@content/page-banners.js';
 import { breadcrumbsFor } from '@content/site.js';
 
@@ -22,10 +21,16 @@ import photoTraining from '@assets/services/photo-training.webp';
 import photoExpertNetwork from '@assets/services/photo-expert-network.webp';
 import photoInvestorNetwork from '@assets/services/photo-investor-network.webp';
 
-/* Editorial teal-graded photographs, one per service, keyed by id.
-   The homepage services section uses the site's flat icons; this page
-   is the dedicated services page, so it gets its own richer imagery
-   (per the brief) — a distinct photo for every one of the seven. */
+/* Editorial teal-graded photographs, one per service, keyed by the
+   service's stable `key`. The homepage services section uses the
+   site's flat icons; this page is the dedicated services page, so it
+   gets its own richer imagery (per the brief) — a distinct photo for
+   every one of the seven.
+
+   These are the DEFAULTS. A service whose dashboard record carries an
+   uploaded image renders that instead (`servicePhoto` below), which
+   is what makes the artwork editable without having to re-upload
+   seven photographs before the page looks right again. */
 const SERVICE_PHOTOS = {
   'idea-development': photoIdeaDevelopment,
   'feasibility-review': photoFeasibility,
@@ -36,11 +41,24 @@ const SERVICE_PHOTOS = {
   'investor-network': photoInvestorNetwork,
 };
 
+/**
+ * The photo for one service: the dashboard's upload when there is
+ * one, otherwise the bundled default for its key.
+ *
+ * Returns `null` for a service with neither — a newly created one,
+ * before anyone has uploaded artwork. The card then draws its frame
+ * empty rather than a broken image.
+ */
+function servicePhoto(service) {
+  return service.image || SERVICE_PHOTOS[service.key] || null;
+}
+
 /** الخدمات — the seven services, plus the expert quotes. */
 export default function Services() {
   const servicesPage = usePage('servicesPage');
-  // Same carousel as the homepage, same live testimonials source.
-  const { testimonials } = useContent();
+  // Same carousel as the homepage, same live testimonials source —
+  // and the services themselves now come from the same place.
+  const { testimonials, services } = useContent();
   useSeo(servicesPage.seo);
 
   return (
@@ -108,9 +126,17 @@ export default function Services() {
              refer to "الخدمة 3". */}
       <Section tone="glow">
         <div className="grid auto-rows-fr gap-6 lg:grid-cols-2 lg:gap-8">
-          {services.map((service, index) => (
-            <Reveal key={service.id} delay={index % 2} className="h-full">
-              {/* Same shell as `ContentCard`: inset media in a 10px
+          {services.map((service, index) => {
+            const photo = servicePhoto(service);
+            /* The alt text is the EDITOR'S call, and an empty one is
+               a real answer: these photographs illustrate a heading
+               that already names the service, so the bundled defaults
+               are decorative and announce nothing. Writing alt text
+               in the dashboard is what promotes one to informative. */
+            const decorative = !service.imageAlt;
+            return (
+              <Reveal key={service.id} delay={index % 2} className="h-full">
+                {/* Same shell as `ContentCard`: inset media in a 10px
                   frame that the photo scales inside, and the whole
                   card lifting on `.band-tile`. These are the only
                   photographs on the site, so this is the one page
@@ -118,44 +144,52 @@ export default function Services() {
                   as it does on the reference itself. Not a link —
                   a service has no page of its own — so it stays a
                   <div> rather than a card pretending to be clickable. */}
-              <div className="band-tile group flex h-full flex-col rounded-lg border border-subtle bg-surface p-3">
-                <div className="media-frame aspect-[16/10] bg-sunken">
-                  <img
-                    src={SERVICE_PHOTOS[service.id]}
-                    alt=""
-                    aria-hidden="true"
-                    loading="lazy"
-                    // `decoding="async"` keeps a 1100px decode off the
-                    // main thread; `width`/`height` give the element an
-                    // intrinsic ratio, so the row does not reflow if the
-                    // frame's `aspect-[16/10]` ever changes. The files
-                    // are WebP at the size they are displayed — see
-                    // `scripts/optimize-images.mjs`.
-                    decoding="async"
-                    width={1100}
-                    height={825}
-                    className="media-zoom size-full object-cover"
-                  />
+                <div className="band-tile group flex h-full flex-col rounded-lg border border-subtle bg-surface p-3">
+                  <div className="media-frame aspect-[16/10] bg-sunken">
+                    {/* A service created in the dashboard may not have a
+                      photo yet and has no bundled default to fall back
+                      on. The frame then stays empty — `bg-sunken` and
+                      the fixed ratio hold the card's shape — rather
+                      than rendering a broken image. */}
+                    {photo ? (
+                      <img
+                        src={photo}
+                        alt={decorative ? '' : service.imageAlt}
+                        aria-hidden={decorative ? 'true' : undefined}
+                        loading="lazy"
+                        // `decoding="async"` keeps a 1100px decode off the
+                        // main thread; `width`/`height` give the element an
+                        // intrinsic ratio, so the row does not reflow if the
+                        // frame's `aspect-[16/10]` ever changes. The files
+                        // are WebP at the size they are displayed — see
+                        // `scripts/optimize-images.mjs`.
+                        decoding="async"
+                        width={1100}
+                        height={825}
+                        className="media-zoom size-full object-cover"
+                      />
+                    ) : null}
 
-                  {/* The index, set on the media rather than beside the
+                    {/* The index, set on the media rather than beside the
                       title — it numbers the service without competing
                       with the heading for the first line of the card. */}
-                  <span className="absolute top-4 inline-flex size-10 items-center justify-center rounded-full bg-brand-950/70 text-sm font-bold text-brand-200 ring-1 ring-inset ring-brand-200/25 backdrop-blur-sm end-4">
-                    <span className="ltr-run">{index + 1}</span>
-                  </span>
-                </div>
+                    <span className="absolute top-4 inline-flex size-10 items-center justify-center rounded-full bg-brand-950/70 text-sm font-bold text-brand-200 ring-1 ring-inset ring-brand-200/25 backdrop-blur-sm end-4">
+                      <span className="ltr-run">{index + 1}</span>
+                    </span>
+                  </div>
 
-                <div className="flex flex-col gap-3 px-4 pb-4 pt-6 lg:px-5 lg:pb-5">
-                  <h2 className="text-lg font-semibold text-ink transition-colors duration-(--dur-base) ease-(--ease-standard) group-hover:text-brand-200 lg:text-xl">
-                    {service.title}
-                  </h2>
-                  <p className="text-base leading-relaxed text-ink-secondary">
-                    {service.description}
-                  </p>
+                  <div className="flex flex-col gap-3 px-4 pb-4 pt-6 lg:px-5 lg:pb-5">
+                    <h2 className="text-lg font-semibold text-ink transition-colors duration-(--dur-base) ease-(--ease-standard) group-hover:text-brand-200 lg:text-xl">
+                      {service.title}
+                    </h2>
+                    <p className="text-base leading-relaxed text-ink-secondary">
+                      {service.description}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </Reveal>
-          ))}
+              </Reveal>
+            );
+          })}
         </div>
       </Section>
 

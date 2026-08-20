@@ -62,6 +62,7 @@ export const TABLES = {
   COLLECTION_ITEMS: 'collection_items',
   TESTIMONIALS: 'testimonials',
   FAQ_ITEMS: 'faq_items',
+  SERVICES: 'services',
   NAVIGATION: 'navigation_items',
   SETTINGS: 'site_settings',
   MEDIA: 'media',

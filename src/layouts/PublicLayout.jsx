@@ -4,7 +4,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from '@components/layout/Navbar.jsx';
 import Footer from '@components/layout/Footer.jsx';
 import BackToTop from '@components/layout/BackToTop.jsx';
+import RouteLoader from '@components/layout/RouteLoader.jsx';
 import AutoReveal from '@components/motion/AutoReveal.jsx';
+import { useContent } from '@context/ContentContext.jsx';
 
 /**
  * Shell for every public page: sticky navbar, animated main, footer.
@@ -48,9 +50,39 @@ import AutoReveal from '@components/motion/AutoReveal.jsx';
  * which the client rejected — one unchanging shape from the first
  * pixel to the last is a rail, not lighting. See the note on
  * `.section-ambient-layer`.
+ *
+ * NOTHING RENDERS BEFORE THE CONTENT IS CURRENT
+ * ----------------------------------------------------------------
+ * `ready` is false until the first read of the published content
+ * settles (ContentContext, "first paint is not the seed"). While it
+ * is, this shell draws the brand loader and nothing else — no
+ * navbar, no page, no footer, because all three are content and all
+ * three would otherwise paint the build-time seed and then visibly
+ * swap. That swap is what the client reported as the old page
+ * flashing under the new one after an edit.
+ *
+ * It is a gate, not a spinner-by-default: `ready` starts TRUE when
+ * Supabase is unconfigured, and the context opens it after two
+ * seconds regardless, so the slow path costs a bounded wait rather
+ * than the site.
  */
 export default function PublicLayout() {
   const { pathname } = useLocation();
+  const { ready } = useContent();
+
+  if (!ready) {
+    return (
+      <div
+        data-theme="dark"
+        className="public-site page-ambient flex min-h-dvh flex-col justify-center bg-app"
+        // The page has no content yet and the loader speaks for it;
+        // announcing a half-built document underneath would be noise.
+        aria-busy="true"
+      >
+        <RouteLoader />
+      </div>
+    );
+  }
 
   return (
     // `public-site` scopes the marketing site's interaction rules
