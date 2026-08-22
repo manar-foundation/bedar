@@ -12,12 +12,11 @@ import { cn } from '@utils/cn.js';
    `name` values match the live Webflow form so an existing
    integration keeps receiving the same keys.
 
-   NOT YET WIRED. There is no submit endpoint until Phase 4 (the
-   Phase 1 placeholder mentioned GoHighLevel; the actual destination
-   is a Phase 4 decision). `onSubmit` is undefined today, so a
-   submission resolves to the site's own error message — the truth,
-   not a simulation. Passing a real `onSubmit` later makes the
-   success path work with no change here.
+   WIRED to `/api/contact` (a Vercel serverless function) through
+   `services/publicForms.js`, passed in as `onSubmit` from the Contact
+   page. That endpoint emails the submission to the site inbox via
+   Resend. When `onSubmit` is absent the form still degrades to its own
+   error message rather than pretending to send.
 
    Phase 5 adds the `form_submission` dataLayer push on CONFIRMED
    success only, never on click (Dashboard spec §4.1). Captcha is
@@ -87,6 +86,25 @@ export function ContactForm({ form, onSubmit, className }) {
           />
         ),
       )}
+
+      {/* Honeypot — invisible to people, tempting to naive bots. Kept
+          in the DOM but off-screen (not display:none, which some bots
+          and autofill skip). The endpoint silently drops any
+          submission that fills it. */}
+      <input
+        type="text"
+        name="_honeypot"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          left: '-9999px',
+          width: '1px',
+          height: '1px',
+          overflow: 'hidden',
+        }}
+      />
 
       <Button type="submit" variant="accent" size="lg" loading={status === 'pending'}>
         {status === 'pending' ? form.pendingLabel : form.submitLabel}

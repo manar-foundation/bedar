@@ -657,6 +657,34 @@ not a restart — and a missing one ships as an empty string rather than failing
 the build. `SUPABASE_SERVICE_ROLE_KEY` belongs to the seed script only and must
 never be added to Vercel.
 
+### Form delivery (contact + newsletter)
+
+The public contact form and the footer newsletter signup post to two Vercel
+serverless functions — `api/contact.js` and `api/newsletter.js` — which email
+each submission to the site inbox via **Resend** (`lib/email.js`, plain `fetch`,
+no npm dependency). The browser side is `src/services/publicForms.js`, wired in
+as the `onSubmit`/`onSubscribe` props on `<ContactForm>` and `<NewsletterForm>`.
+It uses plain `fetch` — no `@supabase/supabase-js` — so the bundle rule still
+holds. `vercel.json`'s SPA rewrite excludes `/api/*` so those requests reach the
+functions.
+
+These functions read three env vars in Vercel (Production **and** Preview), with
+**no** `VITE_` prefix so the API key never ships to the browser:
+
+| Var                  | Purpose                                    | Default                     |
+| -------------------- | ------------------------------------------ | --------------------------- |
+| `RESEND_API_KEY`     | Resend API key (required)                  | —                           |
+| `CONTACT_TO_EMAIL`   | recipient inbox                            | `info@bedar.org`            |
+| `CONTACT_FROM_EMAIL` | sender (must be on a Resend-verified domain) | `Bedar <onboarding@resend.dev>` |
+
+Until `bedar.org` is verified in Resend, keep `CONTACT_FROM_EMAIL` at the default
+and set `CONTACT_TO_EMAIL` to the address you registered with Resend — Resend only
+delivers to the account owner before a domain is verified. After verifying,
+switch `CONTACT_FROM_EMAIL` to e.g. `Bedar <noreply@bedar.org>` and
+`CONTACT_TO_EMAIL` to `info@bedar.org`. The contact form carries a hidden
+honeypot field the endpoints silently drop. To test locally, use `vercel dev`
+(plain `npm run dev` serves no functions, so the form's fetch 404s).
+
 **Rollback** — two independent safety nets:
 
 - _Vercel:_ Deployments tab → "Promote to Production" on any earlier build.

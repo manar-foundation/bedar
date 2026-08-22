@@ -27,6 +27,13 @@ export default [
     },
   },
   {
+    // `api/` (Vercel serverless functions) and `lib/` (their shared
+    // helpers) run in Node, not the browser — they read `process.env`
+    // and never ship in the client bundle. Give them Node globals.
+    files: ['api/**/*.js', 'lib/**/*.js'],
+    languageOptions: { globals: globals.node },
+  },
+  {
     // A context file exports its Provider and its `useX` hook together.
     // Splitting them apart to satisfy Fast Refresh would scatter every
     // context across two files for a dev-only HMR nicety, so the rule

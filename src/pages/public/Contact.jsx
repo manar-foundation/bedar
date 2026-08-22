@@ -2,6 +2,7 @@ import { Mail, Phone } from 'lucide-react';
 
 import { PageHero, Section, SectionHeading } from '@components/ui';
 import { ContactForm } from '@components/layout/ContactForm.jsx';
+import { submitContactForm } from '@services/publicForms.js';
 import { Reveal } from '@components/motion/Reveal.jsx';
 import { useContent, usePage } from '@context/ContentContext.jsx';
 import { useSeo } from '@hooks/useSeo.js';
@@ -120,7 +121,7 @@ export default function Contact() {
           {/* ── Form ────────────────────────────────────────── */}
           <Reveal>
             <div className="panel-quiet p-7 sm:p-9 lg:p-10">
-              <ContactForm form={contact.form} />
+              <ContactForm form={contact.form} onSubmit={submitContactForm} />
             </div>
           </Reveal>
         </div>
