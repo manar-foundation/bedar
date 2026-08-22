@@ -1,4 +1,4 @@
-import { sendEmail, escapeHtml, isEmail, readBody } from '../lib/email.js';
+import { isEmail, readBody } from '../lib/form-request.js';
 import { verifyCaptcha } from '../lib/recaptcha.js';
 import { canWrite, insertRow } from '../lib/supabase-rest.js';
 
@@ -7,7 +7,7 @@ import { canWrite, insertRow } from '../lib/supabase-rest.js';
 
    Wired to <ContactForm> through `src/services/publicForms.js`.
 
-   FOUR GATES, THEN TWO WRITES, IN THIS ORDER
+   THREE GATES, THEN ONE WRITE, IN THIS ORDER
    ----------------------------------------------------------------
      honeypot   a hidden field only a bot fills
      captcha    Google siteverify, server-side (client notes §4:
@@ -15,24 +15,20 @@ import { canWrite, insertRow } from '../lib/supabase-rest.js';
      shape      required fields, valid email
      ─────────────────────────────────────────────────────────────
      store      INSERT into `form_submissions` (client notes §2) —
-                the RECORD, which the dashboard's "طلبات النماذج"
-                screen reads
-     notify     email via Resend — the NOTIFICATION on top of it
+                the record the dashboard's "طلبات النماذج" screen
+                reads, at /admin/submissions
 
-   The order is the requirement. The store comes before the email
-   because the record is the thing that must not be lost: Resend
-   being down, or the inbox filtering the message, used to mean an
-   enquiry that never existed.
-
-   WHY A FAILED EMAIL IS STILL A 200
+   THE DATABASE IS THE DELIVERY
    ----------------------------------------------------------------
-   Once the row is written the visitor's request HAS been accepted,
-   and the enquiry is in the dashboard. Returning 500 there would
-   show them the error message and invite a resubmission that
-   duplicates a row already saved. A failed store, on the other
-   hand, is a real 500 — unless no database is configured at all, in
-   which case email alone is the documented fallback and the endpoint
-   behaves as it did before this table existed.
+   No mail is sent from this path and no third party stands between
+   the visitor pressing send and the enquiry being readable in the
+   dashboard. Success means exactly one thing — the row is in
+   `form_submissions`.
+
+   Which is why a missing `SUPABASE_SERVICE_ROLE_KEY` is a hard 500
+   and not a warning: an accepted submission that was not stored is
+   an enquiry that went nowhere, and telling the visitor it worked
+   would be a lie.
 
    The field `name` keys (Name-7, Email-7, …) match the live Webflow
    form, so the payload shape is stable — see content/pages.js.
@@ -47,8 +43,7 @@ export default async function handler(req, res) {
   const body = readBody(req);
 
   // Honeypot — a real person never fills a hidden field. Bots that do
-  // get a 200 so they think it worked and move on; nothing is stored
-  // and no email is sent.
+  // get a 200 so they think it worked and move on; nothing is stored.
   if (body._honeypot) return res.status(200).json({ ok: true });
 
   const captcha = await verifyCaptcha(body.captchaToken, {
@@ -68,7 +63,7 @@ export default async function handler(req, res) {
   const message = String(body['Message-7'] || '').trim();
 
   if (!name || !message || !isEmail(email)) {
-    return res.status(422).json({ error: 'Missing or invalid fields' });
+    return res.status(422).json({ error: 'البيانات المُرسَلة غير مكتملة أو غير صحيحة.' });
   }
 
   // The stored payload is what was submitted, minus the two fields
@@ -76,71 +71,34 @@ export default async function handler(req, res) {
   // an empty honeypot are noise in a table an administrator reads.
   const { captchaToken: _token, _honeypot: _trap, ...payload } = body;
 
-  let stored = false;
-  if (canWrite()) {
-    try {
-      await insertRow('form_submissions', {
-        form_key: 'contact',
-        name,
-        email,
-        phone,
-        subject,
-        message,
-        payload,
-        user_agent: String(req.headers?.['user-agent'] ?? '').slice(0, 500),
-        captcha,
-      });
-      stored = true;
-    } catch (err) {
-      console.error('contact submission could not be stored:', err);
-      return res.status(500).json({ error: 'Failed to save message' });
-    }
-  } else {
-    // Loud, because it means §2 is not actually in effect on this
-    // deploy — the dashboard screen will be empty and nobody will
-    // know why.
-    console.warn(
-      'form_submissions not written: SUPABASE_SERVICE_ROLE_KEY is not set on this deployment.',
+  if (!canWrite()) {
+    // Loud, and fatal: with no database there is nowhere for this
+    // enquiry to go. The dashboard screen would be empty and nobody
+    // would know why.
+    console.error(
+      'contact submission not stored: SUPABASE_SERVICE_ROLE_KEY is not set on this deployment.',
     );
+    return res.status(500).json({ error: 'تعذّر حفظ الرسالة. حاول مرة أخرى لاحقاً.' });
   }
-
-  const rows = [
-    ['الاسم', name],
-    ['البريد الإلكتروني', email],
-    ['رقم الهاتف', phone],
-    ['الموضوع', subject],
-    ['الرسالة', message],
-  ];
-
-  const html =
-    `<div dir="rtl" style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#0f172a;line-height:1.8">` +
-    `<h2 style="margin:0 0 16px;font-size:18px">رسالة جديدة من نموذج التواصل</h2>` +
-    rows
-      .map(
-        ([label, value]) =>
-          `<p style="margin:0 0 10px"><strong>${label}:</strong> ${escapeHtml(value) || '—'}</p>`,
-      )
-      .join('') +
-    `</div>`;
-
-  const text = rows.map(([label, value]) => `${label}: ${value || '—'}`).join('\n');
 
   try {
-    await sendEmail({
-      subject: subject ? `تواصل: ${subject}` : `رسالة جديدة من ${name}`,
-      html,
-      text,
-      replyTo: email,
+    await insertRow('form_submissions', {
+      form_key: 'contact',
+      name,
+      email,
+      phone,
+      subject,
+      message,
+      payload,
+      user_agent: String(req.headers?.['user-agent'] ?? '').slice(0, 500),
+      captcha,
+      // `is_handled` defaults to false — a new row is an UNREAD
+      // request until someone marks it in the dashboard.
     });
   } catch (err) {
-    console.error('contact notification email failed:', err);
-    // The record is safe, so the visitor's submission succeeded and
-    // only the notification did not. With no database configured
-    // there is no record either, and a failed email means the
-    // message went nowhere — which the visitor has to be told.
-    if (stored) return res.status(200).json({ ok: true, emailed: false });
-    return res.status(500).json({ error: 'Failed to send message' });
+    console.error('contact submission could not be stored:', err);
+    return res.status(500).json({ error: 'تعذّر حفظ الرسالة. حاول مرة أخرى لاحقاً.' });
   }
 
-  return res.status(200).json({ ok: true });
+  return res.status(200).json({ ok: true, stored: true });
 }
