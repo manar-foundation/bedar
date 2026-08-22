@@ -8,6 +8,7 @@ import {
   Globe,
   History,
   Image,
+  Inbox,
   Settings as SettingsIcon,
   Shuffle,
 } from 'lucide-react';
@@ -46,8 +47,11 @@ const ACTION_TONES = {
   delete: 'bg-error-500',
 };
 
-/** Shortcuts to the screens an editor opens without being sent. */
+/** Shortcuts to the screens an editor opens without being sent.
+ *  Submissions leads: it is the only one where somebody outside the
+ *  organisation is waiting on an answer. */
 const SHORTCUTS = [
+  { to: '/admin/submissions', label: 'طلبات النماذج', icon: Inbox },
   { to: '/admin/pages', label: 'الصفحات', icon: FileText },
   { to: '/admin/collections/articles', label: 'المجموعات', icon: Folders },
   { to: '/admin/media', label: 'الوسائط', icon: Image },

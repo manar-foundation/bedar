@@ -10,8 +10,9 @@
 -- Until now a submission was EMAILED and nothing else (api/contact.js,
 -- api/newsletter.js). Email is a notification, not a record: it is not
 -- searchable, it cannot be marked handled, and a bounced or filtered
--- message is a lost enquiry with no trace. This table is the record;
--- the email stays as the notification on top of it.
+-- message is a lost enquiry with no trace. This table replaces it
+-- outright — the endpoints send no mail at all, so a row here IS the
+-- delivery and a submission that fails to land is a 500 to the visitor.
 --
 -- WHO WRITES, WHO READS
 -- ----------------------------------------------------------------
@@ -23,8 +24,9 @@
 -- verify the captcha and the honeypot before they get here, so the
 -- gate sits in front of the write rather than inside RLS.
 --
--- Reads are staff-only. Nothing here is public: these rows hold a
--- member of the public's name, email, phone and message.
+-- Reads are staff-only, through /admin/submissions. Nothing here is
+-- public: these rows hold a member of the public's name, email, phone
+-- and message.
 -- ================================================================
 
 create table public.form_submissions (
@@ -70,7 +72,7 @@ create table public.form_submissions (
 );
 
 comment on table public.form_submissions is
-  'Every contact + newsletter submission, saved before it is emailed. Written by the api/ serverless functions with the service-role key (client notes §2).';
+  'Every contact + newsletter submission. The only delivery — nothing is emailed. Written by the api/ serverless functions with the service-role key, read at /admin/submissions (client notes §2).';
 comment on column public.form_submissions.form_key is
   'Which form the request came through — shown as its own column in the dashboard.';
 comment on column public.form_submissions.payload is
@@ -145,8 +147,8 @@ create policy "form_submissions: editors triage"
   using (public.can_edit())
   with check (public.can_edit());
 
--- Deleting a submission destroys the only copy of someone's enquiry.
--- Admins only.
+-- Deleting a submission destroys the only copy of someone's enquiry --
+-- there is no emailed duplicate anywhere. Admins only.
 create policy "form_submissions: admins delete"
   on public.form_submissions for delete
   to authenticated

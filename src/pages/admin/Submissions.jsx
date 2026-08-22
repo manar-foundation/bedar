@@ -39,8 +39,9 @@ import { formatDateTime } from '@utils/format.js';
    opens it.
 
    Deleting is admin-only (RLS says so too) because it destroys the
-   only copy of someone's enquiry — the email is a notification and
-   may have been filtered or bounced.
+   ONLY copy of someone's enquiry. Nothing is emailed anywhere, so
+   this table is not a searchable mirror of an inbox — it is the
+   inbox, and a deleted row is gone.
    ================================================================ */
 
 const TABS = [
@@ -172,12 +173,19 @@ export default function Submissions() {
       ),
     },
     {
+      // Name, email AND phone in one column: §2 asks for all three,
+      // and three narrow columns of Latin text in an RTL table is
+      // harder to scan than one stacked cell. A newsletter row has
+      // only the address, so the other two lines simply do not render.
       key: 'who',
       header: 'المُرسِل',
       render: (row) => (
         <span className="flex min-w-0 flex-col">
           {row.name ? <span className="truncate font-medium text-ink">{row.name}</span> : null}
           <span className="ltr-run truncate text-xs text-ink-muted">{row.email || '—'}</span>
+          {row.phone ? (
+            <span className="ltr-run truncate text-xs text-ink-muted">{row.phone}</span>
+          ) : null}
         </span>
       ),
     },
@@ -326,8 +334,8 @@ export default function Submissions() {
         busy={busy}
         title="حذف الطلب"
       >
-        سيُحذف هذا الطلب نهائياً ولا يمكن استرجاعه. الرسالة المُرسَلة بالبريد ليست نسخة احتياطية —
-        قد تكون قد فُلترت أو حُذفت.
+        سيُحذف هذا الطلب نهائياً ولا يمكن استرجاعه. لا توجد نسخة أخرى منه — الطلبات تُحفظ هنا فقط
+        ولا تُرسَل بالبريد.
       </ConfirmDialog>
     </AdminPage>
   );

@@ -18,18 +18,20 @@ import { cn } from '@utils/cn.js';
 
    WIRED to `/api/contact` (a Vercel serverless function) through
    `services/publicForms.js`, passed in as `onSubmit` from the Contact
-   page. That endpoint emails the submission to the site inbox via
-   Resend. When `onSubmit` is absent the form still degrades to its own
-   error message rather than pretending to send.
+   page. That endpoint SAVES the submission to `form_submissions`,
+   where it is read at /admin/submissions. Nothing is emailed — the
+   stored row is the delivery. When `onSubmit` is absent the form still
+   degrades to its own error message rather than pretending to send.
 
    THE THREE THINGS THAT HAPPEN ON SUBMIT, IN ORDER
    ----------------------------------------------------------------
    1. A reCAPTCHA token is minted (client notes §4). The token is
       obtained BEFORE the request, and the endpoint verifies it with
-      Google before it saves or emails anything — this side alone
+      Google before it saves anything — this side alone
       proves nothing.
    2. The endpoint is awaited. It writes the row to
-      `form_submissions` (§2) and then emails it.
+      `form_submissions` (§2), and a resolve means that row exists —
+      which is what the success message below tells the visitor.
    3. ONLY THEN the analytics event fires (§3), with the name the
       dashboard holds for this form — never a name written here, and
       never on click. `pushFormSuccess` sits in the resolved branch

@@ -694,46 +694,51 @@ in the bundle. The key bypasses every RLS policy, so it must never be given a
 
 ### Form delivery (contact + newsletter)
 
-The public contact form and the footer newsletter signup post to two Vercel
-serverless functions — `api/contact.js` and `api/newsletter.js` — which email
-each submission to the site inbox via **Resend** (`lib/email.js`, plain `fetch`,
-no npm dependency). The browser side is `src/services/publicForms.js`, wired in
-as the `onSubmit`/`onSubscribe` props on `<ContactForm>` and `<NewsletterForm>`.
-It uses plain `fetch` — no `@supabase/supabase-js` — so the bundle rule still
-holds. `vercel.json`'s SPA rewrite excludes `/api/*` so those requests reach the
+**Submissions are saved to the database. Nothing is emailed.** The public
+contact form and the footer newsletter signup post to two Vercel serverless
+functions — `api/contact.js` and `api/newsletter.js` — which verify the
+reCAPTCHA token with Google and then `INSERT` the submission into
+`form_submissions`. The administrator reads it at **`/admin/submissions`**
+("طلبات النماذج" in the rail). There is no mail provider in this path and
+no third-party delivery to fail — the stored row IS the delivery.
+
+The browser side is `src/services/publicForms.js`, wired in as the
+`onSubmit`/`onSubscribe` props on `<ContactForm>` and `<NewsletterForm>`. It uses
+plain `fetch` — no `@supabase/supabase-js` — so the bundle rule still holds.
+`vercel.json`'s SPA rewrite excludes `/api/*` so those requests reach the
 functions.
 
-These functions read three env vars in Vercel (Production **and** Preview), with
-**no** `VITE_` prefix so the API key never ships to the browser:
+These functions read three env vars in Vercel (Production **and** Preview), none
+with a `VITE_` prefix — that prefix would publish them to every visitor:
 
-| Var                         | Purpose                                      | Default                         |
-| --------------------------- | -------------------------------------------- | ------------------------------- |
-| `RESEND_API_KEY`            | Resend API key (required)                    | —                               |
-| `CONTACT_TO_EMAIL`          | recipient inbox                              | `info@bedar.org`                |
-| `CONTACT_FROM_EMAIL`        | sender (must be on a Resend-verified domain) | `Bedar <onboarding@resend.dev>` |
-| `RECAPTCHA_SECRET_KEY`      | verifies each submission with Google (§4)    | — (unset ⇒ check skipped)       |
-| `SUPABASE_SERVICE_ROLE_KEY` | writes `form_submissions` (§2)               | — (unset ⇒ email only)          |
-| `SITE_URL`                  | absolute origin for robots/sitemap links     | `VITE_SITE_URL`, then the host  |
-
-Until `bedar.org` is verified in Resend, keep `CONTACT_FROM_EMAIL` at the default
-and set `CONTACT_TO_EMAIL` to the address you registered with Resend — Resend only
-delivers to the account owner before a domain is verified. After verifying,
-switch `CONTACT_FROM_EMAIL` to e.g. `Bedar <noreply@bedar.org>` and
-`CONTACT_TO_EMAIL` to `info@bedar.org`.
+| Var                         | Purpose                                    | Unset                                     |
+| --------------------------- | ------------------------------------------ | ----------------------------------------- |
+| `SUPABASE_SERVICE_ROLE_KEY` | writes `form_submissions` (§2) — required | **500, nothing saved**                    |
+| `RECAPTCHA_SECRET_KEY`      | verifies each submission with Google (§4)  | check skipped, and the skip is on the row |
+| `SITE_URL`                  | absolute origin for robots/sitemap links   | `VITE_SITE_URL`, then the request's host  |
 
 **What a submission goes through, in order:** honeypot → reCAPTCHA verified
 server-side with Google → field validation → `INSERT` into `form_submissions`
-→ notification email. The record comes before the email deliberately: Resend
-being down, or the inbox filtering the message, used to mean an enquiry that
-never existed. Once the row is written the endpoint answers 200 even if the
-email fails, because the enquiry IS saved and a 500 would invite a
-resubmission that duplicates it.
+→ `200`. Each step refuses on its own terms: a filled honeypot gets a silent
+200 and no row, a bad token a 400, a malformed body a 422, and a failed write a
+500. A `200` means, and only means, that the row exists.
 
-Both fail-safes are explicit. With `RECAPTCHA_SECRET_KEY` unset the captcha
-check is SKIPPED (so a preview deploy still works) and the skip is recorded on
-the row rather than looking like a pass. With `SUPABASE_SERVICE_ROLE_KEY` unset
-nothing is stored and the function logs a warning — the dashboard screen will
-be empty and that warning is the only clue, so check it first if it is.
+Two behaviours are deliberate and easy to mistake for bugs:
+
+- **`SUPABASE_SERVICE_ROLE_KEY` unset is fatal, not a warning.** With no email
+  fallback there is nowhere else for an enquiry to go, so both endpoints answer
+  500 rather than tell a visitor their message was received. If the dashboard
+  screen is empty, check this variable first.
+- **A repeat newsletter address is a success, not an error.** The partial unique
+  index `form_submissions_newsletter_email_key` on `lower(email)` stops the list
+  growing by a row per click; PostgREST answers 409, and the endpoint maps that
+  to `200 {alreadySubscribed:true}` — never a 500.
+
+The reCAPTCHA halves are a **pair**: `RECAPTCHA_SECRET_KEY` on the server and
+the SITE key at `/admin/integrations`. With the secret set and the site key
+blank, the browser mints no token and every submission is refused with 400. With
+the secret unset the check is skipped so a preview deploy still works, and
+`captcha.skipped` is recorded on the row rather than looking like a pass.
 
 To test locally, use `vercel dev` (plain `npm run dev` serves no functions, so
 the form's fetch 404s, and `/robots.txt` and `/sitemap.xml` do not resolve).

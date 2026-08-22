@@ -2,15 +2,16 @@
    PUBLIC FORMS — the browser side of the contact + newsletter forms.
 
    Posts to the site's own Vercel serverless functions (`/api/contact`,
-   `/api/newsletter`), which now do three things per submission
-   (client notes §2, §4):
+   `/api/newsletter`), which do two things per submission (client
+   notes §2, §4):
 
      1. verify the reCAPTCHA token with Google, server-side, BEFORE
         anything else — the secret key never reaches this file
      2. SAVE the submission to `form_submissions`, which is what the
-        dashboard's new "طلبات النماذج" screen reads
-     3. email it to the site inbox via Resend, as the notification on
-        top of the record
+        dashboard's "طلبات النماذج" screen reads at /admin/submissions
+
+   There is no step 3. Nothing is emailed anywhere: the stored row IS
+   the delivery, and a resolved promise here means it exists.
 
    Same discipline as `publicContent.js`: plain `fetch`, NO
    `@supabase/supabase-js`, so `grep -c supabase dist/index.html`

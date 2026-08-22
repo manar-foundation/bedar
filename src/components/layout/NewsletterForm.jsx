@@ -19,16 +19,21 @@ import { cn } from '@utils/cn.js';
 
    WIRED to `/api/newsletter` (a Vercel serverless function) through
    `services/publicForms.js`, passed in as `onSubscribe` from the
-   Footer. That endpoint emails the signup to the site inbox via
-   Resend. When `onSubscribe` is absent the form still degrades to its
-   own error message rather than pretending to subscribe.
+   Footer. That endpoint SAVES the signup to `form_submissions`, where
+   it is read at /admin/submissions. Nothing is emailed. When
+   `onSubscribe` is absent the form still degrades to its own error
+   message rather than pretending to subscribe.
 
    Same three steps as the contact form, and for the same reasons —
    see the header of `ContactForm.jsx`: a reCAPTCHA token is minted
    first (client notes §4), the endpoint stores the signup in
-   `form_submissions` and emails it (§2), and only the RESOLVED
-   branch fires the analytics event whose name the dashboard holds
-   (§3). Never on click.
+   `form_submissions` (§2), and only the RESOLVED branch fires the
+   analytics event whose name the dashboard holds (§3). Never on click.
+
+   An address that is ALREADY on the list resolves too — the endpoint
+   answers 200 for a repeat signup rather than an error, so somebody
+   who subscribed last month and forgot sees the success message and
+   not a failure.
 
    The live status is announced with `role="status"` so a screen
    reader user learns the outcome; a colour change alone tells them
