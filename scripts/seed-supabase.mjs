@@ -201,12 +201,25 @@ function navigationPlan() {
 
 /* ── Settings ───────────────────────────────────────────────── */
 const SETTINGS = {
+  /* The whole Organization schema block — client notes §6 requires
+     every one of these to be editable from the dashboard rather than
+     fixed in code, and `components/layout/SiteSchema.jsx` renders
+     exactly this shape as JSON-LD. `logo` is deliberately NOT seeded
+     from the module: the seed value there is a `/src/` source path
+     that does not survive the build, and an empty value makes the
+     schema component fall back to the bundled, fingerprinted mark. */
   organization: {
+    schemaType: siteSettings.schemaType,
     name: siteSettings.name,
     legalName: siteSettings.legalName,
+    alternateName: siteSettings.alternateName,
+    description: siteSettings.description,
     url: siteSettings.url,
-    logo: siteSettings.logo,
+    logo: '',
     email: siteSettings.email,
+    telephone: siteSettings.telephone,
+    foundingDate: siteSettings.foundingDate,
+    address: siteSettings.address,
   },
   social: siteSettings.social,
   header_cta: headerCta,
@@ -221,6 +234,9 @@ const SETTINGS = {
   captcha: siteSettings.captcha,
   consent: siteSettings.consent,
   forms: { contact: pageContent.contact.form },
+  /* robots.txt body + sitemap options (client notes §7, §8). Read
+     server-side by `api/robots.js` and `api/sitemap.js`. */
+  seo: siteSettings.seo,
 };
 
 /* ── Run ────────────────────────────────────────────────────── */

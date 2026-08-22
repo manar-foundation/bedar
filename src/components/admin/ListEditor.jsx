@@ -2,7 +2,7 @@ import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 
 import { Input, Switch, Textarea } from '@components/ui';
 
-import { IconAction } from './BlockEditor.jsx';
+import { IconAction } from './IconAction.jsx';
 
 /* ================================================================
    Repeater for a `list` page field.

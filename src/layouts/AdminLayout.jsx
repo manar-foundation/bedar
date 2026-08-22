@@ -10,6 +10,7 @@ import {
   Globe,
   History,
   Image,
+  Inbox,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -53,6 +54,7 @@ const NAV_SECTIONS = [
       { to: '/admin/global', label: 'الهيدر والفوتر', icon: Globe },
       { to: '/admin/collections/articles', label: 'المجموعات', icon: Folders },
       { to: '/admin/media', label: 'مكتبة الوسائط', icon: Image },
+      { to: '/admin/submissions', label: 'طلبات النماذج', icon: Inbox },
     ],
   },
   {
@@ -68,7 +70,10 @@ const NAV_SECTIONS = [
     items: [
       { to: '/admin/users', label: 'المستخدمون', icon: UsersIcon },
       { to: '/admin/security', label: 'الأمان', icon: ShieldCheck },
-      { to: '/admin/settings', label: 'الإعدادات', icon: SettingsIcon },
+      // Renamed from "الإعدادات" per client notes §6: this screen is
+      // where the site's general SEO settings live — the Organization
+      // schema, robots.txt and the sitemap — so it says so.
+      { to: '/admin/settings', label: 'إعدادات SEO', icon: SettingsIcon },
     ],
   },
 ];

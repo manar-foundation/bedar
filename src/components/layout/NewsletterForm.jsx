@@ -2,6 +2,10 @@ import { useId, useState } from 'react';
 
 import { Button } from '@components/ui/Button.jsx';
 import { fieldChrome, fieldTone } from '@components/ui/fieldStyles.js';
+import { useContent } from '@context/ContentContext.jsx';
+import { useCaptcha } from '@hooks/useCaptcha.js';
+import { pushFormSuccess } from '@utils/analytics.js';
+import { FORM_KEYS } from '@utils/constants.js';
 import { cn } from '@utils/cn.js';
 
 /* ================================================================
@@ -19,8 +23,12 @@ import { cn } from '@utils/cn.js';
    Resend. When `onSubscribe` is absent the form still degrades to its
    own error message rather than pretending to subscribe.
 
-   Phase 5 (Dashboard spec §4.1) adds the `newsletter_submission`
-   dataLayer push — on CONFIRMED success only, never on click.
+   Same three steps as the contact form, and for the same reasons —
+   see the header of `ContactForm.jsx`: a reCAPTCHA token is minted
+   first (client notes §4), the endpoint stores the signup in
+   `form_submissions` and emails it (§2), and only the RESOLVED
+   branch fires the analytics event whose name the dashboard holds
+   (§3). Never on click.
 
    The live status is announced with `role="status"` so a screen
    reader user learns the outcome; a colour change alone tells them
@@ -32,6 +40,12 @@ export function NewsletterForm({ newsletter, onSubscribe, className }) {
   const statusId = `${inputId}-status`;
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState('idle'); // idle | pending | success | error
+  const { settings } = useContent();
+  const {
+    mount: mountCaptcha,
+    getToken: getCaptchaToken,
+    reset: resetCaptcha,
+  } = useCaptcha(settings.captcha);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -40,11 +54,15 @@ export function NewsletterForm({ newsletter, onSubscribe, className }) {
     setStatus('pending');
     try {
       if (!onSubscribe) throw new Error('newsletter endpoint not configured');
-      await onSubscribe(email);
+      const token = await getCaptchaToken();
+      await onSubscribe(email, token);
       setStatus('success');
       setEmail('');
+      pushFormSuccess(FORM_KEYS.NEWSLETTER, settings);
     } catch {
       setStatus('error');
+      // A captcha token is single-use — a retry needs a fresh one.
+      resetCaptcha();
     }
   };
 
@@ -93,6 +111,10 @@ export function NewsletterForm({ newsletter, onSubscribe, className }) {
           'placeholder:[direction:ltr]',
         )}
       />
+
+      {/* See the note in ContactForm — the container stays mounted
+          because Google measures it; invisible mode renders no box. */}
+      <div ref={mountCaptcha} className="empty:hidden" />
 
       <Button type="submit" variant="accent" loading={status === 'pending'}>
         {status === 'pending' ? newsletter.pendingLabel : newsletter.submitLabel}

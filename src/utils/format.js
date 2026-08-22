@@ -16,6 +16,15 @@ const dateFormatter = new Intl.DateTimeFormat(AR_LATN, {
   calendar: 'gregory',
 });
 
+const dateTimeFormatter = new Intl.DateTimeFormat(AR_LATN, {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  calendar: 'gregory',
+});
+
 const numberFormatter = new Intl.NumberFormat(AR_LATN);
 
 /** "15 يناير 2026" — Gregorian, Western digits. */
@@ -24,6 +33,20 @@ export function formatDate(value) {
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return '';
   return dateFormatter.format(date);
+}
+
+/**
+ * "15 ينا 2026، 14:30" — date AND time, Western digits.
+ *
+ * Used where the ordering within a day matters: a form submission
+ * inbox is read newest-first and two enquiries on the same morning
+ * are indistinguishable without the clock.
+ */
+export function formatDateTime(value) {
+  if (!value) return '';
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return dateTimeFormatter.format(date);
 }
 
 /** ISO date for <time datetime> and schema.org. */

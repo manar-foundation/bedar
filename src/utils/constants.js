@@ -72,6 +72,8 @@ export const TABLES = {
   MEDIA: 'media',
   REDIRECTS: 'redirects',
   VERSIONS: 'content_versions',
+  /** Contact + newsletter submissions (client notes §2). */
+  FORM_SUBMISSIONS: 'form_submissions',
 };
 
 /** Storage bucket for the media library (Dashboard spec §7). */
@@ -91,6 +93,8 @@ export const SETTINGS_KEYS = {
   CAPTCHA: 'captcha',
   CONSENT: 'consent',
   FORMS: 'forms',
+  /** robots.txt content + sitemap options — client notes §7, §8. */
+  SEO: 'seo',
 };
 
 /* ── Two-factor authentication (Dashboard spec §13) ─────────────
@@ -129,11 +133,53 @@ export const REDIRECT_CODES = [
   { value: 302, label: '302 — مؤقت' },
 ];
 
-/** GTM dataLayer events, per Dashboard spec §4.1. These fire ONLY on
- *  confirmed submission success, never on click or attempt. */
+/* ── Public forms (client notes §2, §3, §4) ─────────────────────
+   The site has two, both of which now (a) save to
+   `form_submissions`, (b) fire a dashboard-named analytics event on
+   confirmed success, and (c) sit behind reCAPTCHA. `FORM_KEYS` is
+   the discriminator all three share — it is the `form_key` column,
+   the key under `integrations.formEvents`, and the tab on the
+   dashboard's submissions screen. */
+export const FORM_KEYS = {
+  CONTACT: 'contact',
+  NEWSLETTER: 'newsletter',
+};
+
+export const FORM_LABELS = {
+  [FORM_KEYS.CONTACT]: 'نموذج تواصل معنا',
+  [FORM_KEYS.NEWSLETTER]: 'الاشتراك في النشرة البريدية',
+};
+
+/**
+ * FALLBACK dataLayer event names (Dashboard spec §4.1).
+ *
+ * These are defaults, not the contract. Client notes §3 is explicit
+ * that the event name must come from the dashboard so it can be
+ * matched to a conversion in GA4 / GTM without a deploy — the
+ * lookup is `settings.integrations.formEvents[formKey]`, and these
+ * values are only what a site with that field still blank sends.
+ * Either way the event fires ONLY after the submission is confirmed
+ * saved, never on click.
+ */
 export const DATALAYER_EVENTS = {
-  FORM_SUBMISSION: 'form_submission',
-  NEWSLETTER_SUBMISSION: 'newsletter_submission',
+  [FORM_KEYS.CONTACT]: 'form_submission',
+  [FORM_KEYS.NEWSLETTER]: 'newsletter_submission',
+};
+
+/**
+ * reCAPTCHA integration modes (client notes §4).
+ *
+ * The key the client supplied is a v2 INVISIBLE key: Google's
+ * checkbox anchor rejects it as the wrong key type, while the
+ * invisible anchor accepts it — the opposite way round from a v3
+ * key, which neither anchor accepts. So `v2-invisible` is the
+ * default. The other two are here because swapping the key later
+ * must not need a deploy, which is the whole point of §4 and §5.
+ */
+export const CAPTCHA_VERSIONS = {
+  V2_INVISIBLE: 'v2-invisible',
+  V2_CHECKBOX: 'v2-checkbox',
+  V3: 'v3',
 };
 
 /** Site language. Arabic-only — multilingual is out of scope (§14). */

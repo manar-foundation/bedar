@@ -2,15 +2,29 @@
    PUBLIC FORMS — the browser side of the contact + newsletter forms.
 
    Posts to the site's own Vercel serverless functions (`/api/contact`,
-   `/api/newsletter`), which deliver the submission to the site inbox
-   via Resend. Same discipline as `publicContent.js`: plain `fetch`,
-   NO `@supabase/supabase-js`, so `grep -c supabase dist/index.html`
-   stays 0.
+   `/api/newsletter`), which now do three things per submission
+   (client notes §2, §4):
+
+     1. verify the reCAPTCHA token with Google, server-side, BEFORE
+        anything else — the secret key never reaches this file
+     2. SAVE the submission to `form_submissions`, which is what the
+        dashboard's new "طلبات النماذج" screen reads
+     3. email it to the site inbox via Resend, as the notification on
+        top of the record
+
+   Same discipline as `publicContent.js`: plain `fetch`, NO
+   `@supabase/supabase-js`, so `grep -c supabase dist/index.html`
+   stays 0. Note that the WRITE goes through the serverless function
+   rather than through PostgREST — an anon INSERT policy on
+   `form_submissions` would be an open, unauthenticated write
+   endpoint into the database, and the captcha check has to happen
+   somewhere the visitor cannot skip.
 
    Each function REJECTS (throws) on a non-2xx response. That is the
    contract <ContactForm>/<NewsletterForm> rely on — their handlers
    await this and fall to the dashboard-editable error message on a
-   throw, and only show the success state on a resolve.
+   throw, and only show the success state (and fire the analytics
+   event) on a resolve.
    ================================================================ */
 
 async function postJson(path, payload) {
@@ -36,12 +50,20 @@ async function postJson(path, payload) {
   return res.json().catch(() => ({}));
 }
 
-/** Contact form → /api/contact. `data` is the raw FormData object. */
-export function submitContactForm(data) {
-  return postJson('/api/contact', data);
+/**
+ * Contact form → /api/contact.
+ *
+ * `data` is the raw FormData object; `captchaToken` is what
+ * `useCaptcha` minted for THIS submission. It is sent under a key of
+ * its own rather than mixed into the form fields so the endpoint can
+ * strip it before the payload is stored — a spent captcha token in
+ * the submissions table is noise.
+ */
+export function submitContactForm(data, captchaToken = '') {
+  return postJson('/api/contact', { ...data, captchaToken });
 }
 
 /** Newsletter → /api/newsletter. */
-export function subscribeNewsletter(email) {
-  return postJson('/api/newsletter', { email });
+export function subscribeNewsletter(email, captchaToken = '') {
+  return postJson('/api/newsletter', { email, captchaToken });
 }

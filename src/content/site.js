@@ -171,9 +171,15 @@ export const footer = {
 
 /**
  * Global settings. Everything here becomes an editable field in the
- * dashboard Settings screen (Dashboard spec §6, §11) and feeds the
- * site-wide Organization schema — entered once, never duplicated
- * per page.
+ * "إعدادات SEO" screen (Dashboard spec §6, §11; client notes §5-§8)
+ * and feeds the site-wide Organization schema — entered once, never
+ * duplicated per page.
+ *
+ * THIS FILE IS THE SEED, NOT THE SOURCE. Once Supabase is wired up,
+ * `site_settings` wins for every key here (see
+ * `context/ContentContext.jsx` → `mergeSettings`). What is written
+ * below is what an unconfigured project renders, and the starting
+ * value the seed script loads into the database.
  */
 export const siteSettings = {
   name: 'بدار',
@@ -181,6 +187,31 @@ export const siteSettings = {
   url: 'https://bedar.org',
   logo: '/src/assets/bedar-logo.svg',
   email: 'info@bedar.org',
+
+  /* ── Organization schema (client notes §6) ──────────────────────
+     Every field below is emitted by `components/layout/SiteSchema.jsx`
+     as JSON-LD, and every one of them is editable in the dashboard.
+     Nothing about the organisation is written into the schema
+     component itself — that is the requirement, and it is why blank
+     values here are simply omitted from the output rather than
+     rendered as empty strings. */
+
+  /** schema.org type. `NGO` is a subtype of Organization and is the
+   *  accurate one for Manar; the field is a choice because Bedar may
+   *  later be described as an EducationalOrganization. */
+  schemaType: 'NGO',
+  alternateName: 'Bedar',
+  description:
+    'منصة بدار للريادة المجتمعية — نعمل على تمكين المبادرات المجتمعية وصناعة أثر مستدام.',
+  telephone: '',
+  foundingDate: '',
+  address: {
+    streetAddress: '',
+    addressLocality: '',
+    addressRegion: '',
+    postalCode: '',
+    addressCountry: '',
+  },
 
   /**
    * Footer contact rail. `label` is the platform name and `handle`
@@ -211,19 +242,57 @@ export const siteSettings = {
     { id: 'x', label: 'X', handle: '@bedarplatform', href: 'https://x.com/bedarplatform' },
   ],
 
-  /** Injected site-wide — Dashboard spec §11. Empty until configured. */
+  /**
+   * Injected site-wide by `components/layout/SiteIntegrations.jsx`
+   * (Dashboard spec §11, client notes §5). Empty until configured.
+   */
   integrations: {
+    /** `GTM-XXXXXXX`. Installs the container on every public page. */
     gtmContainerId: '',
+    /** The `content` value only, not the whole meta tag. */
     searchConsoleVerification: '',
+    /** Injected into <head> / before </body>, verbatim. */
     headCode: '',
     footerCode: '',
+
+    /**
+     * The analytics event each form fires ON CONFIRMED SUCCESS
+     * (client notes §3). Blank falls back to `DATALAYER_EVENTS`.
+     * The name is a setting and not a constant precisely so it can
+     * be matched to a GA4 / GTM conversion without a deploy.
+     */
+    formEvents: {
+      contact: '',
+      newsletter: '',
+    },
   },
 
-  /** Captcha is configurable, never hardcoded — Dashboard spec §4. */
+  /**
+   * Captcha is configurable, never hardcoded — Dashboard spec §4,
+   * client notes §4.
+   *
+   * The SITE key belongs in the page: it is transmitted to every
+   * visitor by definition, and Google's own documentation publishes
+   * it. The SECRET key is not here and is not in the database — it
+   * lives in `RECAPTCHA_SECRET_KEY` on the server, next to
+   * `lib/recaptcha.js`, which is the only code that uses it.
+   */
   captcha: {
-    provider: '', // 'recaptcha' | 'hcaptcha' | 'turnstile'
-    siteKey: '',
-    // secret key is server-side only, never stored in this file
+    provider: 'recaptcha',
+    /** See `CAPTCHA_VERSIONS` — this key is a v2 *invisible* key. */
+    version: 'v2-invisible',
+    siteKey: '6LdAI5ItAAAAAGuHH_ZFmlVV7JTXjcKy3b4fFFh-',
+  },
+
+  /**
+   * What the site tells crawlers (client notes §7, §8). Served by
+   * `api/robots.js`; `%SITE_URL%` is expanded at request time so one
+   * value is correct on production and on every preview deploy.
+   */
+  seo: {
+    robotsTxt: 'User-agent: *\nAllow: /\n\nSitemap: %SITE_URL%/sitemap.xml\n',
+    sitemapEnabled: true,
+    sitemapExcludePaths: ['/admin'],
   },
 
   /** GDPR — Manar is a Netherlands-registered NGO (Dashboard spec §12). */

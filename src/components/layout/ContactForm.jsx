@@ -1,6 +1,10 @@
 import { useState } from 'react';
 
 import { Button, Input, Textarea } from '@components/ui';
+import { useContent } from '@context/ContentContext.jsx';
+import { useCaptcha } from '@hooks/useCaptcha.js';
+import { pushFormSuccess } from '@utils/analytics.js';
+import { FORM_KEYS } from '@utils/constants.js';
 import { cn } from '@utils/cn.js';
 
 /* ================================================================
@@ -18,9 +22,19 @@ import { cn } from '@utils/cn.js';
    Resend. When `onSubmit` is absent the form still degrades to its own
    error message rather than pretending to send.
 
-   Phase 5 adds the `form_submission` dataLayer push on CONFIRMED
-   success only, never on click (Dashboard spec §4.1). Captcha is
-   configurable and mounts here too (`siteSettings.captcha`).
+   THE THREE THINGS THAT HAPPEN ON SUBMIT, IN ORDER
+   ----------------------------------------------------------------
+   1. A reCAPTCHA token is minted (client notes §4). The token is
+      obtained BEFORE the request, and the endpoint verifies it with
+      Google before it saves or emails anything — this side alone
+      proves nothing.
+   2. The endpoint is awaited. It writes the row to
+      `form_submissions` (§2) and then emails it.
+   3. ONLY THEN the analytics event fires (§3), with the name the
+      dashboard holds for this form — never a name written here, and
+      never on click. `pushFormSuccess` sits in the resolved branch
+      for exactly that reason: a failed send that still reported a
+      conversion would make every funnel in GA4 wrong.
 
    The result is announced with `role="status"` — a colour change
    alone tells a screen reader user nothing.
@@ -28,6 +42,12 @@ import { cn } from '@utils/cn.js';
 
 export function ContactForm({ form, onSubmit, className }) {
   const [status, setStatus] = useState('idle'); // idle | pending | success | error
+  const { settings } = useContent();
+  const {
+    mount: mountCaptcha,
+    getToken: getCaptchaToken,
+    reset: resetCaptcha,
+  } = useCaptcha(settings.captcha);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -37,10 +57,15 @@ export function ContactForm({ form, onSubmit, className }) {
     setStatus('pending');
     try {
       if (!onSubmit) throw new Error('contact endpoint not configured');
-      await onSubmit(data);
+      const token = await getCaptchaToken();
+      await onSubmit(data, token);
       setStatus('success');
+      pushFormSuccess(FORM_KEYS.CONTACT, settings);
     } catch {
       setStatus('error');
+      // A token may only be redeemed once, so a retry after any
+      // failure needs a fresh one.
+      resetCaptcha();
     }
   };
 
@@ -105,6 +130,12 @@ export function ContactForm({ form, onSubmit, className }) {
           overflow: 'hidden',
         }}
       />
+
+      {/* reCAPTCHA. The container is always in the document because
+          Google measures it on render; for the invisible flavour it
+          occupies nothing and the badge floats bottom-left of the
+          viewport instead. */}
+      <div ref={mountCaptcha} className="empty:hidden" />
 
       <Button type="submit" variant="accent" size="lg" loading={status === 'pending'}>
         {status === 'pending' ? form.pendingLabel : form.submitLabel}

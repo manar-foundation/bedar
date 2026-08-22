@@ -4,10 +4,10 @@ import { ExternalLink, Folders, Star, Trash2 } from 'lucide-react';
 
 import {
   AdminPage,
-  BlockEditor,
   ConfirmDialog,
   DataState,
   ImageField,
+  RichTextEditor,
   SaveBar,
   SeoSection,
   StateBadge,
@@ -24,6 +24,7 @@ import {
   SCHEMA_TYPES,
 } from '@utils/constants.js';
 import { formatDate, readingTime } from '@utils/format.js';
+import { blocksToPlainText } from '@utils/richtext.js';
 
 /* ================================================================
    ARTICLE / NEWS / PROGRAM EDITOR (Dashboard spec §3.2, §5, §6)
@@ -141,13 +142,10 @@ export default function CollectionEditor() {
     }
   };
 
-  const bodyWords = useMemo(
-    () =>
-      (form?.body ?? [])
-        .map((block) => (block.type === 'ul' ? (block.items ?? []).join(' ') : (block.text ?? '')))
-        .join(' '),
-    [form],
-  );
+  // Reading time counts every word the reader sees, whichever block
+  // shape it is stored in — `blocksToPlainText` folds the legacy
+  // `{ text }` blocks and the current run arrays into one string.
+  const bodyWords = useMemo(() => blocksToPlainText(form?.body ?? []), [form]);
 
   return (
     <AdminPage
@@ -214,10 +212,16 @@ export default function CollectionEditor() {
                 </Card>
 
                 <Card className="gap-4">
-                  <BlockEditor
+                  {/* ONE field for the whole body — headings,
+                      paragraphs, images, quotes and lists written in
+                      place (client notes §1). It still saves the block
+                      array `collection_items.body` has always held;
+                      see the header of `utils/richtext.js`. */}
+                  <RichTextEditor
                     label="نص المقال"
-                    blocks={form.body ?? []}
+                    value={form.body ?? []}
                     onChange={(body) => set({ body })}
+                    hint="اكتب المقال كاملاً هنا. استخدم شريط الأدوات لإضافة العناوين والصور والاقتباسات والقوائم داخل النص نفسه."
                   />
                   <p className="text-xs text-ink-muted">
                     زمن القراءة التقريبي: <span className="ltr-run">{readingTime(bodyWords)}</span>{' '}

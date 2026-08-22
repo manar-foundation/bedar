@@ -230,6 +230,12 @@ function mergeSettings(settings) {
     ...(settings.integrations ? { integrations: settings.integrations } : {}),
     ...(settings.captcha ? { captcha: settings.captcha } : {}),
     ...(settings.consent ? { consent: settings.consent } : {}),
+    // robots.txt content + sitemap options (client notes §7, §8).
+    // The site itself does not render these — `api/robots.js` and
+    // `api/sitemap.js` read the same row server-side — but the
+    // dashboard reads them through this context, so they merge here
+    // like every other blob.
+    ...(settings.seo ? { seo: settings.seo } : {}),
   });
 }
 

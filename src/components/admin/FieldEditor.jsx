@@ -1,6 +1,6 @@
 import { Input, Switch, Textarea } from '@components/ui';
 
-import { BlockEditor } from './BlockEditor.jsx';
+import { RichTextEditor } from './RichTextEditor.jsx';
 import { ImageField } from './ImageField.jsx';
 import { ListEditor } from './ListEditor.jsx';
 import { fieldLabel } from './fieldLabels.js';
@@ -16,8 +16,9 @@ import { fieldLabel } from './fieldLabels.js';
      asks for button text and button link as separate fields, and
      because a link glued into a sentence cannot be re-pointed
      without retyping the sentence.
-   · `richtext` is a block array, never an HTML string. See
-     BlockEditor for why that is not negotiable.
+   · `richtext` is edited as ONE rich-text field (client notes §1)
+     but STORED as a block array, never an HTML string. See the
+     header of `utils/richtext.js` for why that is not negotiable.
    ================================================================ */
 
 export function FieldEditor({ field, value, mediaId, altText, onChange }) {
@@ -27,9 +28,10 @@ export function FieldEditor({ field, value, mediaId, altText, onChange }) {
   switch (field.type) {
     case 'richtext':
       return (
-        <BlockEditor
+        <RichTextEditor
           label={label}
-          blocks={Array.isArray(value) ? value : []}
+          hint={hint}
+          value={Array.isArray(value) ? value : []}
           onChange={(blocks) => onChange({ value: blocks })}
         />
       );
