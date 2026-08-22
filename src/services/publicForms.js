@@ -36,12 +36,23 @@ async function postJson(path, payload) {
   return res.json().catch(() => ({}));
 }
 
-/** Contact form → /api/contact. `data` is the raw FormData object. */
+/**
+ * Contact form → /api/contact.
+ *
+ * `data` is the raw FormData object plus the two fields the form
+ * component adds: `captchaToken` (verified server-side before the
+ * submission is stored — client note ٤) and `sourcePath` (which page
+ * it was filled on, shown in the dashboard's requests table).
+ */
 export function submitContactForm(data) {
   return postJson('/api/contact', data);
 }
 
-/** Newsletter → /api/newsletter. */
-export function subscribeNewsletter(email) {
-  return postJson('/api/newsletter', { email });
+/** Newsletter → /api/newsletter. Same captcha contract. */
+export function subscribeNewsletter(email, { captchaToken = '' } = {}) {
+  return postJson('/api/newsletter', {
+    email,
+    captchaToken,
+    sourcePath: typeof window !== 'undefined' ? window.location.pathname : '',
+  });
 }

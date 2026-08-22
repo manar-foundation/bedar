@@ -7,10 +7,11 @@ import { useAuth } from '@context/AuthContext.jsx';
 import { useToast } from '@context/ToastContext.jsx';
 import { useAsyncData } from '@hooks/useAsyncData.js';
 import { canEditSetting, listSettings, updateSetting } from '@services/settingsService.js';
-import { DATALAYER_EVENTS, SETTINGS_KEYS } from '@utils/constants.js';
+import { DATALAYER_EVENTS, FORM_KINDS, SETTINGS_KEYS } from '@utils/constants.js';
 
 /* ================================================================
-   INTEGRATIONS & CUSTOM CODE (Dashboard spec §11, §4)
+   INTEGRATIONS & CUSTOM CODE (Dashboard spec §11, §4 —
+   client notes ٣, ٤, ٥)
 
    Everything on this screen changes how the site BEHAVES rather than
    what it says, so every row here is `min_role = 'admin'` in SQL and
@@ -18,12 +19,30 @@ import { DATALAYER_EVENTS, SETTINGS_KEYS } from '@utils/constants.js';
    would make an editor think the feature does not exist and ask for
    it to be built.
 
-   The captcha SECRET key is deliberately absent. `site_settings` is
-   readable by anonymous visitors (the organisation block feeds the
-   Organization schema and the captcha SITE key is public by
-   definition), so a secret stored here would be a secret published
-   on the website. It belongs in the Netlify function environment /
-   Supabase Vault, next to the code that verifies the token.
+   WHAT NOTE ٥ ADDED
+   ----------------------------------------------------------------
+   The four fields (GTM, Search Console, head code, footer code) were
+   already here and already saved. What was missing is that NOTHING
+   READ THEM — the values sat in the database and never reached a
+   page. `components/layout/SiteHead.jsx` is the other half, and it
+   is what makes saving a Container ID actually install GTM on every
+   page, and clearing it actually remove it.
+
+   WHAT NOTE ٣ ADDED
+   ----------------------------------------------------------------
+   The event name per form. It used to be a constant in the bundle
+   (`DATALAYER_EVENTS`), which is precisely what the note forbids.
+   The constants survive as the FALLBACK for an empty field, so
+   turning the setting on changes a name rather than starting the
+   tracking from silence.
+
+   THE CAPTCHA SECRET KEY IS STILL DELIBERATELY ABSENT.
+   `site_settings` is readable by anonymous visitors (the
+   organisation block feeds the Organization schema and the captcha
+   SITE key is public by definition), so a secret stored here would
+   be a secret published on the website. It belongs in the Vercel
+   function environment, next to `lib/captcha.js`, which is the only
+   code that verifies a token. Client note ٤ says the same thing.
    ================================================================ */
 
 const KEYS = [SETTINGS_KEYS.INTEGRATIONS, SETTINGS_KEYS.CAPTCHA, SETTINGS_KEYS.FORMS];
@@ -33,6 +52,25 @@ const CAPTCHA_PROVIDERS = [
   { value: 'recaptcha', label: 'Google reCAPTCHA' },
   { value: 'hcaptcha', label: 'hCaptcha' },
   { value: 'turnstile', label: 'Cloudflare Turnstile' },
+];
+
+const CAPTCHA_VERSIONS = [
+  { value: 'v2', label: 'v2 — مربّع تحقق يضغطه الزائر' },
+  { value: 'v3', label: 'v3 — تحقق خفي بالنقاط' },
+];
+
+/** The two forms note ٣ asks for a separate event setting on. */
+const FORM_EVENTS = [
+  {
+    key: FORM_KINDS.CONTACT,
+    label: 'نموذج تواصل معنا',
+    example: 'contact_form_submit',
+  },
+  {
+    key: FORM_KINDS.NEWSLETTER,
+    label: 'نموذج الاشتراك في النشرة البريدية',
+    example: 'newsletter_signup',
+  },
 ];
 
 export default function Integrations() {
@@ -60,6 +98,15 @@ export default function Integrations() {
   const set = (key, patch) =>
     setForm((current) => ({ ...current, [key]: { ...current[key], ...patch } }));
 
+  const setEvent = (formKey, value) =>
+    setForm((current) => ({
+      ...current,
+      integrations: {
+        ...current.integrations,
+        formEvents: { ...(current.integrations.formEvents ?? {}), [formKey]: value },
+      },
+    }));
+
   const save = async () => {
     setSaving(true);
     try {
@@ -76,6 +123,8 @@ export default function Integrations() {
       setSaving(false);
     }
   };
+
+  const captchaVersion = form?.captcha?.version === 'v3' ? 'v3' : 'v2';
 
   return (
     <AdminPage
@@ -106,7 +155,7 @@ export default function Integrations() {
                 onChange={(event) =>
                   set('integrations', { gtmContainerId: event.target.value.trim() })
                 }
-                hint="حاوية واحدة تكفي — تحليلات GA4 تُدار من داخلها، لا من هنا."
+                hint="عند الحفظ يُركَّب كود Google Tag Manager تلقائياً في كل صفحات الموقع بالطريقة الرسمية. أفرغ الحقل لإزالته."
               />
 
               <Input
@@ -117,28 +166,47 @@ export default function Integrations() {
                 onChange={(event) =>
                   set('integrations', { searchConsoleVerification: event.target.value.trim() })
                 }
-                hint="قيمة الوسم google-site-verification فقط، بلا وسم HTML."
+                hint="قيمة الوسم google-site-verification فقط، بلا وسم HTML — تُضاف داخل <head> في كل الصفحات."
               />
+            </Card>
 
-              <p className="flex items-start gap-2 rounded-md bg-info-100 px-4 py-3 text-xs leading-relaxed text-info-700">
-                <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                <span>
-                  يُرسل الموقع حدثي{' '}
-                  <span className="ltr-run font-medium">{DATALAYER_EVENTS.FORM_SUBMISSION}</span> و{' '}
-                  <span className="ltr-run font-medium">
-                    {DATALAYER_EVENTS.NEWSLETTER_SUBMISSION}
-                  </span>{' '}
-                  إلى dataLayer عند نجاح الإرسال فعلياً — لا عند الضغط على الزر — حتى تعكس التقارير
-                  إرسالات حقيقية لا محاولات.
-                </span>
+            {/* ── Note ٣ ─────────────────────────────────────────
+                One field per form, and the note is explicit that the
+                name must not live in the code. The hint says WHEN it
+                fires, because "after success" is the half of the
+                requirement a settings field cannot express. */}
+            <Card className="gap-5">
+              <h2 className="text-base font-bold text-ink">أحداث النماذج (Events)</h2>
+              <p className="-mt-3 text-xs leading-relaxed text-ink-muted">
+                اسم الحدث الذي يُطلق إلى dataLayer بعد نجاح إرسال النموذج وحفظ بياناته — لا عند
+                الضغط على زر الإرسال. تُستخدم هذه الأسماء في Google Analytics و Google Tag Manager
+                لتتبّع التحويلات.
               </p>
+
+              {FORM_EVENTS.map((entry) => (
+                <Input
+                  key={entry.key}
+                  label={`اسم الحدث — ${entry.label}`}
+                  dir="ltr"
+                  placeholder={entry.example}
+                  disabled={!editable}
+                  value={form.integrations.formEvents?.[entry.key] ?? ''}
+                  onChange={(event) => setEvent(entry.key, event.target.value.trim())}
+                  hint={
+                    form.integrations.formEvents?.[entry.key]
+                      ? undefined
+                      : `اتركه فارغاً لاستخدام الاسم الافتراضي: ${DATALAYER_EVENTS[entry.key]}`
+                  }
+                />
+              ))}
             </Card>
 
             <Card className="gap-5">
               <h2 className="text-base font-bold text-ink">أكواد مخصّصة</h2>
               <p className="-mt-3 text-xs leading-relaxed text-ink-muted">
-                تُحقن في كل صفحات الموقع. أكواد GoHighLevel الخاصة بصفحة برنامج معيّن ليست من هنا —
-                توضع داخل الصفحة نفسها بالتنسيق مع فريق التطوير.
+                تُحفظ كما تُدخل تماماً وتُنفَّذ في موضعها على كل صفحات الموقع — لا تظهر كنص للزائر.
+                أكواد GoHighLevel الخاصة بصفحة برنامج معيّن ليست من هنا — توضع داخل الصفحة نفسها
+                بالتنسيق مع فريق التطوير.
               </p>
 
               <Textarea
@@ -149,6 +217,7 @@ export default function Integrations() {
                 value={form.integrations.headCode ?? ''}
                 onChange={(event) => set('integrations', { headCode: event.target.value })}
                 className="font-mono text-xs"
+                hint="يُحقن داخل وسم <head>."
               />
 
               <Textarea
@@ -159,22 +228,43 @@ export default function Integrations() {
                 value={form.integrations.footerCode ?? ''}
                 onChange={(event) => set('integrations', { footerCode: event.target.value })}
                 className="font-mono text-xs"
+                hint="يُحقن قبل إغلاق وسم </body>."
               />
+
+              <p className="flex items-start gap-2 rounded-md bg-warning-100 px-4 py-3 text-xs leading-relaxed text-warning-700">
+                <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                هذان الحقلان ينفّذان أي شيفرة تُدخل فيهما على كل صفحات الموقع. راجع الكود قبل الحفظ،
+                ولا تلصق إلا ما تعرف مصدره.
+              </p>
             </Card>
 
+            {/* ── Note ٤ ───────────────────────────────────────── */}
             <Card className="gap-5">
-              <h2 className="text-base font-bold text-ink">الحماية من السبام</h2>
+              <h2 className="text-base font-bold text-ink">الحماية من السبام (CAPTCHA)</h2>
               <p className="-mt-3 text-xs leading-relaxed text-ink-muted">
-                المزوّد قابل للتبديل من هنا، فتغييره لاحقاً لا يحتاج إلى تعديل برمجي.
+                يُطبَّق على جميع نماذج الموقع: نموذج التواصل والاشتراك في النشرة. يتم التحقق من
+                الرمز في الخادم قبل قبول الطلب أو حفظه في قاعدة البيانات.
               </p>
 
-              <Select
-                label="المزوّد"
-                disabled={!editable}
-                value={form.captcha.provider ?? ''}
-                onChange={(event) => set('captcha', { provider: event.target.value })}
-                options={CAPTCHA_PROVIDERS}
-              />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Select
+                  label="المزوّد"
+                  disabled={!editable}
+                  value={form.captcha.provider ?? ''}
+                  onChange={(event) => set('captcha', { provider: event.target.value })}
+                  options={CAPTCHA_PROVIDERS}
+                  hint="اترك «بدون حماية» لتعطيل التحقق على كل النماذج."
+                />
+
+                <Select
+                  label="الإصدار"
+                  disabled={!editable || !form.captcha.provider}
+                  value={captchaVersion}
+                  onChange={(event) => set('captcha', { version: event.target.value })}
+                  options={CAPTCHA_VERSIONS}
+                  hint="مفتاح v2 لا يعمل مع إعداد v3 والعكس — اختر الإصدار الذي أُنشئ به المفتاح."
+                />
+              </div>
 
               <Input
                 label="مفتاح الموقع (Site Key)"
@@ -185,22 +275,42 @@ export default function Integrations() {
                 hint="المفتاح العام الذي يظهر في صفحة الموقع."
               />
 
+              {captchaVersion === 'v3' ? (
+                <Input
+                  label="الحد الأدنى للنقاط"
+                  dir="ltr"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="1"
+                  disabled={!editable || !form.captcha.provider}
+                  value={form.captcha.minScore ?? '0.5'}
+                  onChange={(event) => set('captcha', { minScore: event.target.value })}
+                  hint="يرفض الخادم أي طلب تقلّ نقاطه عن هذا الحد. القيمة الافتراضية 0.5."
+                  fieldClassName="max-w-56"
+                />
+              ) : null}
+
               <p className="flex items-start gap-2 rounded-md bg-warning-100 px-4 py-3 text-xs leading-relaxed text-warning-700">
                 <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                المفتاح السري لا يُحفظ هنا. هذه الإعدادات قابلة للقراءة من المتصفح، فالمفتاح السري
-                يوضع في متغيّرات البيئة على الخادم مع الشيفرة التي تتحقق منه.
+                <span>
+                  المفتاح السري (Secret Key) لا يُحفظ هنا. هذه الإعدادات قابلة للقراءة من متصفّح أي
+                  زائر، فالمفتاح السري يوضع في متغيّرات البيئة على الخادم باسم{' '}
+                  <span className="ltr-run font-medium">RECAPTCHA_SECRET_KEY</span> مع الشيفرة التي
+                  تتحقق منه.
+                </span>
               </p>
             </Card>
 
             <Card className="gap-5">
-              <h2 className="text-base font-bold text-ink">نموذج التواصل</h2>
+              <h2 className="text-base font-bold text-ink">نصوص نموذج التواصل</h2>
               <p className="-mt-3 text-xs leading-relaxed text-ink-muted">
-                يُرسل النموذج إلى GoHighLevel مباشرة ولا تُخزَّن نسخة في لوحة التحكم — مصدر واحد
-                للطلبات بدل مصدرين يتفاوتان.
+                تُحفظ كل الطلبات الواردة في قاعدة البيانات وتظهر في شاشة «طلبات النماذج»، وتُرسل
+                نسخة إلى بريد المنصة.
               </p>
 
               <Input
-                label="وجهة الإرسال (Endpoint)"
+                label="وجهة إضافية (Endpoint)"
                 dir="ltr"
                 disabled={!editable}
                 value={form.forms.contact?.endpoint ?? ''}
@@ -209,7 +319,7 @@ export default function Integrations() {
                     contact: { ...form.forms.contact, endpoint: event.target.value.trim() },
                   })
                 }
-                hint="رابط استقبال النموذج من GoHighLevel."
+                hint="اختياري — رابط استقبال إضافي مثل GoHighLevel."
               />
 
               <div className="grid gap-4 sm:grid-cols-2">

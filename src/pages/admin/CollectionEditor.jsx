@@ -4,10 +4,10 @@ import { ExternalLink, Folders, Star, Trash2 } from 'lucide-react';
 
 import {
   AdminPage,
-  BlockEditor,
   ConfirmDialog,
   DataState,
   ImageField,
+  RichTextEditor,
   SaveBar,
   SeoSection,
   StateBadge,
@@ -24,6 +24,7 @@ import {
   SCHEMA_TYPES,
 } from '@utils/constants.js';
 import { formatDate, readingTime } from '@utils/format.js';
+import { blocksText } from '@utils/richtext.js';
 
 /* ================================================================
    ARTICLE / NEWS / PROGRAM EDITOR (Dashboard spec §3.2, §5, §6)
@@ -141,13 +142,7 @@ export default function CollectionEditor() {
     }
   };
 
-  const bodyWords = useMemo(
-    () =>
-      (form?.body ?? [])
-        .map((block) => (block.type === 'ul' ? (block.items ?? []).join(' ') : (block.text ?? '')))
-        .join(' '),
-    [form],
-  );
+  const bodyWords = useMemo(() => blocksText(form?.body ?? []), [form]);
 
   return (
     <AdminPage
@@ -214,10 +209,14 @@ export default function CollectionEditor() {
                 </Card>
 
                 <Card className="gap-4">
-                  <BlockEditor
+                  <RichTextEditor
                     label="نص المقال"
-                    blocks={form.body ?? []}
+                    // The row id, so switching to another article
+                    // re-seeds the surface and typing never does.
+                    documentKey={id}
+                    value={form.body ?? []}
                     onChange={(body) => set({ body })}
+                    hint="اكتب المقال كاملاً هنا: حدّد النص ثم اختر نوعه من الشريط لتحويله إلى عنوان أو اقتباس أو قائمة، وأدرج الصور من مكتبة الوسائط في موضعها من النص."
                   />
                   <p className="text-xs text-ink-muted">
                     زمن القراءة التقريبي: <span className="ltr-run">{readingTime(bodyWords)}</span>{' '}

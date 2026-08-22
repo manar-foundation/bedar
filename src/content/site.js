@@ -178,9 +178,24 @@ export const footer = {
 export const siteSettings = {
   name: 'بدار',
   legalName: 'منصة بدار للريادة المجتمعية',
+  alternateName: '',
   url: 'https://bedar.org',
   logo: '/src/assets/bedar-logo.svg',
   email: 'info@bedar.org',
+
+  /* The rest of schema.org/Organization (client note ٦). Empty here
+     and editable in the dashboard: an unentered value is OMITTED
+     from the published schema rather than guessed, so seeding a
+     plausible address would be asserting something nobody confirmed.
+     See `utils/schema.js`. */
+  description: '',
+  telephone: '',
+  foundingDate: '',
+  streetAddress: '',
+  addressLocality: '',
+  addressRegion: '',
+  postalCode: '',
+  addressCountry: '',
 
   /**
    * Footer contact rail. `label` is the platform name and `handle`
@@ -211,19 +226,42 @@ export const siteSettings = {
     { id: 'x', label: 'X', handle: '@bedarplatform', href: 'https://x.com/bedarplatform' },
   ],
 
-  /** Injected site-wide — Dashboard spec §11. Empty until configured. */
+  /** Injected site-wide — Dashboard spec §11, client note ٥.
+   *  `SiteHead` reads these and writes them into the document. */
   integrations: {
     gtmContainerId: '',
     searchConsoleVerification: '',
     headCode: '',
     footerCode: '',
+
+    /* The analytics event fired after each form SUCCEEDS, per form
+       (client note ٣). These are defaults an admin overrides in the
+       dashboard — the name must never be fixed in the code, which is
+       why the components read it from here and not from a constant.
+       See `utils/analytics.js`. */
+    formEvents: {
+      contact: 'form_submission',
+      newsletter: 'newsletter_submission',
+    },
   },
 
-  /** Captcha is configurable, never hardcoded — Dashboard spec §4. */
+  /** Captcha is configurable, never hardcoded — Dashboard spec §4,
+   *  client note ٤. Verified server-side; see `lib/captcha.js`. */
   captcha: {
     provider: '', // 'recaptcha' | 'hcaptcha' | 'turnstile'
     siteKey: '',
+    version: 'v2', // reCAPTCHA v2 checkbox vs v3 score
+    minScore: '0.5', // v3 only
     // secret key is server-side only, never stored in this file
+  },
+
+  /** robots.txt and sitemap.xml, both served from `api/` off these
+   *  values (client notes ٧ and ٨). */
+  seo: {
+    robotsTxt: 'User-agent: *\nAllow: /\n',
+    robotsIncludeSitemap: true,
+    sitemapChangefreq: 'weekly',
+    sitemapPriority: '0.7',
   },
 
   /** GDPR — Manar is a Netherlands-registered NGO (Dashboard spec §12). */

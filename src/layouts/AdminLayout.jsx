@@ -10,11 +10,12 @@ import {
   Globe,
   History,
   Image,
+  Inbox,
   LayoutDashboard,
   LogOut,
   Menu,
   Plug,
-  Settings as SettingsIcon,
+  Search,
   ShieldCheck,
   Shuffle,
   Users as UsersIcon,
@@ -58,6 +59,7 @@ const NAV_SECTIONS = [
   {
     title: 'الموقع',
     items: [
+      { to: '/admin/submissions', label: 'طلبات النماذج', icon: Inbox },
       { to: '/admin/redirects', label: 'إعادة التوجيه', icon: Shuffle },
       { to: '/admin/integrations', label: 'التكاملات', icon: Plug },
       { to: '/admin/history', label: 'سجل النسخ', icon: History },
@@ -68,7 +70,11 @@ const NAV_SECTIONS = [
     items: [
       { to: '/admin/users', label: 'المستخدمون', icon: UsersIcon },
       { to: '/admin/security', label: 'الأمان', icon: ShieldCheck },
-      { to: '/admin/settings', label: 'الإعدادات', icon: SettingsIcon },
+      // Renamed from "الإعدادات" per client note ٦ — the screen is
+      // now the site's SEO home (schema, robots.txt, sitemap), and
+      // the old label sent people looking for SEO to the integrations
+      // screen instead.
+      { to: '/admin/settings', label: 'إعدادات SEO', icon: Search },
     ],
   },
 ];

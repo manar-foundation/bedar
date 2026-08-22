@@ -67,6 +67,11 @@ indexes, triggers and RLS policies in the same file that creates it.
   `RichText` renders blocks as React elements, and dashboard-authored HTML
   through `dangerouslySetInnerHTML` would make every editor account an XSS
   vector. RLS does not help there: an editor is authorised to write.
+  This still holds now that the body is edited in a WYSIWYG box: the editor is a
+  surface over the block model, and `htmlToBlocks` (`utils/richtext.js`) is an
+  **allowlist** — it emits only known blocks and marks and reads nothing else.
+  Do not "simplify" it into a sanitiser that strips bad tags from a string; the
+  point is that no string is ever stored.
 - The public site does **not** read Supabase. The dashboard writes to it and the
   Phase 6 publish pipeline writes `src/content/` back into the repo.
 
@@ -90,6 +95,41 @@ indexes, triggers and RLS policies in the same file that creates it.
   Each screen says so on screen; don't "fix" them.
 - A write that RLS refuses comes back as **PGRST116** (zero rows), not 42501 —
   an UPDATE simply matches nothing. Error text has to name both causes.
+- **The rich-text surface is never re-rendered from React state while typing.**
+  Writing `innerHTML` on a contentEditable moves the caret to the start, so
+  `RichTextEditor` seeds the DOM once per document and compares against what it
+  last emitted (`pendingRef`) before ever re-seeding. It is also hidden rather
+  than unmounted in preview mode — unmounting loses the surface the seeding
+  effect has already decided to leave alone, and it comes back empty.
+
+## Things the dashboard now owns that used to be code
+
+Four settings are read at RUNTIME and must not be reintroduced as constants:
+
+- **Form event names** — `integrations.formEvents.<form>`, one per form. Fired
+  only after a submission is stored (`utils/analytics.js`). `DATALAYER_EVENTS`
+  in `constants.js` is the fallback for an empty field, not the source.
+- **GTM, Search Console, head/footer code** — injected by
+  `components/layout/SiteHead.jsx`, on the public site only. Clearing a field
+  removes its snippet; that is part of the requirement, so every effect there
+  returns a real cleanup.
+- **robots.txt** — `seo.robotsTxt`, served by `api/robots.js`. Never add a
+  static `public/robots.txt`: it would win over the rewrite and silently take
+  over.
+- **Organisation schema** — built by `utils/schema.js` from the saved values. An
+  empty field is OMITTED from the output, never filled with a plausible default.
+
+## Form submissions
+
+`api/contact.js` and `api/newsletter.js` do six things in this order: honeypot,
+validate, **verify the captcha**, **store the row**, mail, respond. The captcha
+is verified server-side with a secret that lives outside `src/`; the row is
+written before the email so a mail outage cannot lose a request. Only a 2xx lets
+the browser fire the analytics event.
+
+Both endpoints insert with the **anon key** under the insert-only policy in
+migration 0011. The service-role key must still never appear in Vercel — it
+bypasses every RLS policy in the project.
 
 ## Page layout
 

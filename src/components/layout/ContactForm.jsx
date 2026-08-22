@@ -1,7 +1,12 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { Button, Input, Textarea } from '@components/ui';
+import { useContent } from '@context/ContentContext.jsx';
+import { trackFormSuccess } from '@utils/analytics.js';
+import { FORM_KINDS } from '@utils/constants.js';
 import { cn } from '@utils/cn.js';
+
+import { Captcha } from './Captcha.jsx';
 
 /* ================================================================
    CONTACT FORM — driven entirely by `contact.form` in pages.js.
@@ -18,9 +23,17 @@ import { cn } from '@utils/cn.js';
    Resend. When `onSubmit` is absent the form still degrades to its own
    error message rather than pretending to send.
 
-   Phase 5 adds the `form_submission` dataLayer push on CONFIRMED
-   success only, never on click (Dashboard spec §4.1). Captcha is
-   configurable and mounts here too (`siteSettings.captcha`).
+   THREE THINGS HAPPEN IN ORDER ON SUBMIT (client notes ٢ ٣ ٤)
+   ----------------------------------------------------------------
+   1. A captcha token is obtained (`Captcha`), and sent with the
+      payload. It is VERIFIED ON THE SERVER before anything is stored
+      — see `lib/captcha.js`. Nothing here judges it.
+   2. The endpoint stores the submission and emails it. It rejects on
+      any failure, captcha included, so `await` resolving means the
+      request is safely recorded.
+   3. ONLY THEN the analytics event fires, under the name the
+      dashboard configured for this form — never on click, and never
+      for a submission that failed. See `utils/analytics.js`.
 
    The result is announced with `role="status"` — a colour change
    alone tells a screen reader user nothing.
@@ -28,6 +41,8 @@ import { cn } from '@utils/cn.js';
 
 export function ContactForm({ form, onSubmit, className }) {
   const [status, setStatus] = useState('idle'); // idle | pending | success | error
+  const { settings } = useContent();
+  const captchaRef = useRef(null);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -37,9 +52,22 @@ export function ContactForm({ form, onSubmit, className }) {
     setStatus('pending');
     try {
       if (!onSubmit) throw new Error('contact endpoint not configured');
-      await onSubmit(data);
+
+      const captchaToken = (await captchaRef.current?.getToken()) ?? '';
+      await onSubmit({
+        ...data,
+        captchaToken,
+        // Which page the form was filled on. Several pages carry the
+        // same form, and the dashboard's table shows this so a
+        // request can be traced back to its context.
+        sourcePath: typeof window !== 'undefined' ? window.location.pathname : '',
+      });
+
+      // Resolved = stored. Now, and not one line earlier.
+      trackFormSuccess(settings, FORM_KINDS.CONTACT);
       setStatus('success');
     } catch {
+      captchaRef.current?.reset();
       setStatus('error');
     }
   };
@@ -105,6 +133,8 @@ export function ContactForm({ form, onSubmit, className }) {
           overflow: 'hidden',
         }}
       />
+
+      <Captcha ref={captchaRef} captcha={settings?.captcha} />
 
       <Button type="submit" variant="accent" size="lg" loading={status === 'pending'}>
         {status === 'pending' ? form.pendingLabel : form.submitLabel}

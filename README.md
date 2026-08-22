@@ -403,7 +403,7 @@ followed by a visible swap, which is what the seed-first render used to do. Two
 things bound the wait: a 2 s deadline, and a versioned `localStorage` snapshot of
 the last content this browser saw, which is what gets painted if the deadline
 passes or the read fails. Neither applies when Supabase is unconfigured — there
-`ready` starts true and the seed *is* the site.
+`ready` starts true and the seed _is_ the site.
 
 **Supabase never reaches the public bundle.** `@supabase/supabase-js` is ~53 kB
 gzipped and no public visitor authenticates. `AuthProvider` is therefore mounted
@@ -430,18 +430,19 @@ so bypassing it reveals an empty dashboard, not data.
 Schema, RLS and auth live in `supabase/` — see `supabase/README.md` for the
 setup runbook and the full authorisation model. The short version:
 
-| Table                       | Holds                                                   |
-| --------------------------- | ------------------------------------------------------- |
-| `profiles`                  | dashboard users + role (`admin` / `editor`)             |
-| `pages`, `page_fields`      | per-page content, SEO, publish state, URL               |
-| `collection_items`          | articles, news, programs (one table, one discriminator) |
-| `testimonials`, `faq_items` | the two non-article collections                         |
-| `services`                  | the services band on `/` and on `/services`             |
-| `navigation_items`          | navbar + footer, one ordered tree                       |
-| `site_settings`             | organisation schema, integrations, captcha, consent     |
-| `media`                     | index over the Storage bucket, alt text per file        |
-| `redirects`                 | old path → new path, 301/302                            |
-| `content_versions`          | append-only history of every content edit               |
+| Table                       | Holds                                                       |
+| --------------------------- | ----------------------------------------------------------- |
+| `profiles`                  | dashboard users + role (`admin` / `editor`)                 |
+| `pages`, `page_fields`      | per-page content, SEO, publish state, URL                   |
+| `collection_items`          | articles, news, programs (one table, one discriminator)     |
+| `testimonials`, `faq_items` | the two non-article collections                             |
+| `services`                  | the services band on `/` and on `/services`                 |
+| `navigation_items`          | navbar + footer, one ordered tree                           |
+| `site_settings`             | organisation schema, integrations, captcha, consent         |
+| `media`                     | index over the Storage bucket, alt text per file            |
+| `redirects`                 | old path → new path, 301/302                                |
+| `content_versions`          | append-only history of every content edit                   |
+| `form_submissions`          | contact + newsletter requests, with the form they came from |
 
 Three rules hold the model together, all of them in SQL:
 
@@ -485,19 +486,20 @@ writes Supabase directly; there is no API layer between them, because RLS _is_
 the authorisation layer and a Node tier in front of it would only be a second
 place to forget a policy.
 
-| Screen         | Spec       | What it edits                                                    |
-| -------------- | ---------- | ---------------------------------------------------------------- |
-| لوحة التحكم    | —          | Counts, drafts waiting, recent edits                             |
-| الصفحات        | §2, §5, §6 | Page fields, slug, parent, SEO, publish state                    |
-| الهيدر والفوتر | §3.1       | Navigation tree, header CTA, footer copy                         |
-| المجموعات      | §3.2       | Articles, news, programs, **services**, testimonials, FAQ        |
-| مكتبة الوسائط  | §7         | Upload, alt text, usage, delete                                  |
-| إعادة التوجيه  | §8         | Old path → new path, 301/302, enable                             |
-| التكاملات      | §11, §4    | GTM, Search Console, head/footer code, captcha, form destination |
-| سجل النسخ      | §10        | Every content edit, with restore                                 |
-| المستخدمون     | §9         | Roles, activation                                                |
-| الأمان         | §13        | TOTP enrolment                                                   |
-| الإعدادات      | §6, §12    | Organisation schema, social, consent, own name                   |
+| Screen         | Spec       | What it edits                                                   |
+| -------------- | ---------- | --------------------------------------------------------------- |
+| لوحة التحكم    | —          | Counts, drafts waiting, recent edits                            |
+| الصفحات        | §2, §5, §6 | Page fields, slug, parent, SEO, publish state                   |
+| الهيدر والفوتر | §3.1       | Navigation tree, header CTA, footer copy                        |
+| المجموعات      | §3.2       | Articles, news, programs, **services**, testimonials, FAQ       |
+| مكتبة الوسائط  | §7         | Upload, alt text, usage, delete                                 |
+| طلبات النماذج  | note ٢     | Contact + newsletter submissions, with the form each came from  |
+| إعادة التوجيه  | §8         | Old path → new path, 301/302, enable                            |
+| التكاملات      | §11, §4    | GTM, Search Console, head/footer code, captcha, per-form events |
+| سجل النسخ      | §10        | Every content edit, with restore                                |
+| المستخدمون     | §9         | Roles, activation                                               |
+| الأمان         | §13        | TOTP enrolment                                                  |
+| إعدادات SEO    | §6, §12    | Organisation schema, social, robots.txt, sitemap, consent       |
 
 ### The parts worth knowing before you edit one
 
@@ -517,12 +519,37 @@ loaded and arms `beforeunload` while it is showing. A page is live copy two
 people may be editing; the moment a half-written sentence becomes the public
 site is an editor's decision, not a debounce timer.
 
-**Long-form content is a block array, and there is no rich-text box.**
-`BlockEditor` edits `[{type:'p'|'h2'|'h3'|'quote'|'ul', …}]`, which `RichText`
-renders as React elements. A WYSIWYG producing an HTML string would have to come
-back through `dangerouslySetInnerHTML`, which makes every editor account an XSS
-vector — and RLS does not help there, because an editor is _authorised_ to
-write. The cost (no inline bold, no inline links) is accepted.
+**Long-form content is a block array — edited in one rich-text box.**
+`RichTextEditor` is a contentEditable surface with a toolbar (paragraph, H2, H3,
+quote, bullet and numbered lists, bold, italic, link, image). It replaced
+`BlockEditor`, which made the writer create a numbered "section" card per
+paragraph and pick its type from a dropdown — correct, and miserable to write
+twelve paragraphs in (client note ١).
+
+What it did **not** change is what reaches the database. The surface is a
+WYSIWYG over the block model, not over HTML: every keystroke round-trips through
+`htmlToBlocks` in `src/utils/richtext.js`, which is an **allowlist** — it emits
+only the blocks and inline marks listed there and reads nothing else, so a
+pasted `<script>`, an `onclick`, a `style`, an `<iframe>` or a `javascript:`
+href cannot survive being typed or pasted into it. `RichText` still renders
+those blocks as React elements, so `dangerouslySetInnerHTML` appears nowhere and
+an editor account is still not an XSS vector.
+
+The model gained three things over the old one, all backward compatible: inline
+marks (`spans`), `image` blocks with captions, and ordered lists. A block with
+no marks keeps the plain `{type, text}` shape, so re-saving an untouched article
+does not rewrite 40 kB of migrated Arabic into a new shape.
+
+Two things in that component are load-bearing and easy to undo:
+
+- **The caret rule.** A contentEditable must not be re-rendered from React state
+  as the writer types — rewriting `innerHTML` drops the caret to the top on
+  every keystroke. `pendingRef` holds what the component last emitted so a
+  parent echoing it back is recognised and ignored, while a value it did _not_
+  produce (the save bar's reset, a different row) does re-seed.
+- **The surface is hidden, never unmounted, in preview mode.** Unmounting it
+  loses the DOM the seeding effect has already decided not to rewrite, and the
+  box comes back blank — the article looks deleted.
 
 **Database rules are not re-implemented in the browser.** Featured-item
 exclusivity, the 301 written on a slug rename, the two-level navigation cap and
@@ -535,10 +562,78 @@ reach into Storage, so a half-failure leaves a visible row pointing at a missing
 file — noticeable and retryable — rather than bytes nobody can see.
 
 `src/components/admin/` holds the shared pieces (`AdminPage`, `DataState`,
-`SaveBar`, `FieldEditor`, `BlockEditor`, `ListEditor`, `ImageField`,
-`MediaPicker`, `SeoSection`, `ConfirmDialog`). It is a separate barrel from
-`@components/ui` on purpose: several of these reach the Supabase client, and the
-ui barrel is imported by every public page.
+`SaveBar`, `FieldEditor`, `RichTextEditor`, `ListEditor`, `ImageField`,
+`IconAction`, `MediaPicker`, `SeoSection`, `ConfirmDialog`). It is a separate
+barrel from `@components/ui` on purpose: several of these reach the Supabase
+client, and the ui barrel is imported by every public page.
+
+### Form requests, captcha and analytics events
+
+The public forms are one pipeline, and the order inside it is the requirement
+(client notes ٢, ٣, ٤):
+
+```
+honeypot → validate → verify captcha → STORE the row → send the email → fire the event
+```
+
+- **Every submission is stored** in `form_submissions` and listed at
+  `/admin/submissions`, with the form it came from. The endpoints insert it with
+  the **anon key** under an insert-only RLS policy (migration 0011) — the
+  service-role key still never leaves the seed script. Anon may insert and may
+  not select, so nobody can read a request back out.
+- **Storing happens before mailing.** A Resend outage then loses a notification,
+  not a request; the endpoint still returns 200 because the request _is_ safe,
+  and telling the visitor to send it again would duplicate what we already have.
+- **The captcha is verified on the server**, before the row is written
+  (`lib/captcha.js`). The site key is a dashboard setting; the secret is
+  `RECAPTCHA_SECRET_KEY` in the Vercel environment and lives outside `src/`, so
+  Vite cannot bundle it. reCAPTCHA v2 and v3 are both supported because a site
+  key does not say which it is — the version is a dashboard setting, and
+  guessing wrong makes the form unsubmittable. With a provider configured but no
+  secret deployed the endpoints **refuse** rather than fail open.
+- **The analytics event fires last, and only on success.** Its name is
+  `integrations.formEvents.<form>` in the dashboard, one per form — never a
+  constant in the bundle (`utils/analytics.js`). The old constants survive only
+  as the fallback for an empty field.
+
+### What the dashboard puts in the document
+
+`components/layout/SiteHead.jsx` is mounted once in `PublicLayout` — the public
+site only, so none of it loads in `/admin`. It writes four things, all from
+saved settings and all removable by clearing the field (client notes ٥, ٦):
+
+| From the dashboard      | What lands in the page                                   |
+| ----------------------- | -------------------------------------------------------- |
+| GTM Container ID        | Google's official snippet in `<head>` + the `<noscript>` |
+| Search Console code     | `<meta name="google-site-verification">`                 |
+| Head Code / Footer Code | the snippet, verbatim and **executing**, in place        |
+| Organisation fields     | `Organization` + `WebSite` JSON-LD                       |
+
+`innerHTML` does not execute a `<script>` — the HTML spec says so — which is why
+`utils/injectHtml.js` re-creates each one as a fresh element. That is arbitrary
+script execution by design: the field _is_ that, only an admin can write it
+(`min_role = 'admin'`, enforced in SQL), and an admin who can set it can already
+deploy the site. It is the same reason article bodies, written by **editors**,
+are structured blocks and never HTML.
+
+### robots.txt and sitemap.xml
+
+Both are serverless functions, not files (client notes ٧, ٨):
+
+| URL            | Function         | Source                                           |
+| -------------- | ---------------- | ------------------------------------------------ |
+| `/robots.txt`  | `api/robots.js`  | the `seo.robotsTxt` setting, + a `Sitemap:` line |
+| `/sitemap.xml` | `api/sitemap.js` | published `pages` + `collection_items`, live     |
+
+`vercel.json` rewrites both **before** the SPA catch-all. A static
+`public/robots.txt` would win over the rewrite and silently take over — do not
+add one.
+
+The sitemap is generated per request, so publishing an article adds its URL and
+unpublishing removes it with no deploy. It honours `is_hidden_from_search`, the
+same single switch the page and item editors already show as "إخفاء من محركات
+البحث" — one control that both adds `noindex` and drops the URL, because two
+switches is how a page ends up noindexed and still submitted for crawling.
 
 ## Phased delivery
 
@@ -549,7 +644,7 @@ ui barrel is imported by every public page.
 | 3     | Public pages with verbatim content from bedar.webflow.io        | ✅ Done¹ |
 | 4     | Supabase schema, RLS, Auth + 2FA                                | ✅ Done² |
 | 5     | Admin dashboard (pages, collections, media, SEO, redirects)     | ✅ Done³ |
-| 6     | Publish pipeline: version snapshot → GitHub API → Vercel         | ⏳       |
+| 6     | Publish pipeline: version snapshot → GitHub API → Vercel        | ⏳       |
 | 7     | End-to-end testing, responsive + a11y pass                      | ⏳       |
 
 Routes for every page exist from Phase 1 so navigation, layouts and the 404
@@ -671,11 +766,20 @@ functions.
 These functions read three env vars in Vercel (Production **and** Preview), with
 **no** `VITE_` prefix so the API key never ships to the browser:
 
-| Var                  | Purpose                                    | Default                     |
-| -------------------- | ------------------------------------------ | --------------------------- |
-| `RESEND_API_KEY`     | Resend API key (required)                  | —                           |
-| `CONTACT_TO_EMAIL`   | recipient inbox                            | `info@bedar.org`            |
-| `CONTACT_FROM_EMAIL` | sender (must be on a Resend-verified domain) | `Bedar <onboarding@resend.dev>` |
+| Var                    | Purpose                                                                | Default                                |
+| ---------------------- | ---------------------------------------------------------------------- | -------------------------------------- |
+| `RESEND_API_KEY`       | Resend API key (required)                                              | —                                      |
+| `CONTACT_TO_EMAIL`     | recipient inbox                                                        | `info@bedar.org`                       |
+| `CONTACT_FROM_EMAIL`   | sender (must be on a Resend-verified domain)                           | `Bedar <onboarding@resend.dev>`        |
+| `RECAPTCHA_SECRET_KEY` | captcha secret — required once a provider is selected in the dashboard | —                                      |
+| `SUPABASE_URL`         | for the functions' own reads/writes                                    | falls back to `VITE_SUPABASE_URL`      |
+| `SUPABASE_ANON_KEY`    | same                                                                   | falls back to `VITE_SUPABASE_ANON_KEY` |
+| `SITE_URL`             | canonical origin in robots.txt / sitemap.xml                           | falls back to `VITE_SITE_URL`          |
+
+The Supabase pair is the **anon** key, deliberately: the functions read public
+`site_settings` rows and insert into `form_submissions`, both of which are legal
+for `anon` under a policy written for them. The service-role key bypasses every
+policy in the project and still belongs to the seed script alone.
 
 Until `bedar.org` is verified in Resend, keep `CONTACT_FROM_EMAIL` at the default
 and set `CONTACT_TO_EMAIL` to the address you registered with Resend — Resend only

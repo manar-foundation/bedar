@@ -49,6 +49,7 @@ const CollectionEditor = lazy(() => import('@pages/admin/CollectionEditor.jsx'))
 const MediaLibrary = lazy(() => import('@pages/admin/MediaLibrary.jsx'));
 const Redirects = lazy(() => import('@pages/admin/Redirects.jsx'));
 const Integrations = lazy(() => import('@pages/admin/Integrations.jsx'));
+const Submissions = lazy(() => import('@pages/admin/Submissions.jsx'));
 const Users = lazy(() => import('@pages/admin/Users.jsx'));
 const Security = lazy(() => import('@pages/admin/Security.jsx'));
 const Settings = lazy(() => import('@pages/admin/Settings.jsx'));
@@ -122,6 +123,7 @@ export default function AppRoutes() {
             <Route path="media" element={<MediaLibrary />} />
             <Route path="redirects" element={<Redirects />} />
             <Route path="integrations" element={<Integrations />} />
+            <Route path="submissions" element={<Submissions />} />
             <Route path="users" element={<Users />} />
             {/* Reachable before 2FA enrolment — and the only one.
                 `RequireAuth` sends a user with no factor here and

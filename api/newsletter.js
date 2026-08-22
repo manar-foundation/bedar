@@ -1,13 +1,20 @@
 import { sendEmail, escapeHtml, isEmail, readBody } from '../lib/email.js';
+import { clientIp, verifyCaptcha } from '../lib/captcha.js';
+import { storeSubmission } from '../lib/submissions.js';
 
 /* ================================================================
-   POST /api/newsletter — record a newsletter signup by emailing the
+   POST /api/newsletter — record a newsletter signup and notify the
    site inbox via Resend. Wired to <NewsletterForm> through
    src/services/publicForms.js.
 
-   A signup is delivered as a notification for now; a future step can
-   also push the address into a mailing-list provider from here without
-   touching the client.
+   Same five steps and the same order as `api/contact.js` — honeypot,
+   validate, verify the captcha, STORE, then mail. See that file's
+   header for why the order is what it is.
+
+   The signup now lives in `form_submissions` (client note ٢), so the
+   list of subscribers is a query rather than a search through an
+   inbox. A future step can also push the address into a mailing-list
+   provider from here without touching the client.
    ================================================================ */
 
 export default async function handler(req, res) {
@@ -26,6 +33,22 @@ export default async function handler(req, res) {
     return res.status(422).json({ error: 'Invalid email' });
   }
 
+  const captcha = await verifyCaptcha(body.captchaToken, { remoteIp: clientIp(req) });
+  if (!captcha.ok) {
+    if (captcha.reason === 'misconfigured') {
+      console.error('captcha is enabled in the dashboard but no secret key is set');
+      return res.status(500).json({ error: 'Captcha is not configured' });
+    }
+    return res.status(400).json({ error: 'Captcha verification failed' });
+  }
+
+  try {
+    await storeSubmission({ form: 'newsletter', fields: { email }, body, req });
+  } catch (err) {
+    console.error('storing newsletter signup failed:', err);
+    return res.status(500).json({ error: 'Failed to subscribe' });
+  }
+
   const safe = escapeHtml(email);
   try {
     await sendEmail({
@@ -37,9 +60,10 @@ export default async function handler(req, res) {
       text: `اشتراك جديد في النشرة البريدية: ${email}`,
       replyTo: email,
     });
-    return res.status(200).json({ ok: true });
   } catch (err) {
-    console.error('newsletter subscription failed:', err);
-    return res.status(500).json({ error: 'Failed to subscribe' });
+    // Recorded already — see the same note in api/contact.js.
+    console.error('newsletter notification email failed (signup was stored):', err);
   }
+
+  return res.status(200).json({ ok: true });
 }

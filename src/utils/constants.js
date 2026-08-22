@@ -72,6 +72,24 @@ export const TABLES = {
   MEDIA: 'media',
   REDIRECTS: 'redirects',
   VERSIONS: 'content_versions',
+  FORM_SUBMISSIONS: 'form_submissions',
+};
+
+/**
+ * The forms whose submissions are stored and listed (client note ٢),
+ * and whose success event is named in the dashboard (note ٣).
+ *
+ * The values are the `form_kind` enum in SQL — they are written to
+ * the database by `api/contact.js` and `api/newsletter.js`.
+ */
+export const FORM_KINDS = {
+  CONTACT: 'contact',
+  NEWSLETTER: 'newsletter',
+};
+
+export const FORM_KIND_LABELS = {
+  [FORM_KINDS.CONTACT]: 'نموذج التواصل',
+  [FORM_KINDS.NEWSLETTER]: 'الاشتراك في النشرة',
 };
 
 /** Storage bucket for the media library (Dashboard spec §7). */
@@ -91,6 +109,8 @@ export const SETTINGS_KEYS = {
   CAPTCHA: 'captcha',
   CONSENT: 'consent',
   FORMS: 'forms',
+  /** robots.txt body + sitemap knobs (client notes ٧, ٨). */
+  SEO: 'seo',
 };
 
 /* ── Two-factor authentication (Dashboard spec §13) ─────────────
@@ -129,11 +149,23 @@ export const REDIRECT_CODES = [
   { value: 302, label: '302 — مؤقت' },
 ];
 
-/** GTM dataLayer events, per Dashboard spec §4.1. These fire ONLY on
- *  confirmed submission success, never on click or attempt. */
+/**
+ * FALLBACK dataLayer event names (Dashboard spec §4.1).
+ *
+ * These are no longer the names that fire. Client note ٣ is explicit:
+ * "يجب ألّا يكون اسم الـ Event ثابتًا داخل الكود، بل يتم جلبه من
+ * إعدادات لوحة التحكم لكل نموذج بشكل مستقل" — so the live name comes
+ * from `integrations.formEvents.<form>` and these are only what the
+ * site falls back to when that setting is empty (an unseeded project,
+ * or Supabase unconfigured). Keeping them means turning the setting
+ * on is a change of NAME, never a change from silence to sound.
+ *
+ * Either way the push happens ONLY on a confirmed success — never on
+ * click, and never before the submission is stored.
+ */
 export const DATALAYER_EVENTS = {
-  FORM_SUBMISSION: 'form_submission',
-  NEWSLETTER_SUBMISSION: 'newsletter_submission',
+  [FORM_KINDS.CONTACT]: 'form_submission',
+  [FORM_KINDS.NEWSLETTER]: 'newsletter_submission',
 };
 
 /** Site language. Arabic-only — multilingual is out of scope (§14). */

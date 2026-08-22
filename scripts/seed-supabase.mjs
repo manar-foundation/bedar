@@ -201,12 +201,26 @@ function navigationPlan() {
 
 /* ── Settings ───────────────────────────────────────────────── */
 const SETTINGS = {
+  /* Every schema.org/Organization field the dashboard edits (client
+     note ٦). Listed key by key rather than spread from
+     `siteSettings`, because that object also carries `social`,
+     `integrations`, `captcha`, `seo` and `consent`, each of which is
+     its own row below. */
   organization: {
     name: siteSettings.name,
     legalName: siteSettings.legalName,
+    alternateName: siteSettings.alternateName,
     url: siteSettings.url,
     logo: siteSettings.logo,
     email: siteSettings.email,
+    description: siteSettings.description,
+    telephone: siteSettings.telephone,
+    foundingDate: siteSettings.foundingDate,
+    streetAddress: siteSettings.streetAddress,
+    addressLocality: siteSettings.addressLocality,
+    addressRegion: siteSettings.addressRegion,
+    postalCode: siteSettings.postalCode,
+    addressCountry: siteSettings.addressCountry,
   },
   social: siteSettings.social,
   header_cta: headerCta,
@@ -220,6 +234,7 @@ const SETTINGS = {
   integrations: siteSettings.integrations,
   captcha: siteSettings.captcha,
   consent: siteSettings.consent,
+  seo: siteSettings.seo,
   forms: { contact: pageContent.contact.form },
 };
 
@@ -306,9 +321,47 @@ function check(label, { error }) {
 
 /* Settings — the rows exist from migration 0007 with their
    is_public / min_role metadata. Only the value is written here, so
-   a re-run never resets who is allowed to edit what. */
+   a re-run never resets who is allowed to edit what.
+
+   CONFIGURATION ROWS ARE FILLED, NOT OVERWRITTEN. The seed is the
+   site's COPY — `src/content/` is the source for the words. But
+   `integrations`, `captcha` and `seo` hold things nobody types into
+   a content file: a GTM container id, a captcha site key, a hand
+   written robots.txt. Those are entered once in the dashboard, and
+   a re-run of the seed used to reset them to the empty defaults in
+   `site.js` — which is how a client loses their analytics and their
+   crawl rules to a routine content refresh.
+
+   So for those three the seed only supplies keys the row does not
+   already have, exactly like the `||` merges in migration 0012. */
+const FILL_ONLY = new Set(['integrations', 'captcha', 'seo', 'consent']);
+
+/** `stored` wins over `seeded`, key by key, one level deep. */
+function fillMissing(seeded, stored) {
+  if (!stored || typeof stored !== 'object' || Array.isArray(stored)) return seeded;
+  const out = { ...seeded };
+  for (const [key, value] of Object.entries(stored)) {
+    out[key] =
+      value && typeof value === 'object' && !Array.isArray(value)
+        ? fillMissing(seeded?.[key] ?? {}, value)
+        : value;
+  }
+  return out;
+}
+
+const existing = new Map(
+  ((await db.from('site_settings').select('key, value')).data ?? []).map((row) => [
+    row.key,
+    row.value,
+  ]),
+);
+
 for (const [key, value] of Object.entries(SETTINGS)) {
-  check(`site_settings.${key}`, await db.from('site_settings').update({ value }).eq('key', key));
+  const next = FILL_ONLY.has(key) ? fillMissing(value, existing.get(key)) : value;
+  check(
+    `site_settings.${key}${FILL_ONLY.has(key) ? ' (fill-only)' : ''}`,
+    await db.from('site_settings').update({ value: next }).eq('key', key),
+  );
 }
 
 /* Navigation — parents first, then children, because the child rows

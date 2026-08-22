@@ -5,6 +5,7 @@ import Navbar from '@components/layout/Navbar.jsx';
 import Footer from '@components/layout/Footer.jsx';
 import BackToTop from '@components/layout/BackToTop.jsx';
 import RouteLoader from '@components/layout/RouteLoader.jsx';
+import SiteHead from '@components/layout/SiteHead.jsx';
 import AutoReveal from '@components/motion/AutoReveal.jsx';
 import { useContent } from '@context/ContentContext.jsx';
 
@@ -93,6 +94,13 @@ export default function PublicLayout() {
       data-theme="dark"
       className="public-site page-ambient relative flex min-h-dvh flex-col bg-app"
     >
+      {/* The dashboard's GTM container, Search Console tag, custom
+          head/footer code and Organization schema (client notes ٥
+          and ٦). Renders nothing; it writes to <head> and <body>.
+          Mounted here rather than in `App` so none of it loads on
+          /admin. */}
+      <SiteHead />
+
       <AutoReveal />
 
       <Navbar />

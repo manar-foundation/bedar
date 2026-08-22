@@ -1,8 +1,13 @@
-import { useId, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 
 import { Button } from '@components/ui/Button.jsx';
 import { fieldChrome, fieldTone } from '@components/ui/fieldStyles.js';
+import { useContent } from '@context/ContentContext.jsx';
+import { trackFormSuccess } from '@utils/analytics.js';
+import { FORM_KINDS } from '@utils/constants.js';
 import { cn } from '@utils/cn.js';
+
+import { Captcha } from './Captcha.jsx';
 
 /* ================================================================
    NEWSLETTER FORM — the footer signup, verbatim from
@@ -19,8 +24,11 @@ import { cn } from '@utils/cn.js';
    Resend. When `onSubscribe` is absent the form still degrades to its
    own error message rather than pretending to subscribe.
 
-   Phase 5 (Dashboard spec §4.1) adds the `newsletter_submission`
-   dataLayer push — on CONFIRMED success only, never on click.
+   Captcha, storage and the analytics event work exactly as they do
+   on the contact form, and for the same reasons — see the header of
+   `ContactForm.jsx`. Client note ٤ says "جميع النماذج", so the
+   footer signup is protected too; note ٣ gives it its own event name
+   setting, independent of the contact form's.
 
    The live status is announced with `role="status"` so a screen
    reader user learns the outcome; a colour change alone tells them
@@ -32,6 +40,8 @@ export function NewsletterForm({ newsletter, onSubscribe, className }) {
   const statusId = `${inputId}-status`;
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState('idle'); // idle | pending | success | error
+  const { settings } = useContent();
+  const captchaRef = useRef(null);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -40,10 +50,16 @@ export function NewsletterForm({ newsletter, onSubscribe, className }) {
     setStatus('pending');
     try {
       if (!onSubscribe) throw new Error('newsletter endpoint not configured');
-      await onSubscribe(email);
+
+      const captchaToken = (await captchaRef.current?.getToken()) ?? '';
+      await onSubscribe(email, { captchaToken });
+
+      // Stored and delivered — only now does it count as a signup.
+      trackFormSuccess(settings, FORM_KINDS.NEWSLETTER);
       setStatus('success');
       setEmail('');
     } catch {
+      captchaRef.current?.reset();
       setStatus('error');
     }
   };
@@ -93,6 +109,8 @@ export function NewsletterForm({ newsletter, onSubscribe, className }) {
           'placeholder:[direction:ltr]',
         )}
       />
+
+      <Captcha ref={captchaRef} captcha={settings?.captcha} />
 
       <Button type="submit" variant="accent" loading={status === 'pending'}>
         {status === 'pending' ? newsletter.pendingLabel : newsletter.submitLabel}
