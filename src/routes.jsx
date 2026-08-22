@@ -47,6 +47,7 @@ const GlobalContent = lazy(() => import('@pages/admin/GlobalContent.jsx'));
 const CollectionsList = lazy(() => import('@pages/admin/CollectionsList.jsx'));
 const CollectionEditor = lazy(() => import('@pages/admin/CollectionEditor.jsx'));
 const MediaLibrary = lazy(() => import('@pages/admin/MediaLibrary.jsx'));
+const Submissions = lazy(() => import('@pages/admin/Submissions.jsx'));
 const Redirects = lazy(() => import('@pages/admin/Redirects.jsx'));
 const Integrations = lazy(() => import('@pages/admin/Integrations.jsx'));
 const Users = lazy(() => import('@pages/admin/Users.jsx'));
@@ -120,6 +121,9 @@ export default function AppRoutes() {
               element={<Navigate to="/admin/collections/services" replace />}
             />
             <Route path="media" element={<MediaLibrary />} />
+            {/* Everything the public forms send, saved and triaged
+                here (client notes §2). */}
+            <Route path="submissions" element={<Submissions />} />
             <Route path="redirects" element={<Redirects />} />
             <Route path="integrations" element={<Integrations />} />
             <Route path="users" element={<Users />} />

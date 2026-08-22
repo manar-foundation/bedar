@@ -492,12 +492,17 @@ place to forget a policy.
 | الهيدر والفوتر | §3.1       | Navigation tree, header CTA, footer copy                         |
 | المجموعات      | §3.2       | Articles, news, programs, **services**, testimonials, FAQ        |
 | مكتبة الوسائط  | §7         | Upload, alt text, usage, delete                                  |
+| طلبات النماذج  | notes §2   | Contact + newsletter submissions, filter, triage, CSV export     |
 | إعادة التوجيه  | §8         | Old path → new path, 301/302, enable                             |
-| التكاملات      | §11, §4    | GTM, Search Console, head/footer code, captcha, form destination |
+| التكاملات      | §11, §4    | GTM, Search Console, head/footer code, per-form events, captcha  |
 | سجل النسخ      | §10        | Every content edit, with restore                                 |
 | المستخدمون     | §9         | Roles, activation                                                |
 | الأمان         | §13        | TOTP enrolment                                                   |
-| الإعدادات      | §6, §12    | Organisation schema, social, consent, own name                   |
+| إعدادات SEO    | §6, §12    | Organisation schema, social, robots.txt, sitemap, consent        |
+
+“notes §n” refers to `ملاحظات لوحة التحكم في موقع بدار.docx` — the client's
+follow-up notes, listed under [Source documents](#source-documents). See
+[Client follow-up notes](#client-follow-up-notes) for what each one changed.
 
 ### The parts worth knowing before you edit one
 
@@ -517,12 +522,22 @@ loaded and arms `beforeunload` while it is showing. A page is live copy two
 people may be editing; the moment a half-written sentence becomes the public
 site is an editor's decision, not a debounce timer.
 
-**Long-form content is a block array, and there is no rich-text box.**
-`BlockEditor` edits `[{type:'p'|'h2'|'h3'|'quote'|'ul', …}]`, which `RichText`
-renders as React elements. A WYSIWYG producing an HTML string would have to come
-back through `dangerouslySetInnerHTML`, which makes every editor account an XSS
-vector — and RLS does not help there, because an editor is _authorised_ to
-write. The cost (no inline bold, no inline links) is accepted.
+**Long-form content is ONE rich-text field, still stored as a block array.**
+`RichTextEditor` is a `contentEditable` surface with a toolbar — headings,
+paragraphs, images, quotes, lists, bold, italic and links written in place,
+which is what the client's notes §1 asked for. What it SAVES is unchanged:
+`utils/richtext.js` serialises the editable DOM back to
+`[{type:'p'|'h2'|'h3'|'h4'|'quote'|'ul'|'ol'|'image'|'divider', …}]`, and
+`RichText` renders those as React elements.
+
+Storing the editor's HTML instead would mean rendering dashboard-authored markup
+through `dangerouslySetInnerHTML`, which makes every editor account an XSS
+vector — RLS does not help, because an editor is _authorised_ to write. So
+`domToBlocks` is both the serialiser and the sanitiser: it keeps only what the
+block model can express, which drops pasted `<script>`, `<style>`, inline
+handlers, `javascript:` hrefs and `data:` images on the way through. Bodies
+written in the old `{type, text}` shape still render — `normalizeBlocks` is the
+one place that knows about it, so no content migration was needed.
 
 **Database rules are not re-implemented in the browser.** Featured-item
 exclusivity, the 301 written on a slug rename, the two-level navigation cap and
@@ -535,8 +550,8 @@ reach into Storage, so a half-failure leaves a visible row pointing at a missing
 file — noticeable and retryable — rather than bytes nobody can see.
 
 `src/components/admin/` holds the shared pieces (`AdminPage`, `DataState`,
-`SaveBar`, `FieldEditor`, `BlockEditor`, `ListEditor`, `ImageField`,
-`MediaPicker`, `SeoSection`, `ConfirmDialog`). It is a separate barrel from
+`SaveBar`, `FieldEditor`, `RichTextEditor`, `ListEditor`, `ImageField`,
+`MediaPicker`, `SeoSection`, `ConfirmDialog`, `IconAction`). It is a separate barrel from
 `@components/ui` on purpose: several of these reach the Supabase client, and the
 ui barrel is imported by every public page.
 
@@ -648,14 +663,34 @@ auto-detected from Vite (`npm run build` → `dist`); `.nvmrc` pins the Node maj
 refresh on `/programs` returns a 404), the permanent `/program/*` →
 `/programs/*` redirect, security headers, and immutable caching for
 fingerprinted assets. `netlify.toml` is kept for the previous host and is
-ignored by Vercel.
+ignored by Vercel — note that it does NOT carry the two rewrites below, so
+`/robots.txt` and `/sitemap.xml` only work on Vercel.
+
+**Two paths are served by functions, not by files.** They are rewrites listed
+BEFORE the SPA fallback, so they win over it:
+
+| Path           | Function          | Why not a static file                                            |
+| -------------- | ----------------- | ---------------------------------------------------------------- |
+| `/robots.txt`  | `api/robots.js`   | Its body is a dashboard field (notes §7), read per request       |
+| `/sitemap.xml` | `api/sitemap.js`  | Built from published rows per request (notes §8), no redeploy    |
+
+Both degrade to a sane default if Supabase is unreachable — a crawler that gets
+an error for `robots.txt` may treat the whole site as disallowed, so that
+endpoint must not be able to fail.
 
 **Environment variables.** Every `VITE_*` key in `.env.example` must be set in
 Project → Settings → Environment Variables, for Production, Preview and
 Development. Vite INLINES them at build time, so changing one needs a redeploy,
 not a restart — and a missing one ships as an empty string rather than failing
-the build. `SUPABASE_SERVICE_ROLE_KEY` belongs to the seed script only and must
-never be added to Vercel.
+the build.
+
+`SUPABASE_SERVICE_ROLE_KEY` **is now required in Vercel too.** It used to belong
+to the seed script alone; `api/contact.js` and `api/newsletter.js` use it to
+write `form_submissions` (notes §2). That table deliberately has no anon write
+policy — an anon `INSERT` policy would be an open, unauthenticated write
+endpoint into the database, reachable by anyone holding the anon key that ships
+in the bundle. The key bypasses every RLS policy, so it must never be given a
+`VITE_` prefix and must never appear in `src/`.
 
 ### Form delivery (contact + newsletter)
 
@@ -671,25 +706,84 @@ functions.
 These functions read three env vars in Vercel (Production **and** Preview), with
 **no** `VITE_` prefix so the API key never ships to the browser:
 
-| Var                  | Purpose                                    | Default                     |
-| -------------------- | ------------------------------------------ | --------------------------- |
-| `RESEND_API_KEY`     | Resend API key (required)                  | —                           |
-| `CONTACT_TO_EMAIL`   | recipient inbox                            | `info@bedar.org`            |
-| `CONTACT_FROM_EMAIL` | sender (must be on a Resend-verified domain) | `Bedar <onboarding@resend.dev>` |
+| Var                         | Purpose                                      | Default                         |
+| --------------------------- | -------------------------------------------- | ------------------------------- |
+| `RESEND_API_KEY`            | Resend API key (required)                    | —                               |
+| `CONTACT_TO_EMAIL`          | recipient inbox                              | `info@bedar.org`                |
+| `CONTACT_FROM_EMAIL`        | sender (must be on a Resend-verified domain) | `Bedar <onboarding@resend.dev>` |
+| `RECAPTCHA_SECRET_KEY`      | verifies each submission with Google (§4)    | — (unset ⇒ check skipped)       |
+| `SUPABASE_SERVICE_ROLE_KEY` | writes `form_submissions` (§2)               | — (unset ⇒ email only)          |
+| `SITE_URL`                  | absolute origin for robots/sitemap links     | `VITE_SITE_URL`, then the host  |
 
 Until `bedar.org` is verified in Resend, keep `CONTACT_FROM_EMAIL` at the default
 and set `CONTACT_TO_EMAIL` to the address you registered with Resend — Resend only
 delivers to the account owner before a domain is verified. After verifying,
 switch `CONTACT_FROM_EMAIL` to e.g. `Bedar <noreply@bedar.org>` and
-`CONTACT_TO_EMAIL` to `info@bedar.org`. The contact form carries a hidden
-honeypot field the endpoints silently drop. To test locally, use `vercel dev`
-(plain `npm run dev` serves no functions, so the form's fetch 404s).
+`CONTACT_TO_EMAIL` to `info@bedar.org`.
+
+**What a submission goes through, in order:** honeypot → reCAPTCHA verified
+server-side with Google → field validation → `INSERT` into `form_submissions`
+→ notification email. The record comes before the email deliberately: Resend
+being down, or the inbox filtering the message, used to mean an enquiry that
+never existed. Once the row is written the endpoint answers 200 even if the
+email fails, because the enquiry IS saved and a 500 would invite a
+resubmission that duplicates it.
+
+Both fail-safes are explicit. With `RECAPTCHA_SECRET_KEY` unset the captcha
+check is SKIPPED (so a preview deploy still works) and the skip is recorded on
+the row rather than looking like a pass. With `SUPABASE_SERVICE_ROLE_KEY` unset
+nothing is stored and the function logs a warning — the dashboard screen will
+be empty and that warning is the only clue, so check it first if it is.
+
+To test locally, use `vercel dev` (plain `npm run dev` serves no functions, so
+the form's fetch 404s, and `/robots.txt` and `/sitemap.xml` do not resolve).
 
 **Rollback** — two independent safety nets:
 
 - _Vercel:_ Deployments tab → "Promote to Production" on any earlier build.
   Instant, no rebuild.
 - _GitHub:_ `git revert` at the code level.
+
+---
+
+## Client follow-up notes
+
+`ملاحظات لوحة التحكم في موقع بدار.docx` (Aug 2026) is a second round of
+requirements on top of the dashboard spec. All eight are implemented; this is
+where each one lives.
+
+| #  | Requirement                                        | Where it lives                                                                              |
+| -- | -------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| §1 | One Rich Text field for an article body             | `components/admin/RichTextEditor.jsx` + `utils/richtext.js`; renders via `components/ui/RichText.jsx` |
+| §2 | Every form submission saved and managed             | `form_submissions` table (migration 0011), written by `api/*`, read by `/admin/submissions`  |
+| §3 | A dashboard-named analytics Event per form          | `integrations.formEvents.*` → `utils/analytics.js`, fired by each form on confirmed success  |
+| §4 | reCAPTCHA on every form, secret server-side         | `hooks/useCaptcha.js` (browser) + `lib/recaptcha.js` (verify) before any write               |
+| §5 | Integrations actually injected site-wide            | `components/layout/SiteIntegrations.jsx`, mounted on `PublicLayout`                          |
+| §6 | Editable Organization schema, emitted as JSON-LD    | `utils/schema.js` + `components/layout/SiteSchema.jsx`; edited in "إعدادات SEO"              |
+| §7 | `robots.txt` editable from the dashboard            | `seo.robotsTxt` setting → `api/robots.js` at `/robots.txt`                                   |
+| §8 | Dynamic `sitemap.xml` honouring the exclude switch  | `api/sitemap.js` at `/sitemap.xml`                                                           |
+
+Three things are worth calling out because they look like gaps and are not:
+
+**The captcha key supplied with the notes is reCAPTCHA v2 _invisible_.** Google's
+checkbox anchor rejects it as the wrong key type while the invisible anchor
+accepts it — the opposite way round from a v3 key, which neither accepts. So
+`captcha.version` defaults to `v2-invisible`. All three modes are implemented,
+selectable from the dashboard, because swapping the key later must not need a
+deploy.
+
+**The captcha SECRET key is not in the database and has no dashboard field.**
+`site_settings` is readable by anonymous visitors — a secret stored there is a
+secret published on the website. It lives in `RECAPTCHA_SECRET_KEY` next to
+`lib/recaptcha.js`, which is what §4's own technical note asks for.
+
+**The custom head/footer code fields execute administrator-supplied
+JavaScript**, because that is what §5 asks for in as many words. The gate is
+`min_role = 'admin'` on that settings row, enforced in SQL by a policy that
+composes the role check with `has_required_aal()` — so writing it needs an admin
+who has presented a second factor. It is the same trust boundary Webflow and
+WordPress put around their own custom-code fields, and the opposite of the call
+made for article bodies (§1), which an _editor_ authors.
 
 ---
 
@@ -712,5 +806,7 @@ to 7.11.0 and lose seven minors of fixes for no gain.
 
 - `Bedar_Website_Infrastructure.docx` — hosting, repo structure, deploy workflow
 - `Bedar_Dashboard_Specification.docx` — dashboard scope for v1
+- `ملاحظات لوحة التحكم في موقع بدار.docx` — client follow-up notes (Aug 2026),
+  see [Client follow-up notes](#client-follow-up-notes)
 - `Bedar Design System (2)/` — tokens, foundations, component kit
 - Live reference: <https://bedar.webflow.io/> · Production: <https://www.bedar.org>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Info, Lock, Plug } from 'lucide-react';
+import { Info, Lock, Plug, ShieldCheck } from 'lucide-react';
 
 import { AdminPage, DataState, SaveBar } from '@components/admin';
 import { Card, Input, Select, Textarea } from '@components/ui';
@@ -7,10 +7,17 @@ import { useAuth } from '@context/AuthContext.jsx';
 import { useToast } from '@context/ToastContext.jsx';
 import { useAsyncData } from '@hooks/useAsyncData.js';
 import { canEditSetting, listSettings, updateSetting } from '@services/settingsService.js';
-import { DATALAYER_EVENTS, SETTINGS_KEYS } from '@utils/constants.js';
+import {
+  CAPTCHA_VERSIONS,
+  DATALAYER_EVENTS,
+  FORM_KEYS,
+  FORM_LABELS,
+  SETTINGS_KEYS,
+} from '@utils/constants.js';
 
 /* ================================================================
-   INTEGRATIONS & CUSTOM CODE (Dashboard spec §11, §4)
+   INTEGRATIONS & CUSTOM CODE (Dashboard spec §11, §4;
+   client notes §3, §4, §5)
 
    Everything on this screen changes how the site BEHAVES rather than
    what it says, so every row here is `min_role = 'admin'` in SQL and
@@ -18,21 +25,44 @@ import { DATALAYER_EVENTS, SETTINGS_KEYS } from '@utils/constants.js';
    would make an editor think the feature does not exist and ask for
    it to be built.
 
-   The captcha SECRET key is deliberately absent. `site_settings` is
-   readable by anonymous visitors (the organisation block feeds the
-   Organization schema and the captcha SITE key is public by
-   definition), so a secret stored here would be a secret published
-   on the website. It belongs in the Netlify function environment /
-   Supabase Vault, next to the code that verifies the token.
+   WHAT THESE FIELDS NOW DO
+   ----------------------------------------------------------------
+   They used to be stored and nothing else. Every one of them is now
+   read at runtime:
+
+     GTM id / verification / head / footer
+                    `components/layout/SiteIntegrations.jsx`,
+                    mounted on the public shell (§5)
+     form events    `utils/analytics.js`, fired by each form on
+                    CONFIRMED success (§3)
+     captcha        `hooks/useCaptcha.js` in the browser and
+                    `lib/recaptcha.js` on the server (§4)
+
+   The captcha SECRET key is deliberately absent, and there is
+   nowhere on this screen to type it. `site_settings` is readable by
+   anonymous visitors (the organisation block feeds the Organization
+   schema and the captcha SITE key is public by definition), so a
+   secret stored here would be a secret published on the website. It
+   belongs in `RECAPTCHA_SECRET_KEY` in the serverless environment,
+   next to the code that verifies the token — which is exactly what
+   the client's own note §4 asks for.
    ================================================================ */
 
 const KEYS = [SETTINGS_KEYS.INTEGRATIONS, SETTINGS_KEYS.CAPTCHA, SETTINGS_KEYS.FORMS];
 
+/* Only reCAPTCHA is implemented, so only reCAPTCHA is offered. The
+   list used to carry hCaptcha and Turnstile, which stored a value
+   that no code read — a setting that silently does nothing is worse
+   than one that is missing, because it looks like protection. */
 const CAPTCHA_PROVIDERS = [
   { value: '', label: 'بدون حماية' },
   { value: 'recaptcha', label: 'Google reCAPTCHA' },
-  { value: 'hcaptcha', label: 'hCaptcha' },
-  { value: 'turnstile', label: 'Cloudflare Turnstile' },
+];
+
+const CAPTCHA_VERSION_OPTIONS = [
+  { value: CAPTCHA_VERSIONS.V2_INVISIBLE, label: 'v2 — غير مرئي (Invisible)' },
+  { value: CAPTCHA_VERSIONS.V2_CHECKBOX, label: 'v2 — مربّع الاختيار (Checkbox)' },
+  { value: CAPTCHA_VERSIONS.V3, label: 'v3 — تقييم صامت (Score)' },
 ];
 
 export default function Integrations() {
@@ -59,6 +89,12 @@ export default function Integrations() {
 
   const set = (key, patch) =>
     setForm((current) => ({ ...current, [key]: { ...current[key], ...patch } }));
+
+  /** One form's analytics event name (client notes §3). */
+  const setEvent = (formKey, value) =>
+    set('integrations', {
+      formEvents: { ...(form.integrations.formEvents ?? {}), [formKey]: value },
+    });
 
   const save = async () => {
     setSaving(true);
@@ -106,7 +142,7 @@ export default function Integrations() {
                 onChange={(event) =>
                   set('integrations', { gtmContainerId: event.target.value.trim() })
                 }
-                hint="حاوية واحدة تكفي — تحليلات GA4 تُدار من داخلها، لا من هنا."
+                hint="عند الحفظ يُركَّب كود Google Tag Manager تلقائياً على كل صفحات الموقع. اتركه فارغاً لإزالته. حاوية واحدة تكفي — تحليلات GA4 تُدار من داخلها."
               />
 
               <Input
@@ -117,19 +153,37 @@ export default function Integrations() {
                 onChange={(event) =>
                   set('integrations', { searchConsoleVerification: event.target.value.trim() })
                 }
-                hint="قيمة الوسم google-site-verification فقط، بلا وسم HTML."
+                hint="قيمة الوسم google-site-verification فقط، بلا وسم HTML. تُضاف تلقائياً داخل <head> في كل الصفحات."
               />
+            </Card>
+
+            {/* ── §3 · one event name per form ─────────────────── */}
+            <Card className="gap-5">
+              <h2 className="text-base font-bold text-ink">أحداث النماذج (Events)</h2>
+              <p className="-mt-3 text-xs leading-relaxed text-ink-muted">
+                اسم الحدث الذي يُطلَق إلى dataLayer بعد نجاح إرسال كل نموذج، لاستخدامه في Google
+                Analytics / Google Tag Manager لتتبّع التحويلات. الاسم يُقرأ من هنا ولا يُكتب في
+                الكود، فتغييره لا يحتاج إلى تعديل برمجي.
+              </p>
+
+              {[FORM_KEYS.CONTACT, FORM_KEYS.NEWSLETTER].map((formKey) => (
+                <Input
+                  key={formKey}
+                  label={`حدث ${FORM_LABELS[formKey]}`}
+                  dir="ltr"
+                  placeholder={DATALAYER_EVENTS[formKey]}
+                  disabled={!editable}
+                  value={form.integrations.formEvents?.[formKey] ?? ''}
+                  onChange={(event) => setEvent(formKey, event.target.value.trim())}
+                  hint={`إذا تُرك فارغاً يُستخدم الاسم الافتراضي ${DATALAYER_EVENTS[formKey]}.`}
+                />
+              ))}
 
               <p className="flex items-start gap-2 rounded-md bg-info-100 px-4 py-3 text-xs leading-relaxed text-info-700">
                 <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
                 <span>
-                  يُرسل الموقع حدثي{' '}
-                  <span className="ltr-run font-medium">{DATALAYER_EVENTS.FORM_SUBMISSION}</span> و{' '}
-                  <span className="ltr-run font-medium">
-                    {DATALAYER_EVENTS.NEWSLETTER_SUBMISSION}
-                  </span>{' '}
-                  إلى dataLayer عند نجاح الإرسال فعلياً — لا عند الضغط على الزر — حتى تعكس التقارير
-                  إرسالات حقيقية لا محاولات.
+                  يُطلَق الحدث <strong>بعد</strong> نجاح الإرسال وحفظ البيانات فعلياً — لا عند الضغط
+                  على زر الإرسال — حتى تعكس التقارير إرسالات حقيقية لا محاولات.
                 </span>
               </p>
             </Card>
@@ -137,8 +191,8 @@ export default function Integrations() {
             <Card className="gap-5">
               <h2 className="text-base font-bold text-ink">أكواد مخصّصة</h2>
               <p className="-mt-3 text-xs leading-relaxed text-ink-muted">
-                تُحقن في كل صفحات الموقع. أكواد GoHighLevel الخاصة بصفحة برنامج معيّن ليست من هنا —
-                توضع داخل الصفحة نفسها بالتنسيق مع فريق التطوير.
+                تُحفظ كما تُدخل بلا تعديل، وتُنفَّذ في مكانها من الصفحة على كل صفحات الموقع — لا
+                تظهر للزائر كنص.
               </p>
 
               <Textarea
@@ -149,6 +203,7 @@ export default function Integrations() {
                 value={form.integrations.headCode ?? ''}
                 onChange={(event) => set('integrations', { headCode: event.target.value })}
                 className="font-mono text-xs"
+                hint="يُحقن داخل وسم <head>."
               />
 
               <Textarea
@@ -159,13 +214,21 @@ export default function Integrations() {
                 value={form.integrations.footerCode ?? ''}
                 onChange={(event) => set('integrations', { footerCode: event.target.value })}
                 className="font-mono text-xs"
+                hint="يُحقن في نهاية الصفحة قبل إغلاق وسم </body>."
               />
+
+              <p className="flex items-start gap-2 rounded-md bg-warning-100 px-4 py-3 text-xs leading-relaxed text-warning-700">
+                <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                هذان الحقلان يُنفّذان أي كود JavaScript تضعه فيهما على كل صفحات الموقع. الصلاحية
+                للمديرين فقط، ولا تُلصق فيهما كوداً من مصدر لا تثق به.
+              </p>
             </Card>
 
+            {/* ── §4 · reCAPTCHA ───────────────────────────────── */}
             <Card className="gap-5">
-              <h2 className="text-base font-bold text-ink">الحماية من السبام</h2>
+              <h2 className="text-base font-bold text-ink">الحماية من السبام (CAPTCHA)</h2>
               <p className="-mt-3 text-xs leading-relaxed text-ink-muted">
-                المزوّد قابل للتبديل من هنا، فتغييره لاحقاً لا يحتاج إلى تعديل برمجي.
+                يُطبَّق على كل نماذج الموقع: نموذج التواصل ونموذج الاشتراك في النشرة البريدية.
               </p>
 
               <Select
@@ -174,6 +237,15 @@ export default function Integrations() {
                 value={form.captcha.provider ?? ''}
                 onChange={(event) => set('captcha', { provider: event.target.value })}
                 options={CAPTCHA_PROVIDERS}
+              />
+
+              <Select
+                label="الإصدار"
+                disabled={!editable || !form.captcha.provider}
+                value={form.captcha.version ?? CAPTCHA_VERSIONS.V2_INVISIBLE}
+                onChange={(event) => set('captcha', { version: event.target.value })}
+                options={CAPTCHA_VERSION_OPTIONS}
+                hint="المفتاح المستخدم حالياً من نوع v2 غير مرئي. غيّر هذا الحقل فقط إذا استُبدل المفتاح بمفتاح من نوع آخر."
               />
 
               <Input
@@ -186,17 +258,21 @@ export default function Integrations() {
               />
 
               <p className="flex items-start gap-2 rounded-md bg-warning-100 px-4 py-3 text-xs leading-relaxed text-warning-700">
-                <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                المفتاح السري لا يُحفظ هنا. هذه الإعدادات قابلة للقراءة من المتصفح، فالمفتاح السري
-                يوضع في متغيّرات البيئة على الخادم مع الشيفرة التي تتحقق منه.
+                <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                <span>
+                  المفتاح السري (Secret Key) لا يُحفظ هنا ولا في قاعدة البيانات. هذه الإعدادات قابلة
+                  للقراءة من المتصفح، فالمفتاح السري يوضع في متغيّر البيئة{' '}
+                  <span className="ltr-run font-medium">RECAPTCHA_SECRET_KEY</span> على الخادم، مع
+                  الشيفرة التي تتحقق من كل طلب قبل قبوله أو حفظه.
+                </span>
               </p>
             </Card>
 
             <Card className="gap-5">
               <h2 className="text-base font-bold text-ink">نموذج التواصل</h2>
               <p className="-mt-3 text-xs leading-relaxed text-ink-muted">
-                يُرسل النموذج إلى GoHighLevel مباشرة ولا تُخزَّن نسخة في لوحة التحكم — مصدر واحد
-                للطلبات بدل مصدرين يتفاوتان.
+                تُحفظ كل الطلبات في قاعدة البيانات وتظهر في قسم «طلبات النماذج»، وتُرسل نسخة إشعار
+                بالبريد الإلكتروني. يمكن إضافة وجهة خارجية إضافية أدناه.
               </p>
 
               <Input
@@ -209,7 +285,7 @@ export default function Integrations() {
                     contact: { ...form.forms.contact, endpoint: event.target.value.trim() },
                   })
                 }
-                hint="رابط استقبال النموذج من GoHighLevel."
+                hint="اختياري — رابط استقبال خارجي إن وُجد."
               />
 
               <div className="grid gap-4 sm:grid-cols-2">

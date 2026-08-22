@@ -141,7 +141,26 @@ able to edit it, and a new article has to reach the homepage with no code change
 
 ## Specs
 
-`Bedar_Dashboard_Specification.docx` and `Bedar_Website_Infrastructure.docx` in
-`~/Downloads` are the contract. When in doubt about dashboard scope, check §14 of
-the dashboard spec — several tempting features (visual page builder, multilingual,
-editable 404, maintenance mode, theme controls) are explicitly out of scope for v1.
+Three documents in `~/Downloads` are the contract:
+
+- `Bedar_Dashboard_Specification.docx` — dashboard scope for v1
+- `Bedar_Website_Infrastructure.docx` — hosting, repo, deploy
+- `ملاحظات لوحة التحكم في موقع بدار.docx` — client follow-up notes (Aug 2026),
+  eight numbered items. All implemented; the README's "Client follow-up notes"
+  table says where each one lives. Cite them as "notes §n" to keep them
+  distinct from the dashboard spec's own §n.
+
+When in doubt about dashboard scope, check §14 of the dashboard spec — several
+tempting features (visual page builder, multilingual, editable 404, maintenance
+mode, theme controls) are explicitly out of scope for v1.
+
+The follow-up notes changed two things this file used to state flatly:
+
+- **Article bodies are now edited as ONE rich-text field** (notes §1), but they
+  are still STORED as a block array and still rendered by `RichText` as React
+  elements. `utils/richtext.js` is the seam, and `domToBlocks` is both the
+  serialiser and the sanitiser. The no-`dangerouslySetInnerHTML` rule below is
+  unchanged — do not "simplify" it by storing the editor's HTML.
+- **The public forms now write to the database** (notes §2), through the
+  serverless functions in `api/`, using the service-role key. They are the only
+  writer of `form_submissions`; that table has no anon insert policy on purpose.

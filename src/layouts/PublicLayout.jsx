@@ -5,6 +5,8 @@ import Navbar from '@components/layout/Navbar.jsx';
 import Footer from '@components/layout/Footer.jsx';
 import BackToTop from '@components/layout/BackToTop.jsx';
 import RouteLoader from '@components/layout/RouteLoader.jsx';
+import SiteIntegrations from '@components/layout/SiteIntegrations.jsx';
+import SiteSchema from '@components/layout/SiteSchema.jsx';
 import AutoReveal from '@components/motion/AutoReveal.jsx';
 import { useContent } from '@context/ContentContext.jsx';
 
@@ -65,22 +67,43 @@ import { useContent } from '@context/ContentContext.jsx';
  * Supabase is unconfigured, and the context opens it after two
  * seconds regardless, so the slow path costs a bounded wait rather
  * than the site.
+ *
+ * WHAT THE SHELL CARRIES BESIDES THE PAGE
+ * ----------------------------------------------------------------
+ * `SiteIntegrations` (GTM, Search Console, the dashboard's custom
+ * head/footer code) and `SiteSchema` (site-wide Organization
+ * JSON-LD) are mounted OUTSIDE the `ready` gate, so a tag manager
+ * is installed and the structured data is in <head> from the first
+ * paint rather than after the content read settles. Both render
+ * nothing and both are mounted HERE rather than in `App`, because
+ * neither belongs on the dashboard — see the header of
+ * `SiteIntegrations.jsx`.
  */
 export default function PublicLayout() {
   const { pathname } = useLocation();
   const { ready } = useContent();
 
+  const chrome = (
+    <>
+      <SiteIntegrations />
+      <SiteSchema />
+    </>
+  );
+
   if (!ready) {
     return (
-      <div
-        data-theme="dark"
-        className="public-site page-ambient flex min-h-dvh flex-col justify-center bg-app"
-        // The page has no content yet and the loader speaks for it;
-        // announcing a half-built document underneath would be noise.
-        aria-busy="true"
-      >
-        <RouteLoader />
-      </div>
+      <>
+        {chrome}
+        <div
+          data-theme="dark"
+          className="public-site page-ambient flex min-h-dvh flex-col justify-center bg-app"
+          // The page has no content yet and the loader speaks for it;
+          // announcing a half-built document underneath would be noise.
+          aria-busy="true"
+        >
+          <RouteLoader />
+        </div>
+      </>
     );
   }
 
@@ -93,6 +116,7 @@ export default function PublicLayout() {
       data-theme="dark"
       className="public-site page-ambient relative flex min-h-dvh flex-col bg-app"
     >
+      {chrome}
       <AutoReveal />
 
       <Navbar />
