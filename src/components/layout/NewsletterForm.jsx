@@ -13,11 +13,11 @@ import { cn } from '@utils/cn.js';
    to be dashboard-editable, so not one of those strings is written
    into this file.
 
-   NOT YET WIRED. There is no subscribe endpoint until Phase 4, so
-   `onSubscribe` is undefined today and a submission resolves to the
-   site's own error message — which is the truth, not a simulation:
-   there is nothing to submit to. The moment Phase 4 passes a real
-   `onSubscribe`, the success path works with no change here.
+   WIRED to `/api/newsletter` (a Vercel serverless function) through
+   `services/publicForms.js`, passed in as `onSubscribe` from the
+   Footer. That endpoint emails the signup to the site inbox via
+   Resend. When `onSubscribe` is absent the form still degrades to its
+   own error message rather than pretending to subscribe.
 
    Phase 5 (Dashboard spec §4.1) adds the `newsletter_submission`
    dataLayer push — on CONFIRMED success only, never on click.

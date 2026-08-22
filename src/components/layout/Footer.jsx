@@ -4,6 +4,7 @@ import { Mail } from 'lucide-react';
 import Logo from '@components/ui/Logo.jsx';
 import { SocialIcon } from '@components/ui/SocialIcon.jsx';
 import { NewsletterForm } from './NewsletterForm.jsx';
+import { subscribeNewsletter } from '@services/publicForms.js';
 import { useContent } from '@context/ContentContext.jsx';
 import { cn } from '@utils/cn.js';
 
@@ -213,7 +214,11 @@ export default function Footer() {
             {/* ── Newsletter ─────────────────────────────────── */}
             <div className="col-span-2 lg:col-span-1">
               <ColumnTitle>{footer.newsletter.title}</ColumnTitle>
-              <NewsletterForm newsletter={footer.newsletter} className="mt-5" />
+              <NewsletterForm
+                newsletter={footer.newsletter}
+                onSubscribe={subscribeNewsletter}
+                className="mt-5"
+              />
             </div>
           </div>
         </div>
