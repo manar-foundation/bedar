@@ -123,7 +123,13 @@ export function HeroArtwork({ alt, className }) {
         viewBox="0 0 720 820"
         fill="none"
         preserveAspectRatio="xMinYMax slice"
-        className="hero-lines pointer-events-none absolute bottom-[-12%] start-[-38%] h-[135%] w-[178%] ltr:-scale-x-100"
+        // Below `lg` the hero stacks (copy + buttons above, artwork
+        // below), and the arcs bleed up out of the artwork box far
+        // enough to clip into the CTA frame (client, mobile notes). A
+        // deeper negative `bottom` slides the whole arc set down so it
+        // clears the buttons; `lg:` restores the original offset for the
+        // side-by-side desktop layout, where nothing sits above the arcs.
+        className="hero-lines pointer-events-none absolute bottom-[-26%] start-[-38%] h-[135%] w-[178%] lg:bottom-[-12%] ltr:-scale-x-100"
       >
         {ARCS.map((arc, i) => (
           <path
