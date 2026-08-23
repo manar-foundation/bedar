@@ -770,12 +770,24 @@ where each one lives.
 
 Three things are worth calling out because they look like gaps and are not:
 
-**The captcha key supplied with the notes is reCAPTCHA v2 _invisible_.** Google's
-checkbox anchor rejects it as the wrong key type while the invisible anchor
-accepts it — the opposite way round from a v3 key, which neither accepts. So
-`captcha.version` defaults to `v2-invisible`. All three modes are implemented,
-selectable from the dashboard, because swapping the key later must not need a
-deploy.
+**The site targets reCAPTCHA v2 _checkbox_ — a visible "أنا لست برنامج روبوت"
+box in both public forms — but the key supplied with the notes is v2
+_invisible_ and cannot serve one.** Probed against Google's anchor on the key's
+own registered domain (`bedar.org`): `size=invisible` renders, `size=normal`
+answers `Invalid input`. A site key is issued for exactly one mode, so
+`captcha.version` and `captcha.siteKey` must change TOGETHER — flipping the
+version alone puts `Invalid key type` where the checkbox should be and makes
+both forms unsubmittable for every visitor. Switching needs a NEW key pair from
+the reCAPTCHA admin console: the SITE key into `/admin/integrations`, its
+matching SECRET key into `RECAPTCHA_SECRET_KEY`. Until then the stored pair
+stays `v2-invisible` + the invisible key. The code renders, gates and verifies
+checkbox mode already, and `captchaVersion()` falls back to it for any
+configuration that does not name a mode; all three modes stay selectable from
+the dashboard because swapping the key later must not need a deploy.
+
+The footer signup renders Google's **compact** widget (164px) rather than the
+standard 304px one: its column is ~206px, and the widget is a fixed-width
+cross-origin iframe that does not reflow.
 
 **The captcha SECRET key is not in the database and has no dashboard field.**
 `site_settings` is readable by anonymous visitors — a secret stored there is a

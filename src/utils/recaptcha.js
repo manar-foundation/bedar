@@ -23,17 +23,35 @@
    ----------------------------------------------------------------
    All three flavours are supported because the key is a dashboard
    setting and swapping it must not need a deploy (§5's whole
-   premise). The key supplied with the notes is a v2 INVISIBLE key —
-   Google's checkbox anchor rejects it as the wrong key type while
-   the invisible anchor accepts it, which is the signature of v2
-   invisible and not of v3 (v3 keys are rejected by both).
+   premise). CHECKBOX is the default for a configuration that does
+   not say — a visible "أنا لست برنامج روبوت" tick is what the client
+   asked for, and it is the only flavour a visitor can see working.
 
+     v2-checkbox   render a visible widget; the token exists only
+                   once the visitor has ticked it.  ← the default
      v2-invisible  render a hidden widget, `execute` it, wait for the
                    callback to hand back a token. Shows a badge.
-     v2-checkbox   render a visible widget; the token exists only
-                   once the visitor has ticked it.
      v3            `execute(siteKey, { action })` — no widget, a
                    score the server thresholds.
+
+   A KEY IS BOUND TO ONE FLAVOUR. A site key registered as v2
+   invisible CANNOT render a checkbox and vice versa — Google's
+   anchor refuses it and the widget shows "ERROR for site owner:
+   Invalid key type", which fails the form for every visitor. So the
+   version field and the site key must be changed TOGETHER, and
+   changing one alone is the failure this comment exists to prevent.
+
+   The key currently in `content/site.js` was probed against Google's
+   anchor endpoint on its own registered domain (bedar.org):
+
+     size=invisible → renders, no error
+     size=normal    → "Invalid input"
+
+   i.e. it is v2 INVISIBLE and cannot serve a checkbox. Moving the
+   site to checkbox needs a NEW key pair from the reCAPTCHA admin
+   console — a new SITE key here, and its matching SECRET key in
+   `RECAPTCHA_SECRET_KEY`. The two halves are issued together and a
+   secret from one pair never verifies a token from another.
 
    The script is loaded LAZILY, on first interaction with a form, not
    on page load: it is ~250 kB of third-party JavaScript that sets
@@ -53,11 +71,17 @@ export function captchaEnabled(captcha) {
   return Boolean(captcha?.provider === 'recaptcha' && captcha?.siteKey);
 }
 
+/**
+ * Which flavour to render. Anything unrecognised — including a
+ * settings blob written before this field existed — is treated as
+ * CHECKBOX, because a visible tick is the one mode whose failure a
+ * visitor can see and recover from.
+ */
 export function captchaVersion(captcha) {
   const version = captcha?.version;
   return Object.values(CAPTCHA_VERSIONS).includes(version)
     ? version
-    : CAPTCHA_VERSIONS.V2_INVISIBLE;
+    : CAPTCHA_VERSIONS.V2_CHECKBOX;
 }
 
 /**
@@ -118,11 +142,19 @@ export function loadRecaptcha({ siteKey, version }) {
  *
  * `container` must be in the document: Google measures it, and a
  * detached node renders a zero-size widget that never resolves.
+ *
+ * `compact` picks Google's narrow-column variant (164x144 instead of
+ * 304x78). It exists because the checkbox widget DOES NOT REFLOW —
+ * it is a fixed-width cross-origin iframe, so a column narrower than
+ * it produces horizontal scroll rather than a wrapped widget. The
+ * footer signup sits in a ~206px column and needs it; the contact
+ * page has a full column and does not.
  */
-export function renderWidget(api, { container, siteKey, version, onToken, onExpired }) {
+export function renderWidget(api, { container, siteKey, version, compact, onToken, onExpired }) {
   return api.render(container, {
     sitekey: siteKey,
-    size: version === CAPTCHA_VERSIONS.V2_INVISIBLE ? 'invisible' : 'normal',
+    size:
+      version === CAPTCHA_VERSIONS.V2_INVISIBLE ? 'invisible' : compact ? 'compact' : 'normal',
     badge: 'bottomright',
     theme: 'dark',
     callback: onToken,
@@ -131,4 +163,34 @@ export function renderWidget(api, { container, siteKey, version, onToken, onExpi
   });
 }
 
-export default { captchaEnabled, captchaVersion, loadRecaptcha, renderWidget };
+/* ── Telling "not ticked yet" apart from "genuinely broken" ─────
+   A visitor who has not ticked the box has made an ordinary mistake
+   and needs a prompt; a visitor whose script was blocked by an
+   extension has hit a fault and needs a different sentence. Both
+   arrive at the form's `catch` as an Error, so the reason travels on
+   a `code` property rather than in a message the caller would have
+   to string-match. */
+
+export const CAPTCHA_INCOMPLETE = 'captcha-incomplete';
+
+/** An expected failure: the widget is fine, the visitor has not used it. */
+export function captchaIncompleteError() {
+  const error = new Error('captcha not completed');
+  error.code = CAPTCHA_INCOMPLETE;
+  return error;
+}
+
+/** Did `getToken()` reject because the box is simply not ticked? */
+export function isCaptchaIncomplete(error) {
+  return error?.code === CAPTCHA_INCOMPLETE;
+}
+
+export default {
+  captchaEnabled,
+  captchaVersion,
+  loadRecaptcha,
+  renderWidget,
+  captchaIncompleteError,
+  isCaptchaIncomplete,
+  CAPTCHA_INCOMPLETE,
+};

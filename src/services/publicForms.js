@@ -64,7 +64,15 @@ export function submitContactForm(data, captchaToken = '') {
   return postJson('/api/contact', { ...data, captchaToken });
 }
 
-/** Newsletter → /api/newsletter. */
-export function subscribeNewsletter(email, captchaToken = '') {
-  return postJson('/api/newsletter', { email, captchaToken });
+/**
+ * Newsletter → /api/newsletter.
+ *
+ * `honeypot` is the hidden trap field <NewsletterForm> reads off the form
+ * (empty for a real visitor). It rides under `_honeypot` — the key the
+ * endpoint checks BEFORE the captcha — so a bot that fills it gets the same
+ * silent drop the contact form already gives. It is sent under its own key,
+ * like `captchaToken`, rather than mixed into the stored payload.
+ */
+export function subscribeNewsletter(email, captchaToken = '', honeypot = '') {
+  return postJson('/api/newsletter', { email, captchaToken, _honeypot: honeypot });
 }

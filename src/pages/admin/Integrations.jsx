@@ -59,9 +59,12 @@ const CAPTCHA_PROVIDERS = [
   { value: 'recaptcha', label: 'Google reCAPTCHA' },
 ];
 
+/* Checkbox first because it is the mode the site is built around and
+   the one a new key should be issued for. The order is not cosmetic:
+   the first option is what an administrator reads as the norm. */
 const CAPTCHA_VERSION_OPTIONS = [
-  { value: CAPTCHA_VERSIONS.V2_INVISIBLE, label: 'v2 — غير مرئي (Invisible)' },
   { value: CAPTCHA_VERSIONS.V2_CHECKBOX, label: 'v2 — مربّع الاختيار (Checkbox)' },
+  { value: CAPTCHA_VERSIONS.V2_INVISIBLE, label: 'v2 — غير مرئي (Invisible)' },
   { value: CAPTCHA_VERSIONS.V3, label: 'v3 — تقييم صامت (Score)' },
 ];
 
@@ -240,12 +243,12 @@ export default function Integrations() {
               />
 
               <Select
-                label="الإصدار"
+                label="النوع (Type / Mode)"
                 disabled={!editable || !form.captcha.provider}
-                value={form.captcha.version ?? CAPTCHA_VERSIONS.V2_INVISIBLE}
+                value={form.captcha.version ?? CAPTCHA_VERSIONS.V2_CHECKBOX}
                 onChange={(event) => set('captcha', { version: event.target.value })}
                 options={CAPTCHA_VERSION_OPTIONS}
-                hint="المفتاح المستخدم حالياً من نوع v2 غير مرئي. غيّر هذا الحقل فقط إذا استُبدل المفتاح بمفتاح من نوع آخر."
+                hint="النوع المعتمد للموقع هو v2 — مربّع الاختيار: يظهر للزائر مربّع «أنا لست برنامج روبوت» داخل كل نموذج، ولا يُقبل الإرسال قبل تحديده."
               />
 
               <Input
@@ -254,8 +257,26 @@ export default function Integrations() {
                 disabled={!editable || !form.captcha.provider}
                 value={form.captcha.siteKey ?? ''}
                 onChange={(event) => set('captcha', { siteKey: event.target.value.trim() })}
-                hint="المفتاح العام الذي يظهر في صفحة الموقع."
+                hint="المفتاح العام الذي يظهر في صفحة الموقع. يجب أن يكون مُسجَّلاً في Google بنفس النوع المختار أعلاه."
               />
+
+              {/* The trap this screen exists to prevent. A site key is
+                  ISSUED for one type; pointing the field above at a
+                  type the key was not registered for replaces the
+                  widget with "Invalid key type" and breaks every form
+                  on the site — silently, for visitors only. */}
+              <p className="flex items-start gap-2 rounded-md bg-warning-100 px-4 py-3 text-xs leading-relaxed text-warning-700">
+                <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                <span>
+                  النوع والمفتاح يُغيَّران معاً. كل مفتاح في Google مُسجَّل لنوع واحد فقط، وتغيير
+                  النوع هنا دون استبدال المفتاح يُظهر خطأ{' '}
+                  <span className="ltr-run font-medium">Invalid key type</span> مكان المربّع ويُعطّل
+                  كل نماذج الموقع. عند إنشاء مفتاح جديد من نوع Checkbox في لوحة Google reCAPTCHA
+                  تحصل على مفتاحين: ضَع المفتاح العام هنا، والمفتاح السري في متغيّر البيئة{' '}
+                  <span className="ltr-run font-medium">RECAPTCHA_SECRET_KEY</span> — فالمفتاحان
+                  زوج، ومفتاح سري من زوج آخر لا يقبل الرمز أبداً.
+                </span>
+              </p>
 
               <p className="flex items-start gap-2 rounded-md bg-warning-100 px-4 py-3 text-xs leading-relaxed text-warning-700">
                 <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
@@ -271,8 +292,9 @@ export default function Integrations() {
             <Card className="gap-5">
               <h2 className="text-base font-bold text-ink">نموذج التواصل</h2>
               <p className="-mt-3 text-xs leading-relaxed text-ink-muted">
-                تُحفظ كل الطلبات في قاعدة البيانات وتظهر في قسم «طلبات النماذج»، وتُرسل نسخة إشعار
-                بالبريد الإلكتروني. يمكن إضافة وجهة خارجية إضافية أدناه.
+                تُحفظ كل الطلبات في قاعدة البيانات وتظهر في قسم «طلبات النماذج». لا يُرسل الموقع
+                أي بريد إلكتروني — السجل المحفوظ هو وسيلة الاستلام. يمكن إضافة وجهة خارجية إضافية
+                أدناه.
               </p>
 
               <Input

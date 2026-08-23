@@ -4,7 +4,8 @@ import { Button, Input, Textarea } from '@components/ui';
 import { useContent } from '@context/ContentContext.jsx';
 import { useCaptcha } from '@hooks/useCaptcha.js';
 import { pushFormSuccess } from '@utils/analytics.js';
-import { FORM_KEYS } from '@utils/constants.js';
+import { CAPTCHA_PROMPT, FORM_KEYS } from '@utils/constants.js';
+import { isCaptchaIncomplete } from '@utils/recaptcha.js';
 import { cn } from '@utils/cn.js';
 
 /* ================================================================
@@ -25,10 +26,12 @@ import { cn } from '@utils/cn.js';
 
    THE THREE THINGS THAT HAPPEN ON SUBMIT, IN ORDER
    ----------------------------------------------------------------
-   1. A reCAPTCHA token is minted (client notes §4). The token is
-      obtained BEFORE the request, and the endpoint verifies it with
-      Google before it saves anything — this side alone
-      proves nothing.
+   1. A reCAPTCHA token is read from the CHECKBOX the visitor ticked
+      (client notes §4). No tick, no token, and the handler stops
+      here — nothing is posted, so nothing is stored and no event
+      fires. The token is obtained BEFORE the request, and the
+      endpoint verifies it with Google's `siteverify` before it saves
+      anything; this side alone proves nothing.
    2. The endpoint is awaited. It writes the row to
       `form_submissions` (§2), and a resolve means that row exists —
       which is what the success message below tells the visitor.
@@ -43,12 +46,18 @@ import { cn } from '@utils/cn.js';
    ================================================================ */
 
 export function ContactForm({ form, onSubmit, className }) {
-  const [status, setStatus] = useState('idle'); // idle | pending | success | error
+  // idle | pending | success | error | captcha
+  // `captcha` is its own state and not an `error`: the form is fine,
+  // the visitor has simply not ticked the box, and telling them the
+  // message failed to send would be both wrong and unhelpful.
+  const [status, setStatus] = useState('idle');
   const { settings } = useContent();
   const {
     mount: mountCaptcha,
     getToken: getCaptchaToken,
     reset: resetCaptcha,
+    visible: captchaVisible,
+    solved: captchaSolved,
   } = useCaptcha(settings.captcha);
 
   const handleSubmit = async (event) => {
@@ -63,7 +72,14 @@ export function ContactForm({ form, onSubmit, className }) {
       await onSubmit(data, token);
       setStatus('success');
       pushFormSuccess(FORM_KEYS.CONTACT, settings);
-    } catch {
+    } catch (caught) {
+      if (isCaptchaIncomplete(caught)) {
+        // Nothing was sent. Prompt for the tick and leave the typed
+        // fields exactly as they are — and do NOT reset the widget,
+        // which would wipe a tick that merely expired mid-typing.
+        setStatus('captcha');
+        return;
+      }
       setStatus('error');
       // A token may only be redeemed once, so a retry after any
       // failure needs a fresh one.
@@ -115,29 +131,55 @@ export function ContactForm({ form, onSubmit, className }) {
       )}
 
       {/* Honeypot — invisible to people, tempting to naive bots. Kept
-          in the DOM but off-screen (not display:none, which some bots
-          and autofill skip). The endpoint silently drops any
-          submission that fills it. */}
+          RENDERED (not `display: none`, which some bots and autofill
+          skip) but taken out of the layout entirely. The endpoint
+          silently drops any submission that fills it.
+
+          `sr-only` and NOT `left: -9999px`. The old offset pushed the
+          field 9999px outside its containing block, and on an RTL
+          document that inflated the page's scroll width to ~11,000px
+          on every render of this form — a 1px input dragging ten
+          thousand pixels of phantom width behind it. `sr-only` is a
+          1px clipped box at its own static position, so it costs the
+          layout nothing, and it is already this codebase's way of
+          keeping an input real but unseen (see `ui/Checkbox.jsx`).
+          `aria-hidden` + `tabIndex={-1}` keep it away from screen
+          readers and the tab order, which `sr-only` alone would not. */}
       <input
         type="text"
         name="_honeypot"
         tabIndex={-1}
         autoComplete="off"
         aria-hidden="true"
-        style={{
-          position: 'absolute',
-          left: '-9999px',
-          width: '1px',
-          height: '1px',
-          overflow: 'hidden',
-        }}
+        className="sr-only"
       />
 
-      {/* reCAPTCHA. The container is always in the document because
-          Google measures it on render; for the invisible flavour it
-          occupies nothing and the badge floats bottom-left of the
-          viewport instead. */}
-      <div ref={mountCaptcha} className="empty:hidden" />
+      {/* reCAPTCHA — the visible "أنا لست برنامج روبوت" box. The
+          container is always in the document because Google measures
+          it ON RENDER, and a `display:none` box renders a zero-size
+          widget that can never be ticked. So the non-checkbox
+          flavours take it OUT OF FLOW rather than hiding it, which
+          also stops an empty div from eating one of the form's
+          `gap-5` rows; the invisible badge is fixed-position and
+          unaffected either way. */}
+      <div
+        ref={mountCaptcha}
+        className={cn(
+          // `.captcha-fit` sizes the VISIBLE widget to its column (see
+          // layout.css). It must not be combined with the out-of-flow
+          // styling below: that rule's `min-width: 100%` would beat
+          // `size-px` and stretch this box back to the column width.
+          captchaVisible
+            ? 'captcha-fit'
+            : 'pointer-events-none absolute size-px overflow-hidden',
+        )}
+      />
+
+      {captchaVisible && status === 'captcha' && !captchaSolved ? (
+        <p role="alert" className="text-sm text-error-500">
+          {CAPTCHA_PROMPT}
+        </p>
+      ) : null}
 
       <Button type="submit" variant="accent" size="lg" loading={status === 'pending'}>
         {status === 'pending' ? form.pendingLabel : form.submitLabel}

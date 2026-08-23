@@ -1268,3 +1268,71 @@
     transform: none;
   }
 }
+
+/* ── reCAPTCHA v2 checkbox, on a narrow column ──────────────────
+   Google's checkbox widget is a FIXED-width cross-origin iframe —
+   304px for `normal`, 164px for `compact`. It does not reflow, and
+   its width cannot be overridden from here: the tick target and the
+   "أنا لست برنامج روبوت" label are laid out inside a document we do
+   not control.
+
+   The footer signup takes the `compact` size (see NewsletterForm) —
+   164px fits its ~206px column at every breakpoint. The contact form
+   is the tight one, and its 304px widget causes TWO separate
+   problems on a phone. Both need fixing, and fixing one alone does
+   nothing:
+
+   1. THE LAYOUT BOX INFLATES THE GRID. The widget's 304px intrinsic
+      width becomes the form's min-content, which becomes the grid
+      column's, which pushes the whole `StickySplit` wider than the
+      viewport — the *sibling* `.sticky-col` then measured 362px at a
+      320px viewport and dragged 58px of horizontal scroll onto the
+      page. `width: 0` takes the holder out of that min-content
+      calculation and `min-width: 100%` gives it the column's real
+      width back; `min-width: 0` alone does NOT work, because the
+      holder still reports the iframe as its own min-content.
+
+   2. THE PIXELS STILL NEED TO FIT inside the box we just capped.
+      That is the `transform`, and it has to sit on the child Google
+      injects rather than on the holder — scaling the holder would
+      scale its clip box along with the contents and clip nothing.
+      `overflow: hidden` on the holder is what keeps the unscaled
+      iframe from being counted again; it is a leaf container with
+      nothing sticky inside, so it is not the `overflow: hidden` this
+      file's `.section-glow-layer` note warns about — that one broke
+      `position: sticky` for an entire band. `clip-path` is wrong for
+      the same reason it is wrong there: it hides the overflow but
+      still counts it in the document's scroll width.
+
+   `transform-origin` is physical and does not flip, so it is stated
+   per direction. RTL pins the widget to the right edge of the column,
+   which is also the edge the Arabic widget puts its checkbox on — so
+   what gets clipped on a very narrow screen is the logo, never the
+   tick target. The height is left alone deliberately: a scaled child
+   keeps its unscaled layout height, and reclaiming that with a fixed
+   height would have to know which of the two widget sizes is in the
+   box. A few pixels of slack is the safe side of that trade. */
+@media (max-width: 380px) {
+  .captcha-fit {
+    width: 0;
+    min-width: 100%;
+    overflow: hidden;
+  }
+
+  .captcha-fit > div {
+    transform: scale(0.85);
+    transform-origin: top right;
+  }
+
+  [dir='ltr'] .captcha-fit > div {
+    transform-origin: top left;
+  }
+}
+
+/* Below ~340px the contact column is only about 230px, so 0.85 would
+   clip. iPhone SE (1st gen) and the narrowest Androids live here. */
+@media (max-width: 340px) {
+  .captcha-fit > div {
+    transform: scale(0.74);
+  }
+}

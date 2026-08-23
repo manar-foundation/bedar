@@ -279,7 +279,28 @@ export const siteSettings = {
    */
   captcha: {
     provider: 'recaptcha',
-    /** See `CAPTCHA_VERSIONS` — this key is a v2 *invisible* key. */
+    /**
+     * THE MODE THE SITE TARGETS IS `v2-checkbox` — a visible
+     * "أنا لست برنامج روبوت" box in every public form. The code
+     * renders, gates and verifies that mode, and `captchaVersion()`
+     * falls back to it for any configuration that does not say.
+     *
+     * This seed is still `v2-invisible` because THE KEY BELOW IS AN
+     * INVISIBLE KEY and the two are a matched pair. Probed against
+     * Google's anchor on the key's own registered domain
+     * (bedar.org): `size=invisible` renders, `size=normal` answers
+     * "Invalid input". Flipping this string alone would put
+     * "Invalid key type" where the checkbox should be and break both
+     * public forms for every visitor.
+     *
+     * TO SWITCH: create a v2 "أنا لست روبوت" (Checkbox) key at
+     * https://www.google.com/recaptcha/admin, then change BOTH
+     * halves together — `version` to 'v2-checkbox' and `siteKey` to
+     * the new SITE key here (or, in production, in
+     * /admin/integrations) — and put the new SECRET key in
+     * `RECAPTCHA_SECRET_KEY` on the server. A secret from the old
+     * pair never verifies a token from the new one.
+     */
     version: 'v2-invisible',
     siteKey: '6LdAI5ItAAAAAGuHH_ZFmlVV7JTXjcKy3b4fFFh-',
   },
