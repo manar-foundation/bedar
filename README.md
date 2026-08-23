@@ -763,10 +763,39 @@ where each one lives.
 | §2 | Every form submission saved and managed             | `form_submissions` table (migration 0011), written by `api/*`, read by `/admin/submissions`  |
 | §3 | A dashboard-named analytics Event per form          | `integrations.formEvents.*` → `utils/analytics.js`, fired by each form on confirmed success  |
 | §4 | reCAPTCHA on every form, secret server-side         | `hooks/useCaptcha.js` (browser) + `lib/recaptcha.js` (verify) before any write               |
-| §5 | Integrations actually injected site-wide            | `components/layout/SiteIntegrations.jsx`, mounted on `PublicLayout`                          |
-| §6 | Editable Organization schema, emitted as JSON-LD    | `utils/schema.js` + `components/layout/SiteSchema.jsx`; edited in "إعدادات SEO"              |
+| §5 | Integrations actually injected site-wide            | `api/html.js` writes them into the served HTML; `components/layout/SiteIntegrations.jsx` keeps them current in the browser |
+| §6 | Editable Organization schema, emitted as JSON-LD    | `utils/organization-schema.js`, emitted by `api/html.js` and `components/layout/SiteSchema.jsx`; edited in "إعدادات SEO" |
 | §7 | `robots.txt` editable from the dashboard            | `seo.robotsTxt` setting → `api/robots.js` at `/robots.txt`                                   |
 | §8 | Dynamic `sitemap.xml` honouring the exclude switch  | `api/sitemap.js` at `/sitemap.xml`                                                           |
+
+### The document is served by a function
+
+`vercel.json` rewrites every HTML route to `api/html.js`, and the build emits
+the shell as `dist/shell.html` rather than `dist/index.html`. Both halves are
+required and neither is cosmetic:
+
+- Search Console's **HTML tag** verification is done by a fetcher that reads the
+  raw response and does not run JavaScript. A `<meta name="google-site-verification">`
+  written by React after mount is invisible to it, so the property could never be
+  verified. The same fetcher-vs-renderer gap applies to the Organization JSON-LD
+  and to anything pasted into the custom-code fields.
+- The rename is what makes the rewrite reachable. Vercel checks the **filesystem
+  before rewrites**, so an `index.html` at the output root is served directly for
+  `/` and the function never runs — on the homepage, which is the page Search
+  Console fetches.
+
+The values still come only from `site_settings`; only the timing changed. The
+browser half then **adopts** what the server sent rather than repeating it —
+`bedar-injected-code` records the exact custom-code source so `SiteIntegrations`
+can tell "already on the page" from "the administrator has since edited it", and
+an analytics snippet therefore runs once per page load, not twice.
+
+`/admin` is served **uninjected**: the dashboard is not the site, and loading the
+container there files an editor's afternoon of edits as site traffic.
+
+`npm run preview` serves the raw build, which has no `index.html`; open
+`/shell.html` there, or use the deployed site, which is the only place the
+injection happens.
 
 Three things are worth calling out because they look like gaps and are not:
 

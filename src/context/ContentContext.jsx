@@ -8,7 +8,8 @@ import {
   useState,
 } from 'react';
 
-import { navigation, footer, headerCta, siteSettings } from '@content/site.js';
+import { navigation, footer, headerCta } from '@content/site.js';
+import { deepMerge, mergeSettings } from '@utils/merge-settings.js';
 import { programs, articles, news } from '@content/collections.js';
 import * as seedPages from '@content/pages.js';
 import {
@@ -162,24 +163,6 @@ function mergeCollections(db) {
 }
 
 /**
- * Overlay `patch` onto `base`, recursing into plain objects only.
- *
- * Arrays are REPLACED, never merged element-wise: a list field is
- * edited as a whole in the dashboard, and index-wise merging would
- * make a shortened list keep the seed's trailing entries.
- */
-function deepMerge(base, patch) {
-  if (!patch || typeof patch !== 'object' || Array.isArray(patch)) return patch ?? base;
-  if (!base || typeof base !== 'object' || Array.isArray(base)) return patch;
-
-  const out = { ...base };
-  for (const [key, value] of Object.entries(patch)) {
-    out[key] = key in base ? deepMerge(base[key], value) : value;
-  }
-  return out;
-}
-
-/**
  * Every page export in `content/pages.js`, with the published field
  * values laid over the top. Keyed by export name (`home`,
  * `socialEntrepreneurship`, …) — see `PAGE_KEYS` in `publicContent`.
@@ -220,23 +203,6 @@ function mergeFooter(settings, navColumns) {
  */
 function mergeServices(db) {
   return db?.length ? db : SEED_SERVICES;
-}
-
-function mergeSettings(settings) {
-  if (!settings) return siteSettings;
-  return deepMerge(siteSettings, {
-    ...settings.organization,
-    ...(settings.social ? { social: settings.social } : {}),
-    ...(settings.integrations ? { integrations: settings.integrations } : {}),
-    ...(settings.captcha ? { captcha: settings.captcha } : {}),
-    ...(settings.consent ? { consent: settings.consent } : {}),
-    // robots.txt content + sitemap options (client notes §7, §8).
-    // The site itself does not render these — `api/robots.js` and
-    // `api/sitemap.js` read the same row server-side — but the
-    // dashboard reads them through this context, so they merge here
-    // like every other blob.
-    ...(settings.seo ? { seo: settings.seo } : {}),
-  });
 }
 
 /**

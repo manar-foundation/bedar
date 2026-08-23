@@ -131,6 +131,79 @@ function syncMeta(name, content) {
 const injectedCode = new Map();
 
 /**
+ * Adopt whatever `api/html.js` already wrote into the document.
+ *
+ * The server injects the same two slots from the same settings, and
+ * records the exact source it used in `bedar-injected-code`. Seeding
+ * the map from that is what makes the first client pass a NO-OP: the
+ * markup is already on the page and its scripts have already run, so
+ * re-injecting would execute an administrator's analytics snippet a
+ * second time on the first paint of every visit.
+ *
+ * Comparing the SOURCE, not just "the server injected something", is
+ * deliberate. The document is cached at the edge for a minute; if the
+ * administrator saves a change inside that window the browser reads
+ * the new settings while the HTML still carries the old code, and the
+ * mismatch is what makes the client replace it.
+ */
+let adoptedFromServer = false;
+
+function adoptServerInjection() {
+  if (adoptedFromServer) return;
+  adoptedFromServer = true;
+
+  const state = document.getElementById('bedar-injected-code');
+  if (!state) return;
+  try {
+    const parsed = JSON.parse(state.textContent);
+    for (const slot of ['head', 'footer']) {
+      if (typeof parsed[slot] === 'string') injectedCode.set(slot, parsed[slot]);
+    }
+  } catch {
+    // A malformed marker just means no adoption: the client injects
+    // as it did before, which is correct, only redundant.
+  }
+}
+
+/**
+ * Clear a slot, in both of the shapes it can arrive in.
+ *
+ * The browser stamps `data-bedar-code` on every node it injects, so
+ * those come out with one query. The SERVER cannot: it writes the
+ * administrator's markup verbatim, and adding an attribute to their
+ * tags would mean parsing and re-serialising the very code we promise
+ * to keep byte-for-byte. It brackets the run with two empty marker
+ * elements instead, so removing it means sweeping everything BETWEEN
+ * them — the markers alone would leave the code itself on the page
+ * and the next injection would be a second copy.
+ */
+function removeSlot(slot) {
+  const start = document.querySelector(`[data-bedar-code="${slot}"][data-bedar-code-edge="start"]`);
+
+  if (start) {
+    const doomed = [start];
+    let closed = false;
+    for (let node = start.nextSibling; node; node = node.nextSibling) {
+      doomed.push(node);
+      if (
+        node.nodeType === 1 &&
+        node.getAttribute('data-bedar-code') === slot &&
+        node.getAttribute('data-bedar-code-edge') === 'end'
+      ) {
+        closed = true;
+        break;
+      }
+    }
+    // Only sweep the span once its END marker has actually been seen.
+    // An unterminated run would otherwise take the rest of <head>
+    // with it, which is a blank site rather than a stale tag.
+    for (const node of closed ? doomed : [start]) node.remove();
+  }
+
+  for (const node of document.querySelectorAll(`[data-bedar-code="${slot}"]`)) node.remove();
+}
+
+/**
  * Inject an administrator's raw markup into `target`.
  *
  * Parsed with DOMParser rather than assigned to `innerHTML`:
@@ -142,6 +215,7 @@ const injectedCode = new Map();
  * makes "must be executed in the places designated for them" true.
  */
 function injectCode(code, target, slot) {
+  adoptServerInjection();
   const source = typeof code === 'string' ? code : '';
   // Nothing is removed on unmount, so a slot that already carries
   // this exact source is already correct — and re-injecting it would
@@ -153,7 +227,7 @@ function injectCode(code, target, slot) {
   // Remove the previous generation first, so an edit replaces rather
   // than stacks. Scripts already executed cannot be undone — the
   // marker is what stops a THIRD copy appearing on the next save.
-  for (const node of document.querySelectorAll(`[data-bedar-code="${slot}"]`)) node.remove();
+  removeSlot(slot);
   injectedCode.set(slot, source);
   if (!source.trim()) return;
 
