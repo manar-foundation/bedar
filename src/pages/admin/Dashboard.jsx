@@ -1,19 +1,9 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  ArrowLeft,
-  ExternalLink,
-  FileText,
-  Folders,
-  Globe,
-  History,
-  Image,
-  Inbox,
-  Settings as SettingsIcon,
-  Shuffle,
-} from 'lucide-react';
+import { ArrowLeft, ExternalLink, FileText, Folders, History, Image, Shuffle } from 'lucide-react';
 
 import { DataState } from '@components/admin';
+import { ADMIN_SHORTCUTS } from '@components/admin/navigation.js';
 import { Badge } from '@components/ui';
 import { Spiral } from '@components/ui/Spiral.jsx';
 import { useAuth } from '@context/AuthContext.jsx';
@@ -46,19 +36,6 @@ const ACTION_TONES = {
   update: 'bg-brand-400',
   delete: 'bg-error-500',
 };
-
-/** Shortcuts to the screens an editor opens without being sent.
- *  Submissions leads: it is the only one where somebody outside the
- *  organisation is waiting on an answer. */
-const SHORTCUTS = [
-  { to: '/admin/submissions', label: 'طلبات النماذج', icon: Inbox },
-  { to: '/admin/pages', label: 'الصفحات', icon: FileText },
-  { to: '/admin/collections/articles', label: 'المجموعات', icon: Folders },
-  { to: '/admin/media', label: 'الوسائط', icon: Image },
-  { to: '/admin/global', label: 'الهيدر والفوتر', icon: Globe },
-  { to: '/admin/redirects', label: 'إعادة التوجيه', icon: Shuffle },
-  { to: '/admin/settings', label: 'الإعدادات', icon: SettingsIcon },
-];
 
 export default function Dashboard() {
   const { profile, user } = useAuth();
@@ -144,7 +121,7 @@ export default function Dashboard() {
 
                 <Panel icon={ArrowLeft} title="اختصارات">
                   <ul className="grid grid-cols-2 gap-2 p-4">
-                    {SHORTCUTS.map(({ to, label, icon: Icon }) => (
+                    {ADMIN_SHORTCUTS.map(({ to, label, icon: Icon }) => (
                       <li key={to}>
                         <Link
                           to={to}
