@@ -33,7 +33,10 @@ export function CtaBand({ eyebrow, title, lede, cta, secondaryCta, align = 'spli
       <div className="container-page section-y">
         <div
           className={cn(
-            'panel-inset px-7 py-12 sm:px-10 sm:py-14 lg:px-16 lg:py-20',
+            // Mobile inline padding trimmed (px-7 → px-5) so the two
+            // actions have room to sit side by side inside the panel on a
+            // phone (client, mobile notes); sm+ keeps the roomier padding.
+            'panel-inset px-5 py-12 sm:px-10 sm:py-14 lg:px-16 lg:py-20',
             centered && 'text-center',
           )}
         >
@@ -87,8 +90,13 @@ export function CtaBand({ eyebrow, title, lede, cta, secondaryCta, align = 'spli
             {cta ? (
               <Reveal
                 delay={4}
+                // Client (mobile notes): these two actions sit side by
+                // side on the phone, not stacked. `flex-wrap` keeps them
+                // in one row where they fit and wraps only if a screen is
+                // truly too narrow — replacing `flex-col sm:flex-row`,
+                // which stacked them on every phone below 640px.
                 className={cn(
-                  'flex shrink-0 flex-col gap-3 sm:flex-row',
+                  'flex shrink-0 flex-wrap gap-2 sm:gap-3',
                   centered ? 'items-center justify-center' : 'items-start lg:items-center',
                 )}
               >
@@ -97,13 +105,21 @@ export function CtaBand({ eyebrow, title, lede, cta, secondaryCta, align = 'spli
                   variant="accent"
                   size="lg"
                   to={cta.href}
+                  // Trim horizontal padding below sm so both actions fit
+                  // one row on a phone; restored to the lg default at sm+.
+                  className="max-sm:px-3.5"
                   iconEnd={<ArrowLeft className="size-4" aria-hidden="true" />}
                 >
                   {cta.label}
                 </Button>
 
                 {secondaryCta ? (
-                  <Button variant="inverse" size="lg" to={secondaryCta.href}>
+                  <Button
+                    variant="inverse"
+                    size="lg"
+                    to={secondaryCta.href}
+                    className="max-sm:px-3.5"
+                  >
                     {secondaryCta.label}
                   </Button>
                 ) : null}

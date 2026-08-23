@@ -74,7 +74,12 @@ export function Tabs({ tabs = [], value, onChange, idPrefix = 'tab', className }
             tabIndex={active ? 0 : -1}
             onClick={() => onChange?.(tab.value)}
             className={cn(
-              '-mb-px shrink-0 whitespace-nowrap border-b-2 px-3.5 py-2.5 text-sm',
+              // Tighter padding + smaller type below `sm` (client, mobile
+              // notes: three tabs ran wider than the phone screen). The
+              // strip keeps `overflow-x-auto` as the safety net, but the
+              // aim is that all three fit without scrolling on a phone;
+              // `sm:` restores the roomier desktop sizing.
+              '-mb-px shrink-0 whitespace-nowrap border-b-2 px-1.5 py-2.5 text-xs sm:px-3.5 sm:text-sm',
               'transition-[color,border-color] duration-(--dur-fast) ease-(--ease-standard)',
               'focus-visible:outline-none focus-visible:shadow-focus',
               active
