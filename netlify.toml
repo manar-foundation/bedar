@@ -27,9 +27,25 @@
 # /programs asks Netlify for a file that does not exist and returns
 # Netlify's own 404 instead of the app's. Must stay LAST so real
 # files and any redirects added above still win.
+#
+# `/shell.html`, NOT `/index.html`: the build no longer emits an
+# index.html. Vercel — the canonical host — serves every HTML route
+# through `api/html.js` so the Search Console tag, the Organization
+# JSON-LD and the dashboard's custom code are in the response a
+# non-executing crawler reads, and that function is only reachable
+# if no static file answers `/` first. See the Vite plugin in
+# `vite.config.js`.
+#
+# NETLIFY IS A SECONDARY DEPLOYMENT AND IS ALREADY DEGRADED. It has
+# no `api/` runtime, so `/robots.txt` and `/sitemap.xml` are
+# swallowed by this very fallback and answer with the HTML shell
+# (client notes §7, §8 do not work here), and nothing is injected
+# server-side. This line keeps the app itself loading; it does not
+# make Netlify equivalent to Vercel. Wiring that up would mean
+# porting `api/` to `netlify/functions/`.
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to = "/shell.html"
   status = 200
 
 # ── Security headers ────────────────────────────────────────────
