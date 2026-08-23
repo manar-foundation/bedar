@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { CAPTCHA_VERSIONS } from '@utils/constants.js';
-import { captchaEnabled, captchaVersion, loadRecaptcha, renderWidget } from '@utils/recaptcha.js';
+import {
+  captchaEnabled,
+  captchaIncompleteError,
+  captchaVersion,
+  loadRecaptcha,
+  renderWidget,
+} from '@utils/recaptcha.js';
 
 /* ================================================================
    useCaptcha — one form's reCAPTCHA, from settings to token.
@@ -18,6 +24,12 @@ import { captchaEnabled, captchaVersion, loadRecaptcha, renderWidget } from '@ut
 
      <div ref={captcha.mount} />             // sized only for v2 checkbox
      const token = await captcha.getToken(); // '' when not configured
+
+   CHECKBOX IS THE DEFAULT FLAVOUR (client notes §4, revised): the
+   visitor sees "أنا لست برنامج روبوت" inside every public form and
+   ticks it before pressing send. `captcha.visible` says whether the
+   widget occupies layout, and `captcha.solved` tracks the tick, so a
+   form can prompt for it instead of failing opaquely.
 
    `mount` is a CALLBACK ref, not the ref object — Google needs the
    node, but a component must not read `.current` while it renders
@@ -38,7 +50,7 @@ import { captchaEnabled, captchaVersion, loadRecaptcha, renderWidget } from '@ut
 /** How long to wait for the v2 callback before giving up. */
 const TOKEN_TIMEOUT_MS = 30_000;
 
-export function useCaptcha(captcha) {
+export function useCaptcha(captcha, { compact = false } = {}) {
   const container = useRef(null);
   const widgetId = useRef(null);
   const apiRef = useRef(null);
@@ -52,6 +64,14 @@ export function useCaptcha(captcha) {
   // Surfaced so a form can say "التحقق غير متاح" instead of failing
   // with no explanation when the script is blocked.
   const [failed, setFailed] = useState(false);
+
+  /* Whether the checkbox currently holds a response. Google reports
+     the tick and its expiry through callbacks, so this is the only
+     way a React tree can know — `getResponse` is a poll, not a
+     subscription, and reading it during render would be a side
+     effect. Used to clear a "tick the box" prompt the moment the
+     visitor does, rather than making them press send to find out. */
+  const [solved, setSolved] = useState(false);
 
   /* The node Google renders into. A state value and not just a ref,
      because the checkbox effect below has to RUN when the element
@@ -81,8 +101,12 @@ export function useCaptcha(captcha) {
           container: node,
           siteKey,
           version,
-          onToken: () => {},
-          onExpired: () => {},
+          compact,
+          onToken: () => setSolved(true),
+          // Both an expiry (~2 minutes) and a widget error land here.
+          // Either way the response is gone and the box needs ticking
+          // again, which is exactly what `solved: false` says.
+          onExpired: () => setSolved(false),
         });
       })
       .catch(() => {
@@ -92,7 +116,7 @@ export function useCaptcha(captcha) {
     return () => {
       active = false;
     };
-  }, [enabled, siteKey, version, node]);
+  }, [enabled, siteKey, version, node, compact]);
 
   const getToken = useCallback(async () => {
     if (!enabled) return '';
@@ -107,8 +131,17 @@ export function useCaptcha(captcha) {
     }
 
     if (version === CAPTCHA_VERSIONS.V2_CHECKBOX) {
+      /* The token already exists or it does not — there is nothing to
+         execute and nothing to wait for. An empty response means the
+         box was never ticked, or the tick expired while the visitor
+         was still typing; both are the visitor's to fix, so this is
+         the TYPED error and not a generic failure. Nothing is posted,
+         so there is no insert and no event. */
       const token = widgetId.current !== null ? api.getResponse(widgetId.current) : '';
-      if (!token) throw new Error('captcha not completed');
+      if (!token) {
+        setSolved(false);
+        throw captchaIncompleteError();
+      }
       return token;
     }
 
@@ -124,6 +157,7 @@ export function useCaptcha(captcha) {
         container: container.current,
         siteKey,
         version,
+        compact,
         onToken: (token) => pending.current?.resolve(token),
         onExpired: () => pending.current?.reject(new Error('captcha expired')),
       });
@@ -152,17 +186,20 @@ export function useCaptcha(captcha) {
         reject(error);
       }
     });
-  }, [enabled, siteKey, version]);
+  }, [enabled, siteKey, version, compact]);
 
   /** Clear a spent response so the next submission mints a new one. */
   const reset = useCallback(() => {
     if (widgetId.current !== null && apiRef.current) apiRef.current.reset(widgetId.current);
+    setSolved(false);
   }, []);
 
   return {
     enabled,
     version,
     failed,
+    /** v2 checkbox only: is the box ticked right now? */
+    solved,
     /** Callback ref for the element Google renders the widget into. */
     mount,
     getToken,

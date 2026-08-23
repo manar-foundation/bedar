@@ -169,18 +169,34 @@ export const DATALAYER_EVENTS = {
 /**
  * reCAPTCHA integration modes (client notes §4).
  *
- * The key the client supplied is a v2 INVISIBLE key: Google's
- * checkbox anchor rejects it as the wrong key type, while the
- * invisible anchor accepts it — the opposite way round from a v3
- * key, which neither anchor accepts. So `v2-invisible` is the
- * default. The other two are here because swapping the key later
- * must not need a deploy, which is the whole point of §4 and §5.
+ * `v2-checkbox` is the mode the site is built around: the visitor
+ * sees "أنا لست برنامج روبوت" in every public form and ticks it
+ * before sending. `utils/recaptcha.js` falls back to it for any
+ * configuration that does not name a mode.
+ *
+ * The other two remain selectable because the mode and the key are
+ * dashboard settings and swapping them must not need a deploy (§4,
+ * §5). THEY ARE NOT INTERCHANGEABLE AT RUNTIME: a site key is issued
+ * for one mode, and pointing this field at a mode the key was not
+ * registered for makes Google render "Invalid key type" in place of
+ * the widget — which fails the form for every visitor. Change the
+ * mode and the site key together, never one alone.
  */
 export const CAPTCHA_VERSIONS = {
   V2_INVISIBLE: 'v2-invisible',
   V2_CHECKBOX: 'v2-checkbox',
   V3: 'v3',
 };
+
+/**
+ * What a form says when the checkbox has not been ticked.
+ *
+ * Not dashboard copy: this is an affordance belonging to the captcha
+ * widget rather than to the form's marketing text, and it must stay
+ * truthful about a mechanism an administrator cannot change. The
+ * widget's own label is supplied by Google in Arabic (`hl=ar`).
+ */
+export const CAPTCHA_PROMPT = 'يرجى تأكيد أنك لست روبوتاً قبل الإرسال.';
 
 /** Site language. Arabic-only — multilingual is out of scope (§14). */
 export const SITE_LANG = 'ar';

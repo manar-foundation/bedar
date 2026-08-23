@@ -143,7 +143,12 @@ export function Hero({
               // floating nav has been cleared. `h-full` is what makes
               // the centring act on the viewport-tall section rather
               // than on the content's own height.
-              'flex h-full items-center pt-[calc(var(--nav-h)+2rem)] pb-16 lg:pt-[calc(var(--nav-h)+2rem)] lg:pb-12'
+              // Mobile top padding raised from +2rem to +4rem (client,
+              // mobile notes: "the title is too close to the menu — give
+              // it enough space"). This clears the title from the fixed
+              // nav AND opens the gap to the `--nav-h` seam above it.
+              // Desktop (`lg:`) keeps +2rem — it was never flagged.
+              'flex h-full items-center pt-[calc(var(--nav-h)+4rem)] pb-16 lg:pt-[calc(var(--nav-h)+2rem)] lg:pb-12'
             : // The centred title band every INTERIOR page uses. The
               // brief called its top/bottom spacing too tight, so it is
               // widened here — one place, so every interior hero gets the
@@ -243,8 +248,15 @@ export function Hero({
             {actions ? (
               <RevealOnMount
                 delay={4}
+                // Client (mobile notes): the two hero actions sit side by
+                // side, not stacked — the phone screenshot showed them one
+                // under the other. `flex-wrap` keeps them in a row wherever
+                // they fit (both clear 375px here) and only drops the
+                // second below on a genuinely narrower screen, instead of
+                // the old `flex-col sm:flex-row` that stacked everything
+                // below 640px.
                 className={cn(
-                  'flex flex-col gap-3 sm:flex-row',
+                  'flex flex-wrap gap-3',
                   split ? 'mt-11 lg:mt-14' : 'mt-10',
                   centered ? 'items-center justify-center' : 'items-start',
                 )}

@@ -92,8 +92,6 @@ export default function Services() {
         </StickySplit>
       </Section>
 
-      <SectionSeam />
-
       {/* ── The seven services ───────────────────────────────────
              Two columns rather than three: each description is a full
              paragraph, and three columns makes an unreadable

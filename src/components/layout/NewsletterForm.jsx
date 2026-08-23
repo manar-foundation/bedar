@@ -5,7 +5,8 @@ import { fieldChrome, fieldTone } from '@components/ui/fieldStyles.js';
 import { useContent } from '@context/ContentContext.jsx';
 import { useCaptcha } from '@hooks/useCaptcha.js';
 import { pushFormSuccess } from '@utils/analytics.js';
-import { FORM_KEYS } from '@utils/constants.js';
+import { CAPTCHA_PROMPT, FORM_KEYS } from '@utils/constants.js';
+import { isCaptchaIncomplete } from '@utils/recaptcha.js';
 import { cn } from '@utils/cn.js';
 
 /* ================================================================
@@ -25,10 +26,13 @@ import { cn } from '@utils/cn.js';
    message rather than pretending to subscribe.
 
    Same three steps as the contact form, and for the same reasons —
-   see the header of `ContactForm.jsx`: a reCAPTCHA token is minted
-   first (client notes §4), the endpoint stores the signup in
-   `form_submissions` (§2), and only the RESOLVED branch fires the
-   analytics event whose name the dashboard holds (§3). Never on click.
+   see the header of `ContactForm.jsx`: the reCAPTCHA CHECKBOX must be
+   ticked first and its token read before anything is posted (client
+   notes §4), the endpoint verifies that token with Google and stores
+   the signup in `form_submissions` (§2), and only the RESOLVED branch
+   fires the analytics event whose name the dashboard holds (§3).
+   Never on click. An unticked box stops the handler before the POST,
+   so there is no row and no event.
 
    An address that is ALREADY on the list resolves too — the endpoint
    answers 200 for a repeat signup rather than an error, so somebody
@@ -44,27 +48,48 @@ export function NewsletterForm({ newsletter, onSubscribe, className }) {
   const inputId = useId();
   const statusId = `${inputId}-status`;
   const [email, setEmail] = useState('');
-  const [status, setStatus] = useState('idle'); // idle | pending | success | error
+  // idle | pending | success | error | captcha — see ContactForm for
+  // why an unticked box is its own state and not an error.
+  const [status, setStatus] = useState('idle');
   const { settings } = useContent();
   const {
     mount: mountCaptcha,
     getToken: getCaptchaToken,
     reset: resetCaptcha,
-  } = useCaptcha(settings.captcha);
+    visible: captchaVisible,
+    solved: captchaSolved,
+    // The footer column is ~206px wide; the standard 304px widget
+    // would hang out of it. Google's compact variant is 164px.
+  } = useCaptcha(settings.captcha, { compact: true });
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (status === 'pending') return;
 
+    // The honeypot is an UNCONTROLLED field read straight off the form,
+    // the same way ContactForm reads it — a real person never fills a
+    // hidden input, and the endpoint drops any submission that carries a
+    // value (api/newsletter.js). Unlike the contact form this handler does
+    // not build its whole payload from FormData (the address is controlled
+    // state), so the one trap field is pulled out on its own and threaded
+    // through `onSubscribe` to reach the POST body as `_honeypot`.
+    const honeypot = new FormData(event.currentTarget).get('_honeypot') ?? '';
+
     setStatus('pending');
     try {
       if (!onSubscribe) throw new Error('newsletter endpoint not configured');
       const token = await getCaptchaToken();
-      await onSubscribe(email, token);
+      await onSubscribe(email, token, honeypot);
       setStatus('success');
       setEmail('');
       pushFormSuccess(FORM_KEYS.NEWSLETTER, settings);
-    } catch {
+    } catch (caught) {
+      if (isCaptchaIncomplete(caught)) {
+        // Nothing was posted. Prompt for the tick and keep the typed
+        // address; do not reset a widget the visitor may have ticked.
+        setStatus('captcha');
+        return;
+      }
       setStatus('error');
       // A captcha token is single-use — a retry needs a fresh one.
       resetCaptcha();
@@ -103,7 +128,7 @@ export function NewsletterForm({ newsletter, onSubscribe, className }) {
         placeholder={newsletter.placeholder}
         value={email}
         onChange={(event) => setEmail(event.target.value)}
-        aria-describedby={status === 'error' ? statusId : undefined}
+        aria-describedby={status === 'error' || status === 'captcha' ? statusId : undefined}
         aria-invalid={status === 'error' || undefined}
         // The footer sits on `.surface-dark`, so the field is glass
         // over the deep teal rather than the light `bg-field`.
@@ -117,9 +142,45 @@ export function NewsletterForm({ newsletter, onSubscribe, className }) {
         )}
       />
 
+      {/* Honeypot — the same trap as ContactForm, whose header carries
+          the full reasoning: kept RENDERED (never `display: none`) but
+          clipped with `sr-only` at its own static position, so it costs
+          the layout nothing and cannot inflate the RTL scroll width the
+          way a `left: -9999px` offset would. `aria-hidden` + `tabIndex={-1}`
+          keep it off screen readers and out of the tab order. It is
+          uncontrolled, so `FormData.get('_honeypot')` above reads whatever
+          a naive bot typed; the endpoint silently drops any filled one. */}
+      <input
+        type="text"
+        name="_honeypot"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="sr-only"
+      />
+
       {/* See the note in ContactForm — the container stays mounted
-          because Google measures it; invisible mode renders no box. */}
-      <div ref={mountCaptcha} className="empty:hidden" />
+          and displayed because Google measures it on render; the
+          non-checkbox flavours are taken out of flow instead of
+          hidden. */}
+      <div
+        ref={mountCaptcha}
+        className={cn(
+          // `.captcha-fit` sizes the VISIBLE widget to its column (see
+          // layout.css). It must not be combined with the out-of-flow
+          // styling below: that rule's `min-width: 100%` would beat
+          // `size-px` and stretch this box back to the column width.
+          captchaVisible
+            ? 'captcha-fit'
+            : 'pointer-events-none absolute size-px overflow-hidden',
+        )}
+      />
+
+      {captchaVisible && status === 'captcha' && !captchaSolved ? (
+        <p id={statusId} role="alert" className="text-xs text-accent-300">
+          {CAPTCHA_PROMPT}
+        </p>
+      ) : null}
 
       <Button type="submit" variant="accent" loading={status === 'pending'}>
         {status === 'pending' ? newsletter.pendingLabel : newsletter.submitLabel}
