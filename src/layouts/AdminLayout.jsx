@@ -1,27 +1,9 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-  ArrowRight,
-  ChevronLeft,
-  ExternalLink,
-  FileText,
-  Folders,
-  Globe,
-  History,
-  Image,
-  Inbox,
-  LayoutDashboard,
-  LogOut,
-  Menu,
-  Plug,
-  Settings as SettingsIcon,
-  ShieldCheck,
-  Shuffle,
-  Users as UsersIcon,
-  X,
-} from 'lucide-react';
+import { ArrowRight, ChevronLeft, ExternalLink, LogOut, Menu, X } from 'lucide-react';
 
+import { ADMIN_SECTIONS, currentSectionLabel } from '@components/admin/navigation.js';
 import { Spiral } from '@components/ui/Spiral.jsx';
 import { useAuth } from '@context/AuthContext.jsx';
 import { useContent } from '@context/ContentContext.jsx';
@@ -45,55 +27,9 @@ import { cn } from '@utils/cn.js';
    flip — so the off-screen direction is stated per writing mode.
    ================================================================ */
 
-const NAV_SECTIONS = [
-  {
-    title: 'المحتوى',
-    items: [
-      { to: '/admin', end: true, label: 'لوحة التحكم', icon: LayoutDashboard },
-      { to: '/admin/pages', label: 'الصفحات', icon: FileText },
-      { to: '/admin/global', label: 'الهيدر والفوتر', icon: Globe },
-      { to: '/admin/collections/articles', label: 'المجموعات', icon: Folders },
-      { to: '/admin/media', label: 'مكتبة الوسائط', icon: Image },
-      { to: '/admin/submissions', label: 'طلبات النماذج', icon: Inbox },
-    ],
-  },
-  {
-    title: 'الموقع',
-    items: [
-      { to: '/admin/redirects', label: 'إعادة التوجيه', icon: Shuffle },
-      { to: '/admin/integrations', label: 'التكاملات', icon: Plug },
-      { to: '/admin/history', label: 'سجل النسخ', icon: History },
-    ],
-  },
-  {
-    title: 'الإدارة',
-    items: [
-      { to: '/admin/users', label: 'المستخدمون', icon: UsersIcon },
-      { to: '/admin/security', label: 'الأمان', icon: ShieldCheck },
-      // Renamed from "الإعدادات" per client notes §6: this screen is
-      // where the site's general SEO settings live — the Organization
-      // schema, robots.txt and the sitemap — so it says so.
-      { to: '/admin/settings', label: 'إعدادات SEO', icon: SettingsIcon },
-    ],
-  },
-];
-
-const FLAT_NAV = NAV_SECTIONS.flatMap((section) => section.items);
-
-/**
- * The label for the current screen, for the top bar.
- *
- * Longest matching prefix wins, so `/admin/pages/7` still resolves
- * to "الصفحات" while `/admin` itself only matches itself.
- */
-function currentSectionLabel(pathname) {
-  let best = null;
-  for (const item of FLAT_NAV) {
-    const matches = item.end ? pathname === item.to : pathname.startsWith(item.to);
-    if (matches && (!best || item.to.length > best.to.length)) best = item;
-  }
-  return best?.label ?? 'لوحة التحكم';
-}
+/* The sections themselves live in `components/admin/navigation.js`
+   so this rail and the landing screen's shortcut grid cannot drift
+   apart — see the header there. */
 
 /** First letter of the display name, for the avatar disc. */
 function initialOf(name) {
@@ -202,7 +138,7 @@ export default function AdminLayout() {
           aria-label="تنقل لوحة التحكم"
           className="admin-rail-scroll flex-1 overflow-y-auto px-3 py-5"
         >
-          {NAV_SECTIONS.map((section) => (
+          {ADMIN_SECTIONS.map((section) => (
             <div key={section.title} className="mb-6 last:mb-0">
               <h2 className="px-3 pb-2 text-[11px] font-semibold tracking-[0.12em] text-brand-200/55 uppercase">
                 {section.title}

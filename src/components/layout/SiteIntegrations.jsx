@@ -116,6 +116,21 @@ function syncMeta(name, content) {
 }
 
 /**
+ * The source currently injected in each slot.
+ *
+ * Module scope, not component state, because the point is to survive
+ * a REMOUNT: `PublicLayout` returns a different root element once the
+ * content read settles (the loader branch is a fragment, the real
+ * shell a div), so React unmounts this component and mounts a fresh
+ * one — with the same settings and therefore the same dependency
+ * values. Without this map the injection ran a second time there, and
+ * an administrator's analytics snippet fired twice on every visit
+ * that painted the cached snapshot first: two pageviews, two
+ * conversions, from one visitor.
+ */
+const injectedCode = new Map();
+
+/**
  * Inject an administrator's raw markup into `target`.
  *
  * Parsed with DOMParser rather than assigned to `innerHTML`:
@@ -127,14 +142,23 @@ function syncMeta(name, content) {
  * makes "must be executed in the places designated for them" true.
  */
 function injectCode(code, target, slot) {
+  const source = typeof code === 'string' ? code : '';
+  // Nothing is removed on unmount, so a slot that already carries
+  // this exact source is already correct — and re-injecting it would
+  // re-execute its scripts. The marker check is the safety net: if
+  // the nodes went away, inject again rather than trust the map.
+  const present = Boolean(document.querySelector(`[data-bedar-code="${slot}"]`));
+  if (injectedCode.get(slot) === source && (present || !source.trim())) return;
+
   // Remove the previous generation first, so an edit replaces rather
   // than stacks. Scripts already executed cannot be undone — the
   // marker is what stops a THIRD copy appearing on the next save.
   for (const node of document.querySelectorAll(`[data-bedar-code="${slot}"]`)) node.remove();
-  if (!code || !code.trim()) return;
+  injectedCode.set(slot, source);
+  if (!source.trim()) return;
 
   const parsed = new DOMParser().parseFromString(
-    `<!doctype html><html><head>${code}</head><body></body></html>`,
+    `<!doctype html><html><head>${source}</head><body></body></html>`,
     'text/html',
   );
   // Anything the parser refused to keep in <head> (a bare <div>, a
