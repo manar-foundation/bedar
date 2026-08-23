@@ -2,6 +2,9 @@
   "redirects": [
     { "source": "/program/:path*", "destination": "/programs/:path*", "permanent": true }
   ],
+  "functions": {
+    "api/html.js": { "includeFiles": "dist/shell.html" }
+  },
   "rewrites": [
     { "source": "/robots.txt", "destination": "/api/robots" },
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },

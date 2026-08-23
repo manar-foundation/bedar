@@ -1,5 +1,9 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { canRead, selectPublic } from '../lib/supabase-rest.js';
-import { siteOrigin } from '../lib/site-url.js';
+import { requestOrigin, siteOrigin } from '../lib/site-url.js';
 import { injectIntoShell } from '../lib/head-injection.js';
 import { mergeSettings } from '../src/utils/merge-settings.js';
 
@@ -59,23 +63,67 @@ class SkipInjection extends Error {}
 /** The built shell, cached for the life of the warm instance. */
 let shellCache = null;
 
-async function loadShell(origin) {
-  if (shellCache) return shellCache;
-
-  // Fetched from the deployment's own CDN rather than read off disk:
-  // the build output is uploaded as static assets, and which of them
-  // are visible to a function's filesystem is a platform detail this
-  // does not need to depend on.
-  for (const path of ['/shell.html', '/index.html']) {
+/**
+ * Candidate locations of `shell.html` on the function's own disk.
+ *
+ * `vercel.json` ships it with this function via `includeFiles`, which
+ * is what makes the common path a file read and not a network call.
+ * A page that cannot render because an HTTP fetch failed is a page
+ * that had no business making one.
+ */
+function shellFromDisk() {
+  const candidates = [
+    path.join(process.cwd(), 'dist', 'shell.html'),
+    path.join(process.cwd(), 'shell.html'),
+    fileURLToPath(new URL('../dist/shell.html', import.meta.url)),
+  ];
+  for (const file of candidates) {
     try {
-      const res = await fetch(`${origin}${path}`);
-      if (!res.ok) continue;
-      const html = await res.text();
-      if (!html.includes('</head>')) continue;
-      shellCache = html;
-      return html;
+      const html = fs.readFileSync(file, 'utf8');
+      if (html.includes('</head>')) return html;
     } catch {
       /* try the next candidate */
+    }
+  }
+  return null;
+}
+
+/**
+ * The built shell.
+ *
+ * Disk first, then the deployment's own host. The ORDER and the
+ * choice of host are both the fix for the outage this caused:
+ * the previous version fetched from `siteOrigin()`, which prefers
+ * `SITE_URL`/`VITE_SITE_URL` — `https://bedar.org`, a domain not yet
+ * pointed at the deployment. Every request went looking for the shell
+ * on a host that answers 404, and every page returned 500.
+ *
+ * The configured origin is kept as the LAST resort rather than
+ * dropped, for the reverse case: a deployment reached through a proxy
+ * that rewrites the host beyond recognition.
+ */
+async function loadShell(req) {
+  if (shellCache) return shellCache;
+
+  const onDisk = shellFromDisk();
+  if (onDisk) {
+    shellCache = onDisk;
+    return onDisk;
+  }
+
+  const origins = [requestOrigin(req), siteOrigin(req)].filter(Boolean);
+  for (const origin of origins) {
+    for (const file of ['/shell.html', '/index.html']) {
+      try {
+        const res = await fetch(`${origin}${file}`);
+        if (!res.ok) continue;
+        const html = await res.text();
+        if (!html.includes('</head>')) continue;
+        shellCache = html;
+        return html;
+      } catch {
+        /* try the next candidate */
+      }
     }
   }
   return null;
@@ -119,10 +167,10 @@ function isDashboard(pathname) {
 
 export default async function handler(req, res) {
   const origin = siteOrigin(req);
-  const shell = await loadShell(origin);
+  const shell = await loadShell(req);
 
   if (!shell) {
-    console.error('document: the built shell could not be fetched from', origin);
+    console.error('document: the built shell could not be loaded from disk or from', requestOrigin(req));
     res.setHeader('content-type', 'text/plain; charset=utf-8');
     return res.status(500).send('Site shell unavailable\n');
   }
