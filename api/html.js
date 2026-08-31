@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { canRead, selectPublic } from '../lib/supabase-rest.js';
+import { NOINDEX_CONTENT, isNoindexPath } from '../src/content/noindex-paths.js';
 import { requestOrigin, siteOrigin } from '../lib/site-url.js';
 import { injectIntoShell } from '../lib/head-injection.js';
 import { mergeSettings } from '../src/utils/merge-settings.js';
@@ -165,12 +166,35 @@ function isDashboard(pathname) {
   return pathname === '/admin' || pathname.startsWith('/admin/');
 }
 
+/**
+ * `<meta name="robots">` for a route held back from search.
+ *
+ * Written here rather than by React for the same reason the rest of
+ * this file exists: the fetchers that decide whether a URL gets
+ * listed read the raw response and do not run JavaScript, so a tag
+ * added after mount is a tag they never see.
+ *
+ * Injected on its OWN, before and independently of the settings
+ * injection, because the two must not share a failure: a database
+ * that is unreachable costs the site its tag manager for one request
+ * — it must never cost a held-back page its noindex and quietly put
+ * it in the index. See `src/content/noindex-paths.js`.
+ */
+function injectRobots(html, pathname) {
+  if (!isNoindexPath(pathname)) return html;
+  const tag = `<meta name="robots" content="${NOINDEX_CONTENT}" data-bedar-injected="robots">`;
+  return html.replace('</head>', `  ${tag}\n  </head>`);
+}
+
 export default async function handler(req, res) {
   const origin = siteOrigin(req);
   const shell = await loadShell(req);
 
   if (!shell) {
-    console.error('document: the built shell could not be loaded from disk or from', requestOrigin(req));
+    console.error(
+      'document: the built shell could not be loaded from disk or from',
+      requestOrigin(req),
+    );
     res.setHeader('content-type', 'text/plain; charset=utf-8');
     return res.status(500).send('Site shell unavailable\n');
   }
@@ -183,11 +207,14 @@ export default async function handler(req, res) {
     }
   })();
 
-  let html = shell;
+  // Before the try: a settings failure must not take the robots tag
+  // with it.
+  let html = injectRobots(shell, pathname);
+
   try {
     if (isDashboard(pathname)) throw new SkipInjection();
     const settings = mergeSettings(await loadSettings());
-    html = injectIntoShell(shell, settings, {
+    html = injectIntoShell(html, settings, {
       origin,
       fallbackLogo: logoFromShell(shell),
     });
