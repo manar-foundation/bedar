@@ -41,8 +41,6 @@
    touching the component.
    ================================================================ */
 
-import bannerUsusSyria from '@assets/banners/usus-syria.webp';
-
 export const pageBanners = {
   /** /about — من نحن */
   about: null,
@@ -63,14 +61,18 @@ export const pageBanners = {
   /**
    * /programs/usus-syria — أُسُس سوريا للريادة المجتمعية.
    *
-   * A wide crop of `assets/services/photo-management-guidance.jpg`
-   * (the founder mapping hypotheses across a wall of notes), which is
-   * the closest thing in the bundled photography to what this
-   * programme actually does — validate a business model against the
-   * market. The crop is committed as WebP the same way the service
-   * photographs are; the JPEG it came from is still the master.
+   * `null` on purpose, and it is not an omission to be tidied up: the
+   * client asked for that page's photograph to be a REAL image they
+   * can swap from the dashboard, not a backdrop behind the title
+   * (Aug 2026). It is therefore the programme record's own cover —
+   * `collection_items.cover_media_id`, edited under
+   * /admin/collections/programs — rendered below the band the way
+   * `CollectionDetail` renders an article's cover. The bundled crop
+   * that stands in until a cover is uploaded is imported by
+   * `pages/public/UsusSyria.jsx`, because it is a content image on
+   * that page rather than a band treatment.
    */
-  ususSyria: bannerUsusSyria,
+  ususSyria: null,
 };
 
 /**

@@ -28,10 +28,12 @@ import {
   StickySplit,
 } from '@components/ui';
 import { Reveal, RevealOnMount, Stagger, StaggerItem } from '@components/motion/Reveal.jsx';
+import { useContent } from '@context/ContentContext.jsx';
 import { useSeo } from '@hooks/useSeo.js';
 import { ususSyria } from '@content/usus-syria.js';
 import { pageBanners } from '@content/page-banners.js';
 import { breadcrumbsFor } from '@content/site.js';
+import coverFallback from '@assets/banners/usus-syria.webp';
 
 /* ================================================================
    أُسُس سوريا للريادة المجتمعية — /programs/usus-syria.
@@ -126,24 +128,94 @@ function applyLinkProps(cta) {
   return /^(https?:|mailto:|tel:)/.test(cta.href) ? { href: cta.href } : { to: cta.href };
 }
 
+/* The photograph, when the programme record has no cover of its own.
+   A real file rather than nothing, so the page is never shipped
+   image-less — but it is only the floor: the dashboard's cover wins
+   the moment one is uploaded. See the note on the header below. */
+const FALLBACK_COVER = {
+  src: coverFallback,
+  alt: 'مؤسس يراجع فرضيات مشروعه على لوح من الملاحظات في مساحة عمل مشتركة',
+};
+
 export default function UsusSyria() {
   useSeo(ususSyria.seo);
 
   const { hero, facts, about, benefits, journey, audience, applying, closing } = ususSyria;
+
+  /* The programme's own record, for the one thing on this page that
+     is NOT in the brief: its photograph. Everything else here is
+     structured content in `content/usus-syria.js`, but the client
+     asked to be able to change the header image from the dashboard
+     whenever they like — so it is read from the record's cover
+     (`collection_items.cover_media_id`, the "صورة الغلاف" field under
+     /admin/collections/programs) exactly the way `CollectionDetail`
+     reads an article's.
+
+     `find` rather than an index: the listing is ordered by
+     `published_at`, so a position here would be a bug waiting for the
+     next programme to be published. Undefined until the record is
+     published — a draft is not in the public read — and the bundled
+     crop stands in until then. */
+  const { collections } = useContent();
+  const record = collections.programs.find((item) => item.slug === ususSyria.slug);
+  const cover = record?.image ? { src: record.image, alt: record.imageAlt ?? '' } : FALLBACK_COVER;
 
   return (
     <>
       {/* ── Header ───────────────────────────────────────────────
              The banner every sub-page shares, with the brief's own
              header line as its subtitle and the apply button as its
-             action. The photograph is set in `page-banners.js`, not
-             here — see the note at the top of that file. */}
+             action.
+
+             A PICTURE BESIDE THE TITLE, NOT A BACKDROP BEHIND IT
+             ---------------------------------------------------------
+             `PageHero`'s `image` pins a photograph behind the copy at
+             30% opacity under a scrim, so it reads as texture rather
+             than as a picture. The client asked for the opposite here
+             (Aug 2026): a real image, beside the text, that they can
+             change from the dashboard whenever they want.
+
+             It therefore goes in `visual` — the band's second column
+             — and the copy stays in the first. In RTL that puts the
+             picture on the LEFT of the text, which is what was asked
+             for, and it is the grid's inline axis that does it rather
+             than any `order` or `left-` class, so the same markup is
+             correct in both directions.
+
+             The `page-banners` key is still passed the way every
+             other page passes its own. It is `null` there,
+             deliberately and with a note saying why, so adding an
+             atmospheric backdrop BEHIND this split later stays a
+             one-line change rather than a re-wiring. */}
       <PageHero
         breadcrumbs={[...breadcrumbsFor('/programs'), { label: hero.title }]}
         category={hero.category}
         title={hero.title}
         subtitle={hero.tagline}
         image={pageBanners.ususSyria}
+        visual={
+          /* Framed the way `CollectionDetail` frames an article's
+             cover — same radius, same elevation, same hairline — so
+             the picture belongs to the site rather than to this page.
+             4/3 rather than 16/9: beside a column this tall, a wide
+             crop leaves the band looking half-empty.
+
+             `RevealOnMount`, not `Reveal`: this is above the fold, and
+             a scroll-triggered reveal on something already in view
+             either fires instantly or not at all. */
+          <RevealOnMount delay={3}>
+            <div className="overflow-hidden rounded-2xl shadow-e3 ring-1 ring-white/10">
+              <img
+                src={cover.src}
+                alt={cover.alt}
+                /* Eager: it is at the top of the page, and a lazy
+                   image this high is a visible pop on first paint. */
+                decoding="async"
+                className="aspect-[4/3] w-full object-cover"
+              />
+            </div>
+          </RevealOnMount>
+        }
         actions={
           <Button
             variant="accent"
