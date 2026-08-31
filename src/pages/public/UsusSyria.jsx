@@ -32,7 +32,6 @@ import { useContent } from '@context/ContentContext.jsx';
 import { useSeo } from '@hooks/useSeo.js';
 import { ususSyria } from '@content/usus-syria.js';
 import { pageBanners } from '@content/page-banners.js';
-import { breadcrumbsFor } from '@content/site.js';
 import coverFallback from '@assets/banners/usus-syria.webp';
 import programLogo from '@assets/programs/usus-syria-logo.svg';
 
@@ -135,11 +134,17 @@ function applyLinkProps(cta) {
    listing card, and not as a second site logo. It appears twice, each
    time doing a different job:
 
-     عن البرنامج    pinned in the sticky aside, beside the paragraph
-                    that explains what the programme is — the mark and
-                    its definition on screen together
-     دعوة للتسجيل   in place of the closing band's site spiral, so the
-                    page signs off in the programme's own name
+     header         at the top of the copy column, in place of the
+                    breadcrumb trail and the category chip — the mark
+                    introduces the programme, and a crumb repeating its
+                    name under its own logo was the redundancy the
+                    client's Aug 2026 pass removed
+     closing band   in place of the site spiral, so the page signs off
+                    in the programme's own name
+
+   It led the عن البرنامج aside as well until that same pass. It came
+   out when the mark moved into the header, where it introduces the
+   programme better and does not compete with itself two bands later.
 
    Its teal is the client's file, not a token, and it is left alone:
    it already sits inside the brand's own range (#43B3A7 → #69C1A9)
@@ -210,8 +215,27 @@ export default function UsusSyria() {
              atmospheric backdrop BEHIND this split later stays a
              one-line change rather than a re-wiring. */}
       <PageHero
-        breadcrumbs={[...breadcrumbsFor('/programs'), { label: hero.title }]}
-        category={hero.category}
+        lead={
+          <>
+            {/* The wordmark takes the breadcrumb trail's place at the
+                top of the column, and the location chip sits directly
+                over the name — both client edits (Aug 2026). The trail
+                and the "البرامج الحالية" chip are gone with it: the
+                mark introduces the programme, and repeating its name
+                in a crumb under its own logo was the redundancy the
+                edit removes. */}
+            <RevealOnMount>
+              <img src={programLogo} alt={LOGO_ALT} className="h-auto w-52 lg:w-64" />
+            </RevealOnMount>
+
+            <RevealOnMount delay={1} className="mt-6">
+              <span className="inline-flex items-center gap-2 rounded-full bg-brand-300/10 px-3.5 py-1.5 text-sm font-medium text-brand-100 ring-1 ring-inset ring-brand-200/25">
+                <MapPin className="size-4 shrink-0" aria-hidden="true" />
+                {hero.location}
+              </span>
+            </RevealOnMount>
+          </>
+        }
         title={hero.title}
         subtitle={hero.tagline}
         image={pageBanners.ususSyria}
@@ -250,18 +274,7 @@ export default function UsusSyria() {
             {hero.cta.label}
           </Button>
         }
-      >
-        {/* The two cities, as a chip rather than a sentence: it is a
-            label the brief prints on its own line, and it is the one
-            logistical fact a reader scanning the header needs. Same
-            treatment the hackathon banner gives its delivery format. */}
-        <RevealOnMount delay={4} className="mt-7">
-          <span className="inline-flex items-center gap-2 rounded-full bg-brand-300/10 px-3.5 py-1.5 text-sm font-medium text-brand-100 ring-1 ring-inset ring-brand-200/25">
-            <MapPin className="size-4 shrink-0" aria-hidden="true" />
-            {hero.location}
-          </span>
-        </RevealOnMount>
-      </PageHero>
+      />
 
       {/* ── The four figures ─────────────────────────────────────
              The block the brief prints under its header, in the
@@ -283,19 +296,7 @@ export default function UsusSyria() {
              column would sit two-up and break the set. */}
       <Section>
         <StickySplit
-          aside={
-            <>
-              {/* The wordmark leads the aside, above the section's own
-                  label — it is the programme's name, so it reads as a
-                  masthead for the block that defines it rather than as
-                  an ornament dropped beside the copy. */}
-              <Reveal>
-                <img src={programLogo} alt={LOGO_ALT} className="mb-7 h-auto w-40 lg:w-48" />
-              </Reveal>
-
-              <SectionHeading eyebrow={about.eyebrow} title={about.title} layout="aside" />
-            </>
-          }
+          aside={<SectionHeading eyebrow={about.eyebrow} title={about.title} layout="aside" />}
         >
           <Reveal
             as="p"
@@ -459,7 +460,6 @@ export default function UsusSyria() {
              — this one is open, so the page closes on its call to
              apply rather than on the generic contact band. */}
       <CtaBand
-        eyebrow={closing.eyebrow}
         title={closing.title}
         lede={closing.lede}
         cta={closing.cta}

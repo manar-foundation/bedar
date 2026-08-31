@@ -83,6 +83,19 @@ export function PageHero({
   subtitle,
   /** `[{ label, href }]` — the last entry is the current page. */
   breadcrumbs,
+  /**
+   * Nodes at the TOP of the copy column, above the breadcrumbs and
+   * the title — a programme wordmark, a status chip, anything that
+   * introduces the page before its name does.
+   *
+   * `children` renders at the BOTTOM of the column, after the
+   * actions, which is the wrong end for this: a mark that belongs
+   * over the title cannot be passed as a child and pulled back up
+   * with a negative margin. /programs/usus-syria leads with its own
+   * wordmark and its location chip here, in place of the breadcrumb
+   * trail (client edit, Aug 2026).
+   */
+  lead,
   /** Category chip, above the title. Used by the collection pages. */
   category,
   /** ISO date string. Rendered as a `<time>` under the title. */
@@ -162,6 +175,8 @@ export function PageHero({
           className={cn(split && 'grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16')}
         >
           <div className={cn(split ? 'min-w-0' : 'mx-auto max-w-3xl')}>
+            {lead ? <div className="mb-7">{lead}</div> : null}
+
             {breadcrumbs?.length ? (
               <RevealOnMount>
                 <Breadcrumbs

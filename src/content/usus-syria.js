@@ -249,9 +249,14 @@ export const ususSyria = {
     note: 'يعتمد الاختيار على مدى جاهزية المشروع، وملاءمته للبرنامج، وقدرة الفريق على الاستفادة من الرحلة التدريبية.',
   },
 
-  /* ── 6 · دعوة للتسجيل ─────────────────────────────────────── */
+  /* ── 6 · دعوة للتسجيل ─────────────────────────────────────────
+        The brief labels this section "دعوة للتسجيل" and the band
+        carried it as an eyebrow over the heading. The client struck
+        that word out in their Aug 2026 pass — the section is already
+        announced by "ابدأ رحلتك اليوم" and the button under it — so
+        the label survives only as this comment and as the section's
+        name in the brief. Do not re-add it as an `eyebrow`. */
   closing: {
-    eyebrow: 'دعوة للتسجيل',
     title: 'ابدأ رحلتك اليوم',
     lede: 'إذا كنت تقود شركة ناشئة تمتلك منتجًا أوليًا وتسعى إلى تطويره، واختبار السوق، وبناء مشروع أكثر جاهزية للنمو، فإن برنامج أسس سوريا للريادة المجتمعية يوفر لك البيئة المناسبة للانتقال إلى المرحلة التالية.',
     cta: { label: APPLY_LABEL, href: APPLY_URL },
