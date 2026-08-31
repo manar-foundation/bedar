@@ -93,10 +93,28 @@ export function PageHero({
   image,
   /** Only set this when the photo carries meaning of its own. */
   imageAlt,
+  /**
+   * Artwork for a SECOND column, beside the copy rather than behind
+   * it — the shape `Hero` uses on the homepage, on the banner every
+   * other page already shares.
+   *
+   * `image` and this are not alternatives to each other: `image` is a
+   * backdrop (pinned at 30% under a scrim, texture behind the title),
+   * this is a picture the reader is meant to look at. A page that
+   * wants its photograph SEEN passes it here and leaves its
+   * `page-banners` key `null` — which is what /programs/usus-syria
+   * does, at the client's request (Aug 2026).
+   *
+   * Passing both is legal and occasionally right (an atmospheric
+   * backdrop behind a framed portrait), so neither clears the other.
+   */
+  visual,
   /** Extra nodes at the bottom of the column (stats, meta rows). */
   children,
   className,
 }) {
+  const split = Boolean(visual);
+
   return (
     <section className={cn('surface-dark relative overflow-hidden', className)}>
       {/* ── The banner photograph, when the page sets one ─────────
@@ -131,89 +149,104 @@ export function PageHero({
       />
 
       <div className="container-page relative pb-16 pt-[calc(var(--nav-h)+3.5rem)] lg:pb-24 lg:pt-[calc(var(--nav-h)+5rem)]">
-        <div className="mx-auto max-w-3xl">
-          {breadcrumbs?.length ? (
-            <RevealOnMount>
-              <Breadcrumbs
-                className="[&_a]:text-brand-100/70 [&_a:hover]:text-brand-200 [&_span]:text-white"
-                items={breadcrumbs}
-              />
-            </RevealOnMount>
-          ) : null}
+        {/* Two columns when there is a visual, one when there is not.
+            The ratio is `Hero`'s, so the split banner and the split
+            homepage hero put their fold in the same place.
 
-          {category ? (
-            <RevealOnMount delay={1} className={cn(breadcrumbs?.length ? 'mt-6' : 'mt-0')}>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-brand-100 ring-1 ring-inset ring-white/15">
-                <Tag className="size-3.5" aria-hidden="true" />
-                {category}
-              </span>
-            </RevealOnMount>
-          ) : null}
+            The copy is the FIRST child and the visual the second, so
+            in RTL the picture lands on the LEFT of the text with no
+            `order` and no direction-specific class — the grid places
+            them along the inline axis, which is what flips. Below
+            `lg` the grid is one column and they stack, copy first. */}
+        <div
+          className={cn(split && 'grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16')}
+        >
+          <div className={cn(split ? 'min-w-0' : 'mx-auto max-w-3xl')}>
+            {breadcrumbs?.length ? (
+              <RevealOnMount>
+                <Breadcrumbs
+                  className="[&_a]:text-brand-100/70 [&_a:hover]:text-brand-200 [&_span]:text-white"
+                  items={breadcrumbs}
+                />
+              </RevealOnMount>
+            ) : null}
 
-          {/* The bracketed label. Same treatment as `SectionHeading`'s
-              eyebrow — see the note at the top of this file. */}
-          {eyebrow ? (
-            <RevealOnMount
-              as="p"
-              delay={1}
-              className={cn(
-                'inline-flex items-center gap-1.5 text-xs font-semibold tracking-wide text-brand-200',
-                breadcrumbs?.length || category ? 'mt-6' : 'mt-0',
-              )}
-            >
-              <span aria-hidden="true" className="opacity-60">
-                /
-              </span>
-              {eyebrow}
-              <span aria-hidden="true" className="opacity-60">
-                /
-              </span>
-            </RevealOnMount>
-          ) : null}
+            {category ? (
+              <RevealOnMount delay={1} className={cn(breadcrumbs?.length ? 'mt-6' : 'mt-0')}>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-brand-100 ring-1 ring-inset ring-white/15">
+                  <Tag className="size-3.5" aria-hidden="true" />
+                  {category}
+                </span>
+              </RevealOnMount>
+            ) : null}
 
-          <RevealOnMount delay={2}>
-            <h1
-              className={cn(
-                'text-3xl font-bold leading-tight text-white md:text-4xl lg:text-[2.75rem]',
-                breadcrumbs?.length || category || eyebrow ? 'mt-5' : 'mt-0',
-              )}
-            >
-              {title}
-            </h1>
-          </RevealOnMount>
-
-          {subtitle ? (
-            <RevealOnMount
-              as="p"
-              delay={3}
-              className="mt-5 text-lg leading-relaxed text-brand-100/80"
-            >
-              {subtitle}
-            </RevealOnMount>
-          ) : null}
-
-          {date ? (
-            <RevealOnMount delay={3}>
-              <time
-                dateTime={toISODate(date)}
-                className="mt-5 inline-flex items-center gap-2 text-sm text-brand-100/70"
+            {/* The bracketed label. Same treatment as `SectionHeading`'s
+                eyebrow — see the note at the top of this file. */}
+            {eyebrow ? (
+              <RevealOnMount
+                as="p"
+                delay={1}
+                className={cn(
+                  'inline-flex items-center gap-1.5 text-xs font-semibold tracking-wide text-brand-200',
+                  breadcrumbs?.length || category ? 'mt-6' : 'mt-0',
+                )}
               >
-                <CalendarDays className="size-4" aria-hidden="true" />
-                {formatDate(date)}
-              </time>
-            </RevealOnMount>
-          ) : null}
+                <span aria-hidden="true" className="opacity-60">
+                  /
+                </span>
+                {eyebrow}
+                <span aria-hidden="true" className="opacity-60">
+                  /
+                </span>
+              </RevealOnMount>
+            ) : null}
 
-          {actions ? (
-            <RevealOnMount
-              delay={4}
-              className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center"
-            >
-              {actions}
+            <RevealOnMount delay={2}>
+              <h1
+                className={cn(
+                  'text-3xl font-bold leading-tight text-white md:text-4xl lg:text-[2.75rem]',
+                  breadcrumbs?.length || category || eyebrow ? 'mt-5' : 'mt-0',
+                )}
+              >
+                {title}
+              </h1>
             </RevealOnMount>
-          ) : null}
 
-          {children}
+            {subtitle ? (
+              <RevealOnMount
+                as="p"
+                delay={3}
+                className="mt-5 text-lg leading-relaxed text-brand-100/80"
+              >
+                {subtitle}
+              </RevealOnMount>
+            ) : null}
+
+            {date ? (
+              <RevealOnMount delay={3}>
+                <time
+                  dateTime={toISODate(date)}
+                  className="mt-5 inline-flex items-center gap-2 text-sm text-brand-100/70"
+                >
+                  <CalendarDays className="size-4" aria-hidden="true" />
+                  {formatDate(date)}
+                </time>
+              </RevealOnMount>
+            ) : null}
+
+            {actions ? (
+              <RevealOnMount
+                delay={4}
+                className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center"
+              >
+                {actions}
+              </RevealOnMount>
+            ) : null}
+
+            {children}
+          </div>
+
+          {visual ? <div className="min-w-0">{visual}</div> : null}
         </div>
       </div>
     </section>
