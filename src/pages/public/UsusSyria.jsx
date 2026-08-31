@@ -146,6 +146,13 @@ function applyLinkProps(cta) {
    out when the mark moved into the header, where it introduces the
    programme better and does not compete with itself two bands later.
 
+   BOTH INSTANCES ARE THE SAME SIZE — `w-28 lg:w-32`, on the client's
+   instruction (Aug 2026). The header one was twice that and read as a
+   second masthead competing with the h1 directly under it. Sized on
+   WIDTH in both places, never height: this is a two-line wordmark at
+   1.66:1, and pinning its height collapses it to an illegible smudge.
+   Change one and change the other.
+
    Its teal is the client's file, not a token, and it is left alone:
    it already sits inside the brand's own range (#43B3A7 → #69C1A9)
    and clears AA against the page's near-black surface comfortably.
@@ -225,7 +232,7 @@ export default function UsusSyria() {
                 in a crumb under its own logo was the redundancy the
                 edit removes. */}
             <RevealOnMount>
-              <img src={programLogo} alt={LOGO_ALT} className="h-auto w-52 lg:w-64" />
+              <img src={programLogo} alt={LOGO_ALT} className="h-auto w-28 lg:w-32" />
             </RevealOnMount>
 
             <RevealOnMount delay={1} className="mt-6">
