@@ -6,6 +6,23 @@ import { Reveal } from '@components/motion/Reveal.jsx';
 import { cn } from '@utils/cn.js';
 
 /**
+ * `to` for an in-app path, `href` for anything that leaves the site.
+ *
+ * `Button` already routes on which of the two it is given — `to`
+ * renders a react-router `<Link>`, `href` an `<a>` with the external
+ * `rel`/`target` handling. This band used to hardcode `to`, which
+ * turned an absolute URL into a client-side navigation to the path
+ * `/https://…`. It matters for program pages whose call to action is
+ * an application form on a form host (see `APPLY_URL` in
+ * `content/usus-syria.js`), and it is inert for every band that
+ * already passes an internal path.
+ */
+function linkProps(target) {
+  const href = target?.href ?? '';
+  return /^(https?:|mailto:|tel:)/.test(href) ? { href } : { to: href };
+}
+
+/**
  * The closing call-to-action band. The same block ends several
  * marketing pages, so it is one component fed by page data rather
  * than four near-identical copies.
@@ -104,7 +121,7 @@ export function CtaBand({ eyebrow, title, lede, cta, secondaryCta, align = 'spli
                 <Button
                   variant="accent"
                   size="lg"
-                  to={cta.href}
+                  {...linkProps(cta)}
                   // Trim horizontal padding below sm so both actions fit
                   // one row on a phone; restored to the lg default at sm+.
                   className="max-sm:px-3.5"
@@ -117,7 +134,7 @@ export function CtaBand({ eyebrow, title, lede, cta, secondaryCta, align = 'spli
                   <Button
                     variant="inverse"
                     size="lg"
-                    to={secondaryCta.href}
+                    {...linkProps(secondaryCta)}
                     className="max-sm:px-3.5"
                   >
                     {secondaryCta.label}

@@ -641,6 +641,35 @@ twice for its mobile breakpoint — are one list each. `collection-bodies.js` is
 untouched and still holds the flat body: it is generated, and re-running
 `migrate-bodies.mjs` must not fight the built page.
 
+### Built program pages
+
+There are now **two** programs whose detail view is a built page rather than a
+rich-text body, and they share one arrangement:
+
+| Program                       | Route                   | Content                 | Layout                          |
+| ----------------------------- | ----------------------- | ----------------------- | ------------------------------- |
+| هاكاثون أدوات الإعمار في غزة  | `/programs/hackathon`   | `content/hackathon.js`  | `pages/public/Hackathon.jsx`    |
+| أُسُس سوريا للريادة المجتمعية | `/programs/usus-syria`  | `content/usus-syria.js` | `pages/public/UsusSyria.jsx`    |
+
+Both declare a **static route ahead of `programs/:slug`** in `routes.jsx`, both
+are lazy so no other page pays for them, and both still appear in the /programs
+listing like any other program — only the detail view differs. Neither has an
+entry in `collection-bodies.js`, and neither should get one.
+
+Add a third the same way: structure in `content/<slug>.js`, a layout composed
+from `Section` / `StickySplit` / `SectionHeading` in `pages/public/`, a banner
+key in `content/page-banners.js`, the static route, and a record in the
+`programs` seed.
+
+أُسُس سوريا came from a client brief rather than from a migration
+("إنشاء صفحة هبوط أسس سوريا - بدار - يوليو 2026.docx", July 2026), so nothing
+had to be recovered — every string is the brief's own, and the two judgement
+calls it needed (using the brief's own suggested card layout for section 2, and
+carrying its emoji as lucide marks) are declared at the top of
+`content/usus-syria.js`. **Its "قدّم الآن" CTA has no destination in the brief**:
+`APPLY_URL` in that file points at `/contact-us` until the client supplies the
+real application form, and it is the single place to change.
+
 **Never import `collection-bodies.js` statically from `collections.js`.** It is
 ~49 kB raw, and `collections.js` is reached from `ContentContext`, which every
 public page mounts — a static import ships all nine bodies to a visitor who only
