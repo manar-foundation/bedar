@@ -42,7 +42,25 @@ function linkProps(target) {
  * actions. `align="center"` keeps the old centred stack for a band
  * that carries a single action.
  */
-export function CtaBand({ eyebrow, title, lede, cta, secondaryCta, align = 'split', className }) {
+export function CtaBand({
+  eyebrow,
+  title,
+  lede,
+  cta,
+  secondaryCta,
+  /**
+   * The mark above the copy. Defaults to the site's spiral, which is
+   * what every general-purpose band should keep.
+   *
+   * A page whose closing band belongs to ONE programme rather than to
+   * the site passes that programme's own mark here, so the page signs
+   * off in its own name — /programs/usus-syria does. Not a styling
+   * hook: pass a mark, not decoration.
+   */
+  mark,
+  align = 'split',
+  className,
+}) {
   const centered = align === 'center';
 
   return (
@@ -77,9 +95,7 @@ export function CtaBand({ eyebrow, title, lede, cta, secondaryCta, align = 'spli
                 centered ? 'mx-auto max-w-2xl items-center' : 'max-w-xl',
               )}
             >
-              <Reveal>
-                <Spiral className="size-8 text-brand-200" />
-              </Reveal>
+              <Reveal>{mark ?? <Spiral className="size-8 text-brand-200" />}</Reveal>
 
               {eyebrow ? (
                 <Reveal

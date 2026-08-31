@@ -34,6 +34,7 @@ import { ususSyria } from '@content/usus-syria.js';
 import { pageBanners } from '@content/page-banners.js';
 import { breadcrumbsFor } from '@content/site.js';
 import coverFallback from '@assets/banners/usus-syria.webp';
+import programLogo from '@assets/programs/usus-syria-logo.svg';
 
 /* ================================================================
    أُسُس سوريا للريادة المجتمعية — /programs/usus-syria.
@@ -127,6 +128,27 @@ const SECTOR_ICONS = {
 function applyLinkProps(cta) {
   return /^(https?:|mailto:|tel:)/.test(cta.href) ? { href: cta.href } : { to: cta.href };
 }
+
+/* ── THE PROGRAMME'S OWN WORDMARK ──────────────────────────────
+   A geometric-Kufic lockup of «أُسُس سوريا», supplied by the client
+   (Aug 2026) to sit INSIDE this page — not in the navbar, not on the
+   listing card, and not as a second site logo. It appears twice, each
+   time doing a different job:
+
+     عن البرنامج    pinned in the sticky aside, beside the paragraph
+                    that explains what the programme is — the mark and
+                    its definition on screen together
+     دعوة للتسجيل   in place of the closing band's site spiral, so the
+                    page signs off in the programme's own name
+
+   Its teal is the client's file, not a token, and it is left alone:
+   it already sits inside the brand's own range (#43B3A7 → #69C1A9)
+   and clears AA against the page's near-black surface comfortably.
+   Do not recolour it to `currentColor` — a supplied wordmark is not
+   an icon.
+
+   Twice is the ceiling. A third instance turns a mark into wallpaper. */
+const LOGO_ALT = 'أُسُس سوريا للريادة المجتمعية';
 
 /* The photograph, when the programme record has no cover of its own.
    A real file rather than nothing, so the page is never shipped
@@ -261,7 +283,19 @@ export default function UsusSyria() {
              column would sit two-up and break the set. */}
       <Section>
         <StickySplit
-          aside={<SectionHeading eyebrow={about.eyebrow} title={about.title} layout="aside" />}
+          aside={
+            <>
+              {/* The wordmark leads the aside, above the section's own
+                  label — it is the programme's name, so it reads as a
+                  masthead for the block that defines it rather than as
+                  an ornament dropped beside the copy. */}
+              <Reveal>
+                <img src={programLogo} alt={LOGO_ALT} className="mb-7 h-auto w-40 lg:w-48" />
+              </Reveal>
+
+              <SectionHeading eyebrow={about.eyebrow} title={about.title} layout="aside" />
+            </>
+          }
         >
           <Reveal
             as="p"
@@ -429,6 +463,16 @@ export default function UsusSyria() {
         title={closing.title}
         lede={closing.lede}
         cta={closing.cta}
+        /* The programme's mark instead of the site's spiral. Sized on
+           its WIDTH, not its height: the spiral is a 32px icon, but
+           this is a two-line wordmark at 1.66:1, and pinning its
+           height collapses it to a 73px smudge with the Kufic no
+           longer readable. `alt=""`
+           on purpose: this is the SECOND time the wordmark appears on
+           the page, and a screen reader that has already announced it
+           in the about aside should hear the closing heading here, not
+           the programme's name twice. */
+        mark={<img src={programLogo} alt="" className="h-auto w-28 lg:w-32" />}
       />
     </>
   );
