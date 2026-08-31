@@ -41,6 +41,8 @@
    touching the component.
    ================================================================ */
 
+import bannerUsusSyria from '@assets/banners/usus-syria.webp';
+
 export const pageBanners = {
   /** /about — من نحن */
   about: null,
@@ -58,6 +60,17 @@ export const pageBanners = {
   contact: null,
   /** /programs/hackathon — the hackathon landing page */
   hackathon: null,
+  /**
+   * /programs/usus-syria — أُسُس سوريا للريادة المجتمعية.
+   *
+   * A wide crop of `assets/services/photo-management-guidance.jpg`
+   * (the founder mapping hypotheses across a wall of notes), which is
+   * the closest thing in the bundled photography to what this
+   * programme actually does — validate a business model against the
+   * market. The crop is committed as WebP the same way the service
+   * photographs are; the JPEG it came from is still the master.
+   */
+  ususSyria: bannerUsusSyria,
 };
 
 /**
