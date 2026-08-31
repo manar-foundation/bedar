@@ -59,25 +59,6 @@ export async function loadBody(slug) {
    (the live site's inconsistent /program/:slug is kept only as a 301
    alias in routes.jsx so old inbound links don't 404). ────────── */
 const rawPrograms = [
-  /* Newest first — `CollectionListing` leads with the first item, so
-     the open programme is the one that runs full width. Its detail
-     view is a built page, not a rich-text body: `/programs/usus-syria`
-     resolves to `pages/public/UsusSyria.jsx` through the static route
-     declared before `:slug` in routes.jsx, which is why this record
-     carries no entry in `collection-bodies.js`. Same arrangement the
-     hackathon has. */
-  {
-    id: 'usus-syria',
-    slug: 'usus-syria',
-    href: '/programs/usus-syria',
-    title: 'أُسُس سوريا للريادة المجتمعية',
-    category: 'البرامج الحالية',
-    status: 'current',
-    date: '2026-08-31',
-    excerpt:
-      'مسار عملي تطلقه مؤسسة منار للمشاركة المجتمعية، ويهدف إلى دعم الشركات الناشئة التي تمتلك منتجًا أوليًا (MVP) أو خدمة قابلة للاختبار، لتطوير منتجاتها واختبار السوق وبناء نماذج أعمال أكثر جاهزية للنمو.',
-    state: PUBLISH_STATE.PUBLISHED,
-  },
   {
     id: 'hackathon',
     slug: 'hackathon',

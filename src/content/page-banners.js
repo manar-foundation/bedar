@@ -58,21 +58,6 @@ export const pageBanners = {
   contact: null,
   /** /programs/hackathon — the hackathon landing page */
   hackathon: null,
-  /**
-   * /programs/usus-syria — أُسُس سوريا للريادة المجتمعية.
-   *
-   * `null` on purpose, and it is not an omission to be tidied up: the
-   * client asked for that page's photograph to be a REAL image they
-   * can swap from the dashboard, not a backdrop behind the title
-   * (Aug 2026). It is therefore the programme record's own cover —
-   * `collection_items.cover_media_id`, edited under
-   * /admin/collections/programs — rendered below the band the way
-   * `CollectionDetail` renders an article's cover. The bundled crop
-   * that stands in until a cover is uploaded is imported by
-   * `pages/public/UsusSyria.jsx`, because it is a content image on
-   * that page rather than a band treatment.
-   */
-  ususSyria: null,
 };
 
 /**

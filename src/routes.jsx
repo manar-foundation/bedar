@@ -25,7 +25,6 @@ const ProgramDetail = lazy(() => import('@pages/public/ProgramDetail.jsx'));
 /* One program has a page rather than an article body — see the note
    on its route below, and the header of pages/public/Hackathon.jsx. */
 const Hackathon = lazy(() => import('@pages/public/Hackathon.jsx'));
-const UsusSyria = lazy(() => import('@pages/public/UsusSyria.jsx'));
 const Services = lazy(() => import('@pages/public/Services.jsx'));
 const Blog = lazy(() => import('@pages/public/Blog.jsx'));
 const ArticleDetail = lazy(() => import('@pages/public/ArticleDetail.jsx'));
@@ -81,12 +80,6 @@ export default function AppRoutes() {
               still appears in the /programs listing like any other —
               only the detail view differs. */}
           <Route path="programs/hackathon" element={<Hackathon />} />
-          {/* The second built program page, and the same exception:
-              the client briefed أُسُس سوريا as a landing page rather
-              than as an article, so its content is structured
-              (`content/usus-syria.js`) and it has its own layout.
-              See the header of pages/public/UsusSyria.jsx. */}
-          <Route path="programs/usus-syria" element={<UsusSyria />} />
           <Route path="programs/:slug" element={<ProgramDetail />} />
           {/* The live site linked some detail pages under the singular
               /program/:slug. The path is now unified on the plural
