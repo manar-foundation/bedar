@@ -32,8 +32,8 @@ import { useContent } from '@context/ContentContext.jsx';
 import { useSeo } from '@hooks/useSeo.js';
 import { ususSyria } from '@content/usus-syria.js';
 import { pageBanners } from '@content/page-banners.js';
-import { breadcrumbsFor } from '@content/site.js';
 import coverFallback from '@assets/banners/usus-syria.webp';
+import programLogo from '@assets/programs/usus-syria-logo.svg';
 
 /* ================================================================
    أُسُس سوريا للريادة المجتمعية — /programs/usus-syria.
@@ -128,6 +128,40 @@ function applyLinkProps(cta) {
   return /^(https?:|mailto:|tel:)/.test(cta.href) ? { href: cta.href } : { to: cta.href };
 }
 
+/* ── THE PROGRAMME'S OWN WORDMARK ──────────────────────────────
+   A geometric-Kufic lockup of «أُسُس سوريا», supplied by the client
+   (Aug 2026) to sit INSIDE this page — not in the navbar, not on the
+   listing card, and not as a second site logo. It appears twice, each
+   time doing a different job:
+
+     header         at the top of the copy column, in place of the
+                    breadcrumb trail and the category chip — the mark
+                    introduces the programme, and a crumb repeating its
+                    name under its own logo was the redundancy the
+                    client's Aug 2026 pass removed
+     closing band   in place of the site spiral, so the page signs off
+                    in the programme's own name
+
+   It led the عن البرنامج aside as well until that same pass. It came
+   out when the mark moved into the header, where it introduces the
+   programme better and does not compete with itself two bands later.
+
+   BOTH INSTANCES ARE THE SAME SIZE — `w-28 lg:w-32`, on the client's
+   instruction (Aug 2026). The header one was twice that and read as a
+   second masthead competing with the h1 directly under it. Sized on
+   WIDTH in both places, never height: this is a two-line wordmark at
+   1.66:1, and pinning its height collapses it to an illegible smudge.
+   Change one and change the other.
+
+   Its teal is the client's file, not a token, and it is left alone:
+   it already sits inside the brand's own range (#43B3A7 → #69C1A9)
+   and clears AA against the page's near-black surface comfortably.
+   Do not recolour it to `currentColor` — a supplied wordmark is not
+   an icon.
+
+   Twice is the ceiling. A third instance turns a mark into wallpaper. */
+const LOGO_ALT = 'أُسُس سوريا للريادة المجتمعية';
+
 /* The photograph, when the programme record has no cover of its own.
    A real file rather than nothing, so the page is never shipped
    image-less — but it is only the floor: the dashboard's cover wins
@@ -188,8 +222,27 @@ export default function UsusSyria() {
              atmospheric backdrop BEHIND this split later stays a
              one-line change rather than a re-wiring. */}
       <PageHero
-        breadcrumbs={[...breadcrumbsFor('/programs'), { label: hero.title }]}
-        category={hero.category}
+        lead={
+          <>
+            {/* The wordmark takes the breadcrumb trail's place at the
+                top of the column, and the location chip sits directly
+                over the name — both client edits (Aug 2026). The trail
+                and the "البرامج الحالية" chip are gone with it: the
+                mark introduces the programme, and repeating its name
+                in a crumb under its own logo was the redundancy the
+                edit removes. */}
+            <RevealOnMount>
+              <img src={programLogo} alt={LOGO_ALT} className="h-auto w-28 lg:w-32" />
+            </RevealOnMount>
+
+            <RevealOnMount delay={1} className="mt-6">
+              <span className="inline-flex items-center gap-2 rounded-full bg-brand-300/10 px-3.5 py-1.5 text-sm font-medium text-brand-100 ring-1 ring-inset ring-brand-200/25">
+                <MapPin className="size-4 shrink-0" aria-hidden="true" />
+                {hero.location}
+              </span>
+            </RevealOnMount>
+          </>
+        }
         title={hero.title}
         subtitle={hero.tagline}
         image={pageBanners.ususSyria}
@@ -228,18 +281,7 @@ export default function UsusSyria() {
             {hero.cta.label}
           </Button>
         }
-      >
-        {/* The two cities, as a chip rather than a sentence: it is a
-            label the brief prints on its own line, and it is the one
-            logistical fact a reader scanning the header needs. Same
-            treatment the hackathon banner gives its delivery format. */}
-        <RevealOnMount delay={4} className="mt-7">
-          <span className="inline-flex items-center gap-2 rounded-full bg-brand-300/10 px-3.5 py-1.5 text-sm font-medium text-brand-100 ring-1 ring-inset ring-brand-200/25">
-            <MapPin className="size-4 shrink-0" aria-hidden="true" />
-            {hero.location}
-          </span>
-        </RevealOnMount>
-      </PageHero>
+      />
 
       {/* ── The four figures ─────────────────────────────────────
              The block the brief prints under its header, in the
@@ -425,10 +467,19 @@ export default function UsusSyria() {
              — this one is open, so the page closes on its call to
              apply rather than on the generic contact band. */}
       <CtaBand
-        eyebrow={closing.eyebrow}
         title={closing.title}
         lede={closing.lede}
         cta={closing.cta}
+        /* The programme's mark instead of the site's spiral. Sized on
+           its WIDTH, not its height: the spiral is a 32px icon, but
+           this is a two-line wordmark at 1.66:1, and pinning its
+           height collapses it to a 73px smudge with the Kufic no
+           longer readable. `alt=""`
+           on purpose: this is the SECOND time the wordmark appears on
+           the page, and a screen reader that has already announced it
+           in the about aside should hear the closing heading here, not
+           the programme's name twice. */
+        mark={<img src={programLogo} alt="" className="h-auto w-28 lg:w-32" />}
       />
     </>
   );

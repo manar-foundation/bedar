@@ -76,7 +76,19 @@ export function NumberedList({
               aria-hidden="true"
               className="shrink-0 text-3xl font-extrabold leading-none tabular-nums text-brand-300/80 transition-colors duration-(--dur-base) ease-(--ease-standard) group-hover:text-brand-200 sm:w-24 sm:text-4xl lg:text-5xl"
             >
-              <span className="ltr-run">{formatNumber(index + 1).padStart(2, '0')}.</span>
+              {/* The period sits OUTSIDE the isolate on purpose.
+                  `.ltr-run` was wrapping "01." whole, which typesets the
+                  full string left-to-right and leaves the dot on the
+                  RIGHT of the digits — but in RTL "after the number" is
+                  leftward, so that reads as the dot leading the numeral
+                  rather than closing it (client, Aug 2026).
+
+                  Only the DIGITS need the isolate, so that 01 never
+                  reorders to 10. The period is a neutral character
+                  trailing an isolate in an RTL paragraph, so it takes
+                  the paragraph direction and lands to the left of the
+                  digits, which is where it belongs. */}
+              <span className="ltr-run">{formatNumber(index + 1).padStart(2, '0')}</span>.
             </span>
 
             <div className="flex flex-col gap-2.5">

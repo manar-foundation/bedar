@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -9,6 +10,7 @@ import SiteIntegrations from '@components/layout/SiteIntegrations.jsx';
 import SiteSchema from '@components/layout/SiteSchema.jsx';
 import AutoReveal from '@components/motion/AutoReveal.jsx';
 import { useContent } from '@context/ContentContext.jsx';
+import { NOINDEX_CONTENT, isNoindexPath } from '@content/noindex-paths.js';
 
 /**
  * Shell for every public page: sticky navbar, animated main, footer.
@@ -79,9 +81,48 @@ import { useContent } from '@context/ContentContext.jsx';
  * neither belongs on the dashboard — see the header of
  * `SiteIntegrations.jsx`.
  */
+/**
+ * Keep `<meta name="robots">` in step with the route.
+ *
+ * The tag that MATTERS is the one `api/html.js` writes into the
+ * document before it is sent — a crawler deciding whether to list a
+ * URL does not run this code. This is the browser half, and it earns
+ * its place on one case: a visitor who lands anywhere else and then
+ * clicks through to a held-back page gets no fresh document, so
+ * without this the SPA would carry the previous route's robots state.
+ *
+ * The server's tag is adopted rather than duplicated — it is matched
+ * by name, and only removed on a route that is not held back, which
+ * is why `data-bedar-injected` is not the selector here.
+ */
+function useRobotsTag(pathname) {
+  const noindex = isNoindexPath(pathname);
+
+  useEffect(() => {
+    const existing = document.querySelector('meta[name="robots"]');
+
+    if (!noindex) {
+      // Only ever remove what this site put there. A robots tag in
+      // the shell itself would be a site-wide decision, not ours.
+      if (existing?.dataset.bedarInjected === 'robots') existing.remove();
+      return undefined;
+    }
+
+    const tag = existing ?? document.createElement('meta');
+    tag.setAttribute('name', 'robots');
+    tag.setAttribute('content', NOINDEX_CONTENT);
+    tag.dataset.bedarInjected = 'robots';
+    if (!existing) document.head.appendChild(tag);
+
+    return undefined;
+  }, [noindex]);
+}
+
 export default function PublicLayout() {
   const { pathname } = useLocation();
   const { ready } = useContent();
+
+  useRobotsTag(pathname);
 
   const chrome = (
     <>
