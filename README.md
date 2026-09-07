@@ -649,7 +649,7 @@ rich-text body, and they share one arrangement:
 | Program                       | Route                   | Content                 | Layout                          |
 | ----------------------------- | ----------------------- | ----------------------- | ------------------------------- |
 | هاكاثون أدوات الإعمار في غزة  | `/programs/hackathon`   | `content/hackathon.js`  | `pages/public/Hackathon.jsx`    |
-| أُسُس سوريا للريادة المجتمعية | `/programs/usus-syria`  | `content/usus-syria.js` | `pages/public/UsusSyria.jsx`    |
+| مشروع أُسُس سورية             | `/programs/usus-syria`  | `content/usus-syria.js` | `pages/public/UsusSyria.jsx`    |
 
 Both declare a **static route ahead of `programs/:slug`** in `routes.jsx`, both
 are lazy so no other page pays for them, and both still appear in the /programs
@@ -661,14 +661,28 @@ from `Section` / `StickySplit` / `SectionHeading` in `pages/public/`, a banner
 key in `content/page-banners.js`, the static route, and a record in the
 `programs` seed.
 
-أُسُس سوريا came from a client brief rather than from a migration
-("إنشاء صفحة هبوط أسس سوريا - بدار - يوليو 2026.docx", July 2026), so nothing
-had to be recovered — every string is the brief's own, and the two judgement
-calls it needed (using the brief's own suggested card layout for section 2, and
-carrying its emoji as lucide marks) are declared at the top of
-`content/usus-syria.js`. **Its "قدّم الآن" CTA has no destination in the brief**:
-`APPLY_URL` in that file points at `/contact-us` until the client supplies the
-real application form, and it is the single place to change.
+أُسُس سورية came from a client brief rather than from a migration, so nothing
+had to be recovered — every string is the brief's own. The brief was **re-issued
+in September 2026** ("إنشاء صفحة هبوط أسس سوريا - بدار - يوليو 2026 (1).docx")
+and it is not an edit pass: the programme was re-scoped from a training track
+into an accelerator, so the name, both headline figures, the city line, the
+benefits, the eligibility list and the stage names all changed, §1 التحديات and
+§8 شركاؤنا are new, and رحلة المشروع moved below الفئة المستهدفة. The header of
+`content/usus-syria.js` lists the moves one by one — read it before restoring
+anything from git.
+
+Two things about that page are still open, and both are flagged in the same file:
+
+- **The "قدّم الآن" CTA has no destination in the brief.** `APPLY_URL` points at
+  `/contact-us` until the client supplies the real application form; it is the
+  single place to change, and all five CTAs on the page read it.
+- **§8 شركاؤنا shows two partners whose MOUs are unsigned**, per a comment the
+  client left on the brief. The client supplied both logos (Sept 2026) and they
+  live in `src/assets/partners/`, keyed by id in the page's `PARTNER_LOGOS` map;
+  SDO's is their own reversed file, SMEDC's was reversed here because the partner
+  publishes none — see the note at that map. `/programs/usus-syria` is held out
+  of search (`content/noindex-paths.js`); confirm that band with the client
+  before the hold is lifted, since a logo claims more than a name did.
 
 **Never import `collection-bodies.js` statically from `collections.js`.** It is
 ~49 kB raw, and `collections.js` is reached from `ContentContext`, which every
