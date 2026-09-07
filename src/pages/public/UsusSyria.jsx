@@ -229,9 +229,13 @@ const PARTNER_LOGOS = {
      bloom     a soft teal glow behind the numeral, the page's own
                depth language (`section-title-glow`, the card blooms)
 
-   The figure goes up to 5xl/6xl. At 4xl it was competing with the
-   17px label beside it rather than leading it, and a headline figure
-   that does not dominate its own card is just a large word.
+   The figure is 4xl/5xl against a 16px label — enough to lead the
+   card without the box growing around it. It went to 5xl/6xl for one
+   round and came back down with the padding when the client asked
+   for a smaller box; the tile is 126px now against the 148px it was,
+   and the number still dominates because the LABEL came down too.
+   Shrink those two together or not at all: cutting only the padding
+   moves the height by 8px and reads as no change.
 
    NO MARK ON THESE TWO, at the client's instruction (Sept 2026).
    They carried a Building2 / Target pair for one round and lost it;
@@ -243,7 +247,7 @@ function FigureCard({ value, label }) {
   const [ref, shown] = useCountUp(value);
 
   return (
-    <div className="group relative flex h-full flex-col justify-center gap-2.5 overflow-hidden rounded-xl bg-gradient-to-bl from-brand-400/[0.16] via-brand-500/[0.07] to-transparent p-7 ps-8 ring-1 ring-inset ring-brand-300/25 transition-shadow duration-(--dur-base) ease-(--ease-standard) hover:shadow-e2 hover:ring-brand-300/45">
+    <div className="group relative flex h-full flex-col justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-bl from-brand-400/[0.16] via-brand-500/[0.07] to-transparent p-6 ps-7 ring-1 ring-inset ring-brand-300/25 transition-shadow duration-(--dur-base) ease-(--ease-standard) hover:shadow-e2 hover:ring-brand-300/45">
       {/* The paragraph above this pair is set against a teal rule on
           its reading edge. This is the same rule, so the cards read as
           that sentence's own figures. It fades out downward rather
@@ -261,7 +265,7 @@ function FigureCard({ value, label }) {
 
       <span
         ref={ref}
-        className="relative text-5xl font-bold leading-none tabular-nums text-brand-200 lg:text-6xl"
+        className="relative text-4xl font-bold leading-none tabular-nums text-brand-200 lg:text-5xl"
       >
         {/* `.ltr-run` for the same reason `StatRow` used one: a figure
             inside Arabic prose must not bidi-reorder. */}
