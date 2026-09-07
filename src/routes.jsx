@@ -82,7 +82,7 @@ export default function AppRoutes() {
               only the detail view differs. */}
           <Route path="programs/hackathon" element={<Hackathon />} />
           {/* The second built program page, and the same exception:
-              the client briefed أُسُس سوريا as a landing page rather
+              the client briefed أُسُس سورية as a landing page rather
               than as an article, so its content is structured
               (`content/usus-syria.js`) and it has its own layout.
               See the header of pages/public/UsusSyria.jsx. */}

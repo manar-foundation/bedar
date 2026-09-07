@@ -59,7 +59,7 @@ export const pageBanners = {
   /** /programs/hackathon — the hackathon landing page */
   hackathon: null,
   /**
-   * /programs/usus-syria — أُسُس سوريا للريادة المجتمعية.
+   * /programs/usus-syria — مشروع أُسُس سورية.
    *
    * `null` on purpose, and it is not an omission to be tidied up: the
    * client asked for that page's photograph to be a REAL image they

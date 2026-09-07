@@ -68,10 +68,18 @@
  * whole branch of the site is the failure mode worth designing out.
  */
 export const NOINDEX_PATHS = new Set([
-  /* أُسُس سوريا للريادة المجتمعية — live for review by link only,
-     at the client's request (Aug 2026). Its listing card is held back
+  /* مشروع أُسُس سورية — live for review by link only, at the
+     client's request (Aug 2026). Its listing card is held back
      separately, by keeping the `collection_items` row a draft. Remove
-     both together when the programme is announced. */
+     both together when the programme is announced.
+
+     Sept 2026: there is now a SECOND reason to keep this here. The
+     re-issued brief adds a شركاؤنا band, and the client has since
+     supplied both partner LOGOS — while telling us in the same
+     document that neither MOU is signed. A logo wall is a stronger
+     claim of partnership than a list of names was, so confirm that
+     band with the client before removing this entry. See the note on
+     `partners` in `content/usus-syria.js`. */
   '/programs/usus-syria',
 ]);
 
