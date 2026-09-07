@@ -27,12 +27,13 @@ import {
   SectionHeading,
   SectionSeam,
   Spiral,
-  StatRow,
   StickySplit,
 } from '@components/ui';
 import { Reveal, RevealOnMount, Stagger, StaggerItem } from '@components/motion/Reveal.jsx';
 import { useContent } from '@context/ContentContext.jsx';
+import { useCountUp } from '@hooks/useCountUp.js';
 import { useSeo } from '@hooks/useSeo.js';
+import { formatNumber } from '@utils/format.js';
 import { ususSyria } from '@content/usus-syria.js';
 import { pageBanners } from '@content/page-banners.js';
 import coverFallback from '@assets/banners/usus-syria.webp';
@@ -64,11 +65,11 @@ import logoSdo from '@assets/partners/sdo.webp';
      brief's band              primitive             also used on
      ────────────────────────  ────────────────────  ──────────────
      header                    PageHero              every sub-page
-     the two figures           StatRow               /about, home
      1 · التحديات              quiet-panel rows      (this page)
      2 · عن المشروع            StickySplit + aside   /social-…
        القطاعات المستهدفة      IconCard grid         home, /about
      3 · على ماذا ستحصل        IconCard grid         /programs/hackathon
+       + the two figures       FigureCard            (this page)
      4 · الفئة المستهدفة       panel-quiet list      hackathon conditions
      5 · رحلة المشروع          ProcessSteps          /about, hackathon
      6 · آلية التقديم          NumberedList          /social-…
@@ -87,7 +88,8 @@ import logoSdo from '@assets/partners/sdo.webp';
 
      §1 التحديات      quiet rows, MUTED mark, split header
      §2 عن المشروع     sticky aside header, then a 3-up IconCard grid
-     §3 ستحصل         split header, 5-up IconCard grid, brand mark
+     §3 ستحصل         split header, 7-up grid: 2 figure cards then
+                      5 IconCards, brand mark
      §4 الفئة         centred inverse header on dark, tick list
 
    §1's marks are deliberately NOT the brand tint the IconCard grids
@@ -99,9 +101,13 @@ import logoSdo from '@assets/partners/sdo.webp';
    ----------------------------------------------------------------
    The brief's own order, unchanged, section 1 through section 8 —
    which as of Sept 2026 puts رحلة المشروع AFTER الفئة المستهدفة, the
-   reverse of the July brief. The figures and the location chip come
-   from the block the brief prints under its header, so they stay
-   attached to the header.
+   reverse of the July brief.
+
+   The one departure from the document's layout is the client's own
+   instruction: the two figures the brief prints under its header now
+   open §3 as cards instead of sitting in a ruled row of their own
+   (Sept 2026). The location chip still belongs to the header, and the
+   figures are still the brief's words — only their band moved.
 
    THE EMOJI ARE MARKS, AND THEY ARE DRAWN AS MARKS
    ----------------------------------------------------------------
@@ -194,6 +200,57 @@ const PARTNER_LOGOS = {
   'sme-authority': logoSmedc,
   'syrian-development': logoSdo,
 };
+
+/* ── THE TWO HEADLINE FIGURES, AS CARDS ────────────────────────
+   The brief prints "21 شركة ناشئة" and "3 قطاعات مستهدفة" under its
+   header, and that is where they sat until the client asked (Sept
+   2026) for them to move INTO §3, "داخل بوكس نفس باقي العناصر" — in a
+   box like the rest of that section's items. So the `.stat-row` band
+   under the hero is gone and these two lead the benefits grid.
+
+   The box is IconCard's, class for class: same tile, radius, border,
+   surface, padding, and the same two hover decorations (the accent
+   line wiping in along the top edge, the teal bloom from the reading
+   corner). It is not `IconCard` itself because a figure is not an
+   icon — the number has to be typeset at display scale, which is the
+   one thing that card's icon slot cannot do.
+
+   `justify-center` because these cards carry two lines against the
+   benefit cards' four; centring the pair keeps the row's baselines
+   from looking accidental under `auto-rows-fr`.
+
+   The count-up survives the move — it was `StatRow`'s behaviour and
+   losing it would have made the figures read as static labels — and
+   `formatNumber` keeps the digits Western, which is the whole reason
+   that helper exists.                                              */
+function FigureCard({ value, label }) {
+  const [ref, shown] = useCountUp(value);
+
+  return (
+    <div className="band-tile group relative flex h-full flex-col gap-3 overflow-hidden rounded-xl border border-subtle bg-surface p-7">
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px origin-right scale-x-0 bg-gradient-to-l from-brand-300/0 via-brand-300/70 to-brand-300/0 transition-transform duration-(--dur-slow) ease-(--ease-standard) group-hover:scale-x-100 ltr:origin-left"
+      />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-20 -start-20 size-48 rounded-full bg-brand-400/20 opacity-0 blur-2xl transition-opacity duration-(--dur-slow) ease-(--ease-standard) group-hover:opacity-100"
+      />
+
+      <div className="relative flex flex-1 flex-col justify-center gap-2">
+        <span
+          ref={ref}
+          className="text-4xl font-bold leading-none tabular-nums text-brand-200 lg:text-5xl"
+        >
+          {/* `.ltr-run` for the same reason `StatRow` used one: a
+              figure inside Arabic prose must not bidi-reorder. */}
+          <span className="ltr-run">{formatNumber(shown)}</span>
+        </span>
+        <p className="text-[1.0625rem] font-semibold leading-snug text-ink">{label}</p>
+      </div>
+    </div>
+  );
+}
 
 /**
  * `to` for an in-app path, `href` for a form on another host.
@@ -421,30 +478,6 @@ export default function UsusSyria() {
         }
       />
 
-      {/* ── The two figures ──────────────────────────────────────
-             The block the brief prints under its header, in the
-             ruled row /about and the homepage already use. These are
-             genuine quantities (21 / 3), so unlike the hackathon's
-             date ranges they count up.
-
-             TWO figures, not four — the Sept 2026 brief dropped the
-             other two. `.stat-row` is 2-up on mobile and 4-up at
-             `lg`, which would strand this pair in the first half of
-             an empty row, so the grid is held at 2-up all the way and
-             the row is capped at `max-w-3xl` to keep the two numbers
-             a readable distance apart instead of at opposite ends of
-             the container.
-
-             The rule/padding selectors need no help: at `lg` they
-             give every odd child a leading hairline and take it back
-             off `:first-child`, which is exactly right for two
-             columns as well as for four. */}
-      <Section size="sm">
-        <StatRow stats={facts} className="max-w-3xl lg:grid-cols-2" />
-      </Section>
-
-      <SectionSeam />
-
       {/* ── 1 · التحديات ─────────────────────────────────────────
              New in the Sept 2026 brief, and the page now opens on it:
              four pressures the reader recognises, before any claim
@@ -549,16 +582,30 @@ export default function UsusSyria() {
       <SectionSeam />
 
       {/* ── 3 · على ماذا ستحصل الشركات المشاركة؟ ──────────────────
-             FIVE cards, not six — the Sept 2026 brief dropped
-             اختبار السوق as a card of its own.
+             SEVEN cards: the brief's five benefits, led by the two
+             headline figures the client moved into this band (Sept
+             2026). They come first because they frame the section —
+             the size of the cohort and the number of sectors are the
+             facts the five offers below are measured against — and
+             because keeping the pair adjacent is what makes them read
+             as one figure block rather than as two stray cards.
 
-             Five is the awkward count in a 3-up grid: it leaves two
-             orphans hugging the reading edge of the last row. So at
-             `lg` the grid runs on SIX columns with every card
-             spanning two, and the fourth card starts at column 2 —
-             which puts 3 across the top and the remaining 2 centred
-             under them. Below `lg` it is the ordinary 2-up grid and
-             the span classes do not apply.
+             Seven is the awkward count in a 3-up grid: it strands one
+             card on the reading edge of the last row. So at `lg` the
+             grid runs on SIX columns with every card spanning two —
+             3 per row — and the seventh starts at column 3, which
+             centres it under the two rows above. Below `lg` it is the
+             ordinary 2-up grid and the span classes do not apply.
+
+             Change the card count and change `nth-child(7)` with it;
+             the two are one decision, not two.
+
+             `auto-rows-fr` starts at `sm`, not at the base. Levelling
+             row heights is what keeps cards that sit SIDE BY SIDE on
+             one baseline; in the single column below `sm` there is no
+             row to level, so it only stretched every card to the
+             tallest one — which left the two figure cards, two lines
+             each, as 248px of mostly empty box on a phone.
 
              `lines={null}` — every description is a single short
              sentence, so there is nothing to hold back behind a
@@ -571,7 +618,13 @@ export default function UsusSyria() {
           className="mb-12"
         />
 
-        <Stagger className="grid auto-rows-fr gap-6 sm:grid-cols-2 lg:grid-cols-6 lg:[&>*]:col-span-2 lg:[&>*:nth-child(4)]:col-start-2">
+        <Stagger className="grid gap-6 sm:auto-rows-fr sm:grid-cols-2 lg:grid-cols-6 lg:[&>*]:col-span-2 lg:[&>*:nth-child(7)]:col-start-3">
+          {facts.map((fact) => (
+            <StaggerItem key={fact.id} className="h-full">
+              <FigureCard value={fact.value} label={fact.label} />
+            </StaggerItem>
+          ))}
+
           {benefits.items.map((benefit) => {
             const Icon = BENEFIT_ICONS[benefit.id];
             return (
