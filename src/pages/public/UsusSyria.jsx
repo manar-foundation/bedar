@@ -206,25 +206,36 @@ const PARTNER_LOGOS = {
 /* ── THE TWO HEADLINE FIGURES, AS CARDS ────────────────────────
    The brief prints "21 شركة ناشئة" and "3 قطاعات مستهدفة" under its
    header. The client moved them (Sept 2026) under §2's "مسرعة أعمال
-   متخصصة …" paragraph — the sentence that actually states them — and
-   asked for them in a box like that band's other cards.
+   متخصصة …" paragraph — the sentence that actually states them.
 
-   The box is the sector cards' own: `band-tile`, same radius, border,
-   surface and padding, and the same two hover decorations (the accent
-   line wiping in along the top edge, the teal bloom from the reading
-   corner). It is not `IconCard` because a figure is not an icon —
-   the number has to be typeset at display scale, which that
-   component's icon slot cannot do.
+   WHY THIS IS NOT THE `band-tile` BOX THE SECTOR CARDS USE
+   ----------------------------------------------------------------
+   It was, and it read as almost nothing: `band-tile` is `#0f2325` on
+   a `#081a1a` page behind a `#1b2e31` hairline, which is a 7% lift
+   and a border you cannot see. That is the right restraint for the
+   three sector cards — a row of equals, where the box is a container
+   and the copy is the content — and the wrong one for two figures
+   whose whole job is to be seen. So the client asked for a clearer,
+   better-looking box and this is it:
+
+     surface   a teal wash pooling at the reading corner and fading
+               out, instead of a flat near-black panel
+     ring      brand-300 at 25%, which is visible, against a hairline
+               that was not
+     edge      a brand-300 bar down the inline-start edge — the same
+               gesture the paragraph directly above uses, so the pair
+               reads as belonging to that sentence rather than as two
+               cards that happen to follow it
+     bloom     a soft teal glow behind the numeral, the page's own
+               depth language (`section-title-glow`, the card blooms)
+
+   The figure goes up to 5xl/6xl. At 4xl it was competing with the
+   17px label beside it rather than leading it, and a headline figure
+   that does not dominate its own card is just a large word.
 
    NO MARK ON THESE TWO, at the client's instruction (Sept 2026).
    They carried a Building2 / Target pair for one round and lost it;
-   do not add one back. The figure IS the card's mark — a glyph above
-   a 48px numeral competes with it rather than introducing it — and
-   the tile drops to the two lines it actually has instead of padding
-   itself out to match a grid it no longer sits in.
-
-   `justify-center` because there is no icon anchoring the top: the
-   pair reads as one block centred in its box.
+   do not add one back. The figure IS the card's mark.
 
    The count-up came across from `StatRow` and `formatNumber` keeps
    the digits Western, which is the whole reason that helper exists. */
@@ -232,27 +243,32 @@ function FigureCard({ value, label }) {
   const [ref, shown] = useCountUp(value);
 
   return (
-    <div className="band-tile group relative flex h-full flex-col gap-3 overflow-hidden rounded-xl border border-subtle bg-surface p-7">
+    <div className="group relative flex h-full flex-col justify-center gap-2.5 overflow-hidden rounded-xl bg-gradient-to-bl from-brand-400/[0.16] via-brand-500/[0.07] to-transparent p-7 ps-8 ring-1 ring-inset ring-brand-300/25 transition-shadow duration-(--dur-base) ease-(--ease-standard) hover:shadow-e2 hover:ring-brand-300/45">
+      {/* The paragraph above this pair is set against a teal rule on
+          its reading edge. This is the same rule, so the cards read as
+          that sentence's own figures. It fades out downward rather
+          than boxing the card in. */}
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-px origin-right scale-x-0 bg-gradient-to-l from-brand-300/0 via-brand-300/70 to-brand-300/0 transition-transform duration-(--dur-slow) ease-(--ease-standard) group-hover:scale-x-100 ltr:origin-left"
-      />
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-20 -start-20 size-48 rounded-full bg-brand-400/20 opacity-0 blur-2xl transition-opacity duration-(--dur-slow) ease-(--ease-standard) group-hover:opacity-100"
+        className="pointer-events-none absolute inset-y-0 start-0 w-1 bg-gradient-to-b from-brand-300 via-brand-300/70 to-brand-300/10"
       />
 
-      <div className="relative flex flex-1 flex-col justify-center gap-2">
-        <span
-          ref={ref}
-          className="text-4xl font-bold leading-none tabular-nums text-brand-200 lg:text-5xl"
-        >
-          {/* `.ltr-run` for the same reason `StatRow` used one: a
-              figure inside Arabic prose must not bidi-reorder. */}
-          <span className="ltr-run">{formatNumber(shown)}</span>
-        </span>
-        <p className="text-[1.0625rem] font-semibold leading-snug text-ink">{label}</p>
-      </div>
+      {/* Depth behind the numeral, not decoration beside it. */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-12 size-40 rounded-full bg-brand-300/15 blur-3xl -start-8"
+      />
+
+      <span
+        ref={ref}
+        className="relative text-5xl font-bold leading-none tabular-nums text-brand-200 lg:text-6xl"
+      >
+        {/* `.ltr-run` for the same reason `StatRow` used one: a figure
+            inside Arabic prose must not bidi-reorder. */}
+        <span className="ltr-run">{formatNumber(shown)}</span>
+      </span>
+
+      <p className="relative text-base font-medium leading-snug text-ink">{label}</p>
     </div>
   );
 }
