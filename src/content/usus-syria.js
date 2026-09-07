@@ -134,14 +134,22 @@ export const ususSyria = {
   },
 
   /* The TWO figures the brief lists under the header — it printed
-     four in July and prints two now. Split into value + label so
-     `StatRow` can typeset the number at display scale; the pairs are
-     the brief's own lines ("21 شركة ناشئة", "3 قطاعات مستهدفة") with
-     nothing added.
+     four in July and prints two now. Split into value + label so the
+     number can be typeset at display scale; the pairs are the brief's
+     own lines ("21 شركة ناشئة", "3 قطاعات مستهدفة") with nothing
+     added.
 
-     Do not pad this back to four to fill the row. `StatRow`'s grid is
-     4-up at `lg`, so the page narrows it to 2-up there rather than
-     inventing a third figure — see the note at its call site. */
+     They are still the header's block in the DOCUMENT, which is why
+     they live here at the top of this file rather than inside
+     `about`. Where they are DRAWN is a layout decision, and the
+     client made it in Sept 2026: the page carries them as a pair of
+     cards under §2's "مسرعة أعمال متخصصة …" paragraph — the sentence
+     that actually says "تمكين 21 شركة ناشئة" — instead of giving them
+     a ruled row under the hero. See `FigureCard` in
+     `pages/public/UsusSyria.jsx`.
+
+     Do not pad this back to four to fill a row. Two is what the brief
+     says, and the pair is laid out 2-up around that count. */
   facts: [
     { id: 'startups', value: 21, label: 'شركة ناشئة' },
     { id: 'sectors', value: 3, label: 'قطاعات مستهدفة' },
