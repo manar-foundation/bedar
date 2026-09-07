@@ -1,6 +1,7 @@
 import {
   ArrowLeft,
   BadgeCheck,
+  Building2,
   CalendarCheck,
   Coins,
   GraduationCap,
@@ -12,6 +13,7 @@ import {
   Recycle,
   Rocket,
   Tags,
+  Target,
   Users,
   Zap,
 } from 'lucide-react';
@@ -162,6 +164,23 @@ const SECTOR_ICONS = {
    strings. Keep the array and the content list in step. */
 const CHALLENGE_ICONS = [PlugZap, Tags, Network, Rocket];
 
+/* One mark per headline figure, keyed by its `facts` id — the client
+   asked for these boxes to carry a logo like the rest of §3's cards
+   (Sept 2026), and to have it fit what the box actually says:
+
+     21 شركة ناشئة       a cohort of COMPANIES        → Building2
+     3 قطاعات مستهدفة    sectors that are TARGETED    → Target
+
+   Neither mark appears anywhere else on the page. `Rocket` is the
+   obvious startup glyph and is deliberately NOT used here: §1 already
+   spends it on "الانتقال من التدريب إلى التنفيذ", and one icon
+   standing for two different things on one page is worse than a
+   plainer choice.                                                  */
+const FIGURE_ICONS = {
+  startups: Building2,
+  sectors: Target,
+};
+
 /* ── THE TWO PARTNER LOGOS ─────────────────────────────────────
    Keyed by the `partners` id in `content/usus-syria.js`, the way
    every other mark on this page is keyed. Both files were supplied
@@ -223,7 +242,7 @@ const PARTNER_LOGOS = {
    losing it would have made the figures read as static labels — and
    `formatNumber` keeps the digits Western, which is the whole reason
    that helper exists.                                              */
-function FigureCard({ value, label }) {
+function FigureCard({ value, label, icon: Icon }) {
   const [ref, shown] = useCountUp(value);
 
   return (
@@ -237,16 +256,38 @@ function FigureCard({ value, label }) {
         className="pointer-events-none absolute -top-20 -start-20 size-48 rounded-full bg-brand-400/20 opacity-0 blur-2xl transition-opacity duration-(--dur-slow) ease-(--ease-standard) group-hover:opacity-100"
       />
 
-      <div className="relative flex flex-1 flex-col justify-center gap-2">
+      <div className="relative flex flex-1 flex-col gap-3">
+        {/* IconCard's tile, class for class — including the lift,
+            tilt and colour swap it plays on hover — so the two figure
+            boxes and the five benefit boxes are one row of cards and
+            not two kinds. */}
+        {Icon ? (
+          <span className="relative mb-1 inline-flex size-14 shrink-0 items-center justify-center rounded-2xl bg-tint-brand text-tint-brand-fg ring-1 ring-tint-brand-ring transition-[transform,background-color,color,box-shadow] duration-(--dur-base) ease-(--ease-standard) group-hover:-translate-y-1 group-hover:rotate-[-4deg] group-hover:bg-brand-300 group-hover:text-brand-950 group-hover:shadow-e2 [&_svg]:size-7 [&_svg]:transition-transform [&_svg]:duration-(--dur-base) group-hover:[&_svg]:scale-110">
+            <Icon aria-hidden="true" strokeWidth={1.75} />
+          </span>
+        ) : null}
+
+        {/* The figure sits where IconCard puts its heading, at display
+            scale — 3xl/4xl rather than the 4xl/5xl it carried as a
+            bare stat, because a number that out-measures the icon
+            above it stops reading as part of the same card. */}
         <span
           ref={ref}
-          className="text-4xl font-bold leading-none tabular-nums text-brand-200 lg:text-5xl"
+          className="text-3xl font-bold leading-none tabular-nums text-brand-200 lg:text-4xl"
         >
           {/* `.ltr-run` for the same reason `StatRow` used one: a
               figure inside Arabic prose must not bidi-reorder. */}
           <span className="ltr-run">{formatNumber(shown)}</span>
         </span>
-        <p className="text-[1.0625rem] font-semibold leading-snug text-ink">{label}</p>
+
+        {/* The rule IconCard wipes in under its title, in the same
+            place relative to the heading it belongs to. */}
+        <span
+          aria-hidden="true"
+          className="-mt-1 block h-0.5 w-10 origin-right scale-x-0 rounded-full bg-brand-300 transition-transform duration-(--dur-base) ease-(--ease-standard) group-hover:scale-x-100 ltr:origin-left"
+        />
+
+        <p className="text-[0.9375rem] leading-relaxed text-ink-secondary">{label}</p>
       </div>
     </div>
   );
@@ -621,7 +662,7 @@ export default function UsusSyria() {
         <Stagger className="grid gap-6 sm:auto-rows-fr sm:grid-cols-2 lg:grid-cols-6 lg:[&>*]:col-span-2 lg:[&>*:nth-child(7)]:col-start-3">
           {facts.map((fact) => (
             <StaggerItem key={fact.id} className="h-full">
-              <FigureCard value={fact.value} label={fact.label} />
+              <FigureCard value={fact.value} label={fact.label} icon={FIGURE_ICONS[fact.id]} />
             </StaggerItem>
           ))}
 
