@@ -69,9 +69,9 @@ import logoSdo from '@assets/partners/sdo.webp';
      header                    PageHero              every sub-page
      1 · التحديات              quiet-panel rows      (this page)
      2 · عن المشروع            StickySplit + aside   /social-…
+       + the two figures       FigureCard            (this page)
        القطاعات المستهدفة      IconCard grid         home, /about
      3 · على ماذا ستحصل        IconCard grid         /programs/hackathon
-       + the two figures       FigureCard            (this page)
      4 · الفئة المستهدفة       panel-quiet list      hackathon conditions
      5 · رحلة المشروع          ProcessSteps          /about, hackathon
      6 · آلية التقديم          NumberedList          /social-…
@@ -89,9 +89,9 @@ import logoSdo from '@assets/partners/sdo.webp';
    given different silhouettes:
 
      §1 التحديات      quiet rows, MUTED mark, split header
-     §2 عن المشروع     sticky aside header, then a 3-up IconCard grid
-     §3 ستحصل         split header, 7-up grid: 2 figure cards then
-                      5 IconCards, brand mark
+     §2 عن المشروع     sticky aside header, a 2-up figure pair inside
+                      the split, then a 3-up IconCard grid
+     §3 ستحصل         split header, 5-up IconCard grid, brand mark
      §4 الفئة         centred inverse header on dark, tick list
 
    §1's marks are deliberately NOT the brand tint the IconCard grids
@@ -106,10 +106,12 @@ import logoSdo from '@assets/partners/sdo.webp';
    reverse of the July brief.
 
    The one departure from the document's layout is the client's own
-   instruction: the two figures the brief prints under its header now
-   open §3 as cards instead of sitting in a ruled row of their own
-   (Sept 2026). The location chip still belongs to the header, and the
-   figures are still the brief's words — only their band moved.
+   instruction: the two figures the brief prints under its header are
+   now cards under the عن المشروع paragraph, instead of a ruled row of
+   their own (Sept 2026). That paragraph is where the brief actually
+   says "تمكين 21 شركة ناشئة", so the pair answers the sentence above
+   it. The location chip still belongs to the header, and the figures
+   are still the brief's words — only their band moved.
 
    THE EMOJI ARE MARKS, AND THEY ARE DRAWN AS MARKS
    ----------------------------------------------------------------
@@ -586,7 +588,23 @@ export default function UsusSyria() {
              this. The target sectors follow in the same band, at
              full container width: they belong to section 2 of the
              brief, but three cards inside the split's narrower
-             column would sit two-up and break the set. */}
+             column would sit two-up and break the set.
+
+             THE TWO FIGURES SIT UNDER THAT PARAGRAPH
+             ---------------------------------------------------------
+             Client instruction (Sept 2026), and the right home for
+             them: the paragraph is where the brief actually SAYS
+             "تمكين 21 شركة ناشئة … عبر برنامج مكثف", so the pair
+             quantifies the sentence directly above it instead of
+             leading a list of what the programme gives you. They
+             travelled from a ruled row under the hero, through §3,
+             to here.
+
+             Inside the split's own column rather than at container
+             width: they belong to the paragraph, and a pair of cards
+             spanning the full band would read as a section of their
+             own and push the eye past the sentence they answer to.
+             Two cards fit that column exactly 2-up. */}
       <Section tone="glow">
         <StickySplit
           aside={<SectionHeading eyebrow={about.eyebrow} title={about.title} layout="aside" />}
@@ -597,6 +615,14 @@ export default function UsusSyria() {
           >
             {about.body}
           </Reveal>
+
+          <Stagger className="mt-9 grid gap-6 sm:auto-rows-fr sm:grid-cols-2">
+            {facts.map((fact) => (
+              <StaggerItem key={fact.id} className="h-full">
+                <FigureCard value={fact.value} label={fact.label} icon={FIGURE_ICONS[fact.id]} />
+              </StaggerItem>
+            ))}
+          </Stagger>
         </StickySplit>
 
         <Reveal as="h3" className="mb-8 mt-14 text-lg font-bold text-ink lg:text-xl">
@@ -623,30 +649,28 @@ export default function UsusSyria() {
       <SectionSeam />
 
       {/* ── 3 · على ماذا ستحصل الشركات المشاركة؟ ──────────────────
-             SEVEN cards: the brief's five benefits, led by the two
-             headline figures the client moved into this band (Sept
-             2026). They come first because they frame the section —
-             the size of the cohort and the number of sectors are the
-             facts the five offers below are measured against — and
-             because keeping the pair adjacent is what makes them read
-             as one figure block rather than as two stray cards.
+             FIVE cards, not six — the Sept 2026 brief dropped
+             اختبار السوق as a card of its own. The two headline
+             figures passed through this grid for one round and now
+             live under the عن المشروع paragraph they quantify, at the
+             client's instruction; see the note on §2.
 
-             Seven is the awkward count in a 3-up grid: it strands one
-             card on the reading edge of the last row. So at `lg` the
-             grid runs on SIX columns with every card spanning two —
-             3 per row — and the seventh starts at column 3, which
-             centres it under the two rows above. Below `lg` it is the
-             ordinary 2-up grid and the span classes do not apply.
+             Five is the awkward count in a 3-up grid: it leaves two
+             orphans hugging the reading edge of the last row. So at
+             `lg` the grid runs on SIX columns with every card
+             spanning two, and the fourth card starts at column 2 —
+             which puts 3 across the top and the remaining 2 centred
+             under them. Below `lg` it is the ordinary 2-up grid and
+             the span classes do not apply.
 
-             Change the card count and change `nth-child(7)` with it;
+             Change the card count and change `nth-child(4)` with it;
              the two are one decision, not two.
 
              `auto-rows-fr` starts at `sm`, not at the base. Levelling
              row heights is what keeps cards that sit SIDE BY SIDE on
              one baseline; in the single column below `sm` there is no
-             row to level, so it only stretched every card to the
-             tallest one — which left the two figure cards, two lines
-             each, as 248px of mostly empty box on a phone.
+             row to level and it only stretches every card to the
+             tallest.
 
              `lines={null}` — every description is a single short
              sentence, so there is nothing to hold back behind a
@@ -659,13 +683,7 @@ export default function UsusSyria() {
           className="mb-12"
         />
 
-        <Stagger className="grid gap-6 sm:auto-rows-fr sm:grid-cols-2 lg:grid-cols-6 lg:[&>*]:col-span-2 lg:[&>*:nth-child(7)]:col-start-3">
-          {facts.map((fact) => (
-            <StaggerItem key={fact.id} className="h-full">
-              <FigureCard value={fact.value} label={fact.label} icon={FIGURE_ICONS[fact.id]} />
-            </StaggerItem>
-          ))}
-
+        <Stagger className="grid gap-6 sm:auto-rows-fr sm:grid-cols-2 lg:grid-cols-6 lg:[&>*]:col-span-2 lg:[&>*:nth-child(4)]:col-start-2">
           {benefits.items.map((benefit) => {
             const Icon = BENEFIT_ICONS[benefit.id];
             return (

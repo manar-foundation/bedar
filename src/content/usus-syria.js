@@ -141,14 +141,15 @@ export const ususSyria = {
 
      They are still the header's block in the DOCUMENT, which is why
      they live here at the top of this file rather than inside
-     `benefits`. Where they are DRAWN is a layout decision, and the
-     client made it in Sept 2026: the page now leads the §3 grid with
-     them, in the same card as that section's other items, instead of
-     giving them a ruled row under the hero. See `FigureCard` in
+     `about`. Where they are DRAWN is a layout decision, and the
+     client made it in Sept 2026: the page carries them as a pair of
+     cards under §2's "مسرعة أعمال متخصصة …" paragraph — the sentence
+     that actually says "تمكين 21 شركة ناشئة" — instead of giving them
+     a ruled row under the hero. See `FigureCard` in
      `pages/public/UsusSyria.jsx`.
 
      Do not pad this back to four to fill a row. Two is what the brief
-     says, and §3's grid is arranged around the count. */
+     says, and the pair is laid out 2-up around that count. */
   facts: [
     { id: 'startups', value: 21, label: 'شركة ناشئة' },
     { id: 'sectors', value: 3, label: 'قطاعات مستهدفة' },
