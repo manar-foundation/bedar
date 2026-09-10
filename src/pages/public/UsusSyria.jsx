@@ -27,13 +27,12 @@ import {
   SectionHeading,
   SectionSeam,
   Spiral,
+  StatRow,
   StickySplit,
 } from '@components/ui';
 import { Reveal, RevealOnMount, Stagger, StaggerItem } from '@components/motion/Reveal.jsx';
 import { useContent } from '@context/ContentContext.jsx';
-import { useCountUp } from '@hooks/useCountUp.js';
 import { useSeo } from '@hooks/useSeo.js';
-import { formatNumber } from '@utils/format.js';
 import { ususSyria } from '@content/usus-syria.js';
 import { pageBanners } from '@content/page-banners.js';
 import coverFallback from '@assets/banners/usus-syria.webp';
@@ -65,9 +64,9 @@ import logoSdo from '@assets/partners/sdo.webp';
      brief's band              primitive             also used on
      ────────────────────────  ────────────────────  ──────────────
      header                    PageHero              every sub-page
+       + the two figures       StatRow               home, /about
      1 · التحديات              quiet-panel rows      (this page)
      2 · عن المشروع            StickySplit + aside   /social-…
-       + the two figures       FigureCard            (this page)
        القطاعات المستهدفة      IconCard grid         home, /about
      3 · على ماذا ستحصل        IconCard grid         /programs/hackathon
      4 · الفئة المستهدفة       panel-quiet list      hackathon conditions
@@ -87,8 +86,7 @@ import logoSdo from '@assets/partners/sdo.webp';
    given different silhouettes:
 
      §1 التحديات      quiet rows, MUTED mark, split header
-     §2 عن المشروع     sticky aside header, a 2-up figure pair inside
-                      the split, then a 3-up IconCard grid
+     §2 عن المشروع     sticky aside header, then a 3-up IconCard grid
      §3 ستحصل         split header, 5-up IconCard grid, brand mark
      §4 الفئة         centred inverse header on dark, tick list
 
@@ -103,13 +101,10 @@ import logoSdo from '@assets/partners/sdo.webp';
    which as of Sept 2026 puts رحلة المشروع AFTER الفئة المستهدفة, the
    reverse of the July brief.
 
-   The one departure from the document's layout is the client's own
-   instruction: the two figures the brief prints under its header are
-   now cards under the عن المشروع paragraph, instead of a ruled row of
-   their own (Sept 2026). That paragraph is where the brief actually
-   says "تمكين 21 شركة ناشئة", so the pair answers the sentence above
-   it. The location chip still belongs to the header, and the figures
-   are still the brief's words — only their band moved.
+   The two figures the brief prints under its header are drawn as a
+   ruled `StatRow` band directly under the hero, ahead of §1 — the
+   brief's own header block. The location chip stays in the header,
+   over the programme name; the figures are the brief's own words.
 
    THE EMOJI ARE MARKS, AND THEY ARE DRAWN AS MARKS
    ----------------------------------------------------------------
@@ -202,80 +197,6 @@ const PARTNER_LOGOS = {
   'sme-authority': logoSmedc,
   'syrian-development': logoSdo,
 };
-
-/* ── THE TWO HEADLINE FIGURES, AS CARDS ────────────────────────
-   The brief prints "21 شركة ناشئة" and "3 قطاعات مستهدفة" under its
-   header. The client moved them (Sept 2026) under §2's "مسرعة أعمال
-   متخصصة …" paragraph — the sentence that actually states them.
-
-   WHY THIS IS NOT THE `band-tile` BOX THE SECTOR CARDS USE
-   ----------------------------------------------------------------
-   It was, and it read as almost nothing: `band-tile` is `#0f2325` on
-   a `#081a1a` page behind a `#1b2e31` hairline, which is a 7% lift
-   and a border you cannot see. That is the right restraint for the
-   three sector cards — a row of equals, where the box is a container
-   and the copy is the content — and the wrong one for two figures
-   whose whole job is to be seen. So the client asked for a clearer,
-   better-looking box and this is it:
-
-     surface   a teal wash pooling at the reading corner and fading
-               out, instead of a flat near-black panel
-     ring      brand-300 at 25%, which is visible, against a hairline
-               that was not
-     edge      a brand-300 bar down the inline-start edge — the same
-               gesture the paragraph directly above uses, so the pair
-               reads as belonging to that sentence rather than as two
-               cards that happen to follow it
-     bloom     a soft teal glow behind the numeral, the page's own
-               depth language (`section-title-glow`, the card blooms)
-
-   The figure is 4xl/5xl against a 16px label — enough to lead the
-   card without the box growing around it. It went to 5xl/6xl for one
-   round and came back down with the padding when the client asked
-   for a smaller box; the tile is 126px now against the 148px it was,
-   and the number still dominates because the LABEL came down too.
-   Shrink those two together or not at all: cutting only the padding
-   moves the height by 8px and reads as no change.
-
-   NO MARK ON THESE TWO, at the client's instruction (Sept 2026).
-   They carried a Building2 / Target pair for one round and lost it;
-   do not add one back. The figure IS the card's mark.
-
-   The count-up came across from `StatRow` and `formatNumber` keeps
-   the digits Western, which is the whole reason that helper exists. */
-function FigureCard({ value, label }) {
-  const [ref, shown] = useCountUp(value);
-
-  return (
-    <div className="group relative flex h-full flex-col justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-bl from-brand-400/[0.16] via-brand-500/[0.07] to-transparent p-6 ps-7 ring-1 ring-inset ring-brand-300/25 transition-shadow duration-(--dur-base) ease-(--ease-standard) hover:shadow-e2 hover:ring-brand-300/45">
-      {/* The paragraph above this pair is set against a teal rule on
-          its reading edge. This is the same rule, so the cards read as
-          that sentence's own figures. It fades out downward rather
-          than boxing the card in. */}
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 start-0 w-1 bg-gradient-to-b from-brand-300 via-brand-300/70 to-brand-300/10"
-      />
-
-      {/* Depth behind the numeral, not decoration beside it. */}
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-12 size-40 rounded-full bg-brand-300/15 blur-3xl -start-8"
-      />
-
-      <span
-        ref={ref}
-        className="relative text-4xl font-bold leading-none tabular-nums text-brand-200 lg:text-5xl"
-      >
-        {/* `.ltr-run` for the same reason `StatRow` used one: a figure
-            inside Arabic prose must not bidi-reorder. */}
-        <span className="ltr-run">{formatNumber(shown)}</span>
-      </span>
-
-      <p className="relative text-base font-medium leading-snug text-ink">{label}</p>
-    </div>
-  );
-}
 
 /**
  * `to` for an in-app path, `href` for a form on another host.
@@ -380,6 +301,40 @@ const FALLBACK_COVER = {
   alt: 'مؤسس يراجع فرضيات مشروعه على لوح من الملاحظات في مساحة عمل مشتركة',
 };
 
+/* ── THIS PAGE'S ACTION TEAL IS THE PROGRAMME'S OWN ────────────
+   Every button on this page (the accent CTAs and the outline ones)
+   is drawn in #69C1A9 — the exact teal of the أُسُس سورية wordmark,
+   as specified by the programme's landing-page file.
+
+   THIS IS A PAGE-SCOPED OVERRIDE, ON PURPOSE.
+   ----------------------------------------------------------------
+   The rest of the public site pins its buttons to the mint highlight
+   (`--action-accent` = `--brand-200`) — the client's Aug 2026
+   direction, stated once in `styles/tokens/colors.css`. أُسُس سورية
+   is the one page that opts out of that mint and keeps the darker
+   turquoise so its buttons match its wordmark and its file. So the
+   override lives HERE, on this page's own carrier, and is NOT touched
+   in the global tokens — changing it there would repaint every button
+   on every page and undo the Aug 2026 decision.
+
+   Set as inline custom properties on the wrapper so they cascade to
+   `PageHero`, every `Section` button and the closing `CtaBand` without
+   any of them being touched. The values are the file's own: the hover
+   lifts brighter (#7ecdb7), the glow is the matching rgba, and the
+   hero aurora's third band follows. `--action-accent-on` (the near-
+   black label) is unchanged — it clears AA against #69C1A9 as it did
+   against the mint. A plain carrier `<div>`, not `display:contents`
+   and never `overflow:hidden`: the full-bleed bands and the sticky
+   splits both need an ancestor that adds no box model of its own. */
+const ACCENT_SCOPE = {
+  '--action-primary': '#69C1A9',
+  '--action-primary-hover': '#7ecdb7',
+  '--action-accent': '#69C1A9',
+  '--action-accent-hover': '#7ecdb7',
+  '--action-accent-glow': 'rgba(105, 193, 169, 0.42)',
+  '--hero-aurora-c': 'rgba(105, 193, 169, 0.26)',
+};
+
 export default function UsusSyria() {
   useSeo(ususSyria.seo);
 
@@ -415,7 +370,7 @@ export default function UsusSyria() {
   const cover = record?.image ? { src: record.image, alt: record.imageAlt ?? '' } : FALLBACK_COVER;
 
   return (
-    <>
+    <div style={ACCENT_SCOPE}>
       {/* ── Header ───────────────────────────────────────────────
              The banner every sub-page shares, with the brief's own
              header line as its subtitle and the apply button as its
@@ -503,6 +458,26 @@ export default function UsusSyria() {
         }
       />
 
+      {/* ── The two headline figures ─────────────────────────────
+             The brief prints "21 شركة ناشئة" and "3 قطاعات مستهدفة"
+             under its header, and that is where they sit: a ruled
+             `StatRow` band directly under the hero, ahead of the
+             first section — the brief's own header block.
+
+             `StatRow`, not tiled cards or a `band-tile` box: the two
+             numbers are the content, so they run as one hairline-
+             ruled row with no box around either. `max-w-3xl` keeps
+             the pair from stranding across the full container, and
+             `lg:grid-cols-2` holds them 2-up rather than letting the
+             4-up default leave two lonely columns. The count-up and
+             the Western digits are `StatRow`'s own (`useCountUp` +
+             `formatNumber`); the figures are the brief's words. */}
+      <Section size="sm">
+        <StatRow stats={facts} className="max-w-3xl lg:grid-cols-2" />
+      </Section>
+
+      <SectionSeam />
+
       {/* ── 1 · التحديات ─────────────────────────────────────────
              New in the Sept 2026 brief, and the page now opens on it:
              four pressures the reader recognises, before any claim
@@ -572,21 +547,14 @@ export default function UsusSyria() {
              brief, but three cards inside the split's narrower
              column would sit two-up and break the set.
 
-             THE TWO FIGURES SIT UNDER THAT PARAGRAPH
+             THE TWO FIGURES DO NOT SIT HERE
              ---------------------------------------------------------
-             Client instruction (Sept 2026), and the right home for
-             them: the paragraph is where the brief actually SAYS
-             "تمكين 21 شركة ناشئة … عبر برنامج مكثف", so the pair
-             quantifies the sentence directly above it instead of
-             leading a list of what the programme gives you. They
-             travelled from a ruled row under the hero, through §3,
-             to here.
-
-             Inside the split's own column rather than at container
-             width: they belong to the paragraph, and a pair of cards
-             spanning the full band would read as a section of their
-             own and push the eye past the sentence they answer to.
-             Two cards fit that column exactly 2-up. */}
+             They are the brief's header block and run as a ruled
+             `StatRow` directly under the hero, ahead of §1 — see the
+             band above. Do not fold them back into this paragraph:
+             the paragraph names "تمكين 21 شركة ناشئة" in prose, and a
+             pair of cards repeating the figure here would say the
+             same number twice on one screen. */}
       <Section tone="glow">
         <StickySplit
           aside={<SectionHeading eyebrow={about.eyebrow} title={about.title} layout="aside" />}
@@ -597,14 +565,6 @@ export default function UsusSyria() {
           >
             {about.body}
           </Reveal>
-
-          <Stagger className="mt-9 grid gap-6 sm:auto-rows-fr sm:grid-cols-2">
-            {facts.map((fact) => (
-              <StaggerItem key={fact.id} className="h-full">
-                <FigureCard value={fact.value} label={fact.label} />
-              </StaggerItem>
-            ))}
-          </Stagger>
         </StickySplit>
 
         <Reveal as="h3" className="mb-8 mt-14 text-lg font-bold text-ink lg:text-xl">
@@ -657,7 +617,25 @@ export default function UsusSyria() {
              `lines={null}` — every description is a single short
              sentence, so there is nothing to hold back behind a
              clamp. */}
-      <Section tone="glow-alt">
+      {/* Drawn in the LIGHT theme — see the note on §6 below, which
+          is the other half of the same client instruction. The
+          gradient is the file's own scene for this band. */}
+      <Section
+        tone="glow-alt"
+        data-theme="light"
+        className="band-light-surface"
+        style={{
+          '--band-light-surface':
+            'linear-gradient(180deg, #dcf1ea 0%, #cbe9df 52%, #e4f4ee 100%)',
+          /* Inline, not in the stylesheet: `[data-theme='light']`
+             declares these on this very element from an unlayered
+             rule, and unlayered CSS beats anything in a `@layer`
+             regardless of specificity. Inline is what actually wins.
+             See the band's note in animations.css for the values. */
+          '--action-primary': '#2c7c6a',
+          '--action-primary-hover': '#24685a',
+        }}
+      >
         <SectionHeading
           title={benefits.title}
           lede={benefits.lede}
@@ -784,13 +762,46 @@ export default function UsusSyria() {
              The brief's closing sentence for this section is a
              qualifier on the whole funnel, so it sits under the list
              in the framed panel rather than becoming a sixth step. */}
-      <Section tone="wash">
+      {/* ── DRAWN IN THE LIGHT THEME ──────────────────────────────
+             This band and §3 are the two the client asked to match
+             the landing-page file exactly, and in that file they are
+             LIGHT. `data-theme="light"` re-themes the band's tokens;
+             `band-light-surface` (animations.css) paints the surface
+             underneath them and switches off the dark site's ambient
+             glows, which would otherwise smudge a light band.
+
+             The gradient is the file's own scene for this band. The
+             action colours are NOT the page's `ACCENT_SCOPE` here:
+             `[data-theme='light']` re-declares them on this element,
+             and a declaration on the element beats an inherited one,
+             so the buttons take the light theme's own teal — which is
+             what the file does and what clears AA on a pale surface. */}
+      <Section
+        tone="wash"
+        data-theme="light"
+        className="band-light-surface"
+        style={{
+          '--band-light-surface': 'linear-gradient(180deg, #f5f8f6 0%, #eef3f0 100%)',
+          /* Same reason as §3 — see the note there. */
+          '--action-primary': '#2c7c6a',
+          '--action-primary-hover': '#24685a',
+        }}
+      >
         <StickySplit
           aside={<SectionHeading title={applying.title} lede={applying.lede} layout="aside" />}
         >
           <NumberedList items={applying.items} />
 
-          <Reveal className="panel-inset mt-10 px-6 py-7 sm:px-8">
+          {/* The one thing in this light band that stays DARK, exactly
+              as the file draws it: a dark inset under the funnel. Its
+              surface is already painted by the dark site's own
+              `.panel-inset`, so without this the band's light tokens
+              would put near-black ink on it and the sentence would be
+              unreadable. `data-theme="dark"` hands the panel back its
+              own ink (#a9b7b7 in the file) — the surface and the text
+              have to come from the SAME theme, and here that is the
+              dark one. */}
+          <Reveal data-theme="dark" className="panel-inset mt-10 px-6 py-7 sm:px-8">
             <Spiral
               aria-hidden="true"
               className="pointer-events-none absolute -top-6 size-32 text-brand-200/[0.07] end-5"
@@ -886,6 +897,6 @@ export default function UsusSyria() {
           ))}
         </Stagger>
       </Section>
-    </>
+    </div>
   );
 }
