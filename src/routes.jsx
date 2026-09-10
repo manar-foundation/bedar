@@ -23,8 +23,7 @@ const SocialEntrepreneurship = lazy(() => import('@pages/public/SocialEntreprene
 const Programs = lazy(() => import('@pages/public/Programs.jsx'));
 const ProgramDetail = lazy(() => import('@pages/public/ProgramDetail.jsx'));
 /* One program has a page rather than an article body — see the note
-   on its route below, and the header of pages/public/Hackathon.jsx. */
-const Hackathon = lazy(() => import('@pages/public/Hackathon.jsx'));
+   on its route below, and the header of pages/public/UsusSyria.jsx. */
 const UsusSyria = lazy(() => import('@pages/public/UsusSyria.jsx'));
 const Services = lazy(() => import('@pages/public/Services.jsx'));
 const Blog = lazy(() => import('@pages/public/Blog.jsx'));
@@ -73,19 +72,16 @@ export default function AppRoutes() {
               braces — but the order is also what a reader expects, and
               it keeps the exception visible next to the rule.
 
-              The hackathon is the one program whose source was a built
-              landing page rather than an article, so its content is
-              structured (`content/hackathon.js`) and it has its own
-              layout. Every other program still renders through
-              `ProgramDetail` → `CollectionDetail`, and the hackathon
-              still appears in the /programs listing like any other —
-              only the detail view differs. */}
-          <Route path="programs/hackathon" element={<Hackathon />} />
-          {/* The second built program page, and the same exception:
-              the client briefed أُسُس سورية as a landing page rather
-              than as an article, so its content is structured
-              (`content/usus-syria.js`) and it has its own layout.
-              See the header of pages/public/UsusSyria.jsx. */}
+              أُسُس سورية is the one program the client briefed as a
+              landing page rather than as an article, so its content is
+              structured (`content/usus-syria.js`) and it has its own
+              layout. Every other program — the hackathon included, as
+              of the Sept 2026 content pass that reduced it to a summary
+              and an activities section — renders through
+              `ProgramDetail` → `CollectionDetail`, and each still
+              appears in the /programs listing like any other; only this
+              one program's detail view differs. See the header of
+              pages/public/UsusSyria.jsx. */}
           <Route path="programs/usus-syria" element={<UsusSyria />} />
           <Route path="programs/:slug" element={<ProgramDetail />} />
           {/* The live site linked some detail pages under the singular
