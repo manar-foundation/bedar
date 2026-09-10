@@ -704,6 +704,67 @@
     --lf-c: transparent;
   }
 
+  /* ── A LIGHT BAND ON THE DARK SITE ─────────────────────────────
+        /programs/usus-syria carries two bands drawn in the LIGHT
+        theme while the rest of that page — and the whole site —
+        stays dark. Client instruction, to match the programme's own
+        landing-page file.
+
+        The band sets `data-theme="light"` itself, and that is what
+        re-themes its TOKENS (white cards, dark ink, pale hairlines).
+        This class paints the SURFACE those tokens expect: the public
+        site is dark-only, so a band carries no opaque background of
+        its own, and the page's near-black would otherwise show
+        straight through a set of white cards.
+
+        The gradient arrives per band as `--band-light-surface`. The
+        two bands are different scenes in the light theme and both
+        values are the file's own, not tokens.
+
+        BOTH AMBIENT LAYERS ARE SWITCHED OFF rather than re-themed.
+        They are the dark site's lighting — radial glows mixed for
+        near-black and composited with `screen` — and over a light
+        surface they read as grey smudges. The light theme's own
+        bands carry no glow layer either.
+
+        The `[data-theme='dark']` prefix is deliberate: a band's
+        lighting scene is chosen by `nth-of-type` selectors that all
+        carry it, so a bare class would lose to them on specificity. */
+  [data-theme='dark'] .section-band.band-light-surface {
+    background-image: var(--band-light-surface);
+    background-color: transparent;
+
+    /* The light theme's own `--action-primary` (#407479, a blue-teal)
+       lands at 4.46:1 on this band's pale mint — under AA, and not the
+       colour the file draws either. The file's outline buttons here are
+       the programme's green, which clears AA comfortably. */
+    --action-primary: #2c7c6a;
+    --action-primary-hover: #24685a;
+  }
+
+  /* The funnel's numerals. Ours are `--brand-300` at 80% — a mint mixed
+     to sit on near-black, which over a pale surface reads as a wash
+     rather than as a number. The file sets them solid, in the
+     programme's green, and the hover goes DARKER here rather than
+     brighter: on a light band the dark site's `brand-200` hover would
+     fade the number out at the moment it is pointed at.
+
+     `!important` is load-bearing and not laziness: the numeral's
+     colour comes from a Tailwind UTILITY (`text-brand-300/80`, plus a
+     `group-hover:` variant), and utilities sit in a later cascade
+     layer than this file. Layer order beats specificity, so no
+     selector written here can win without it. */
+  [data-theme='dark'] .section-band.band-light-surface ol > li > span:first-child {
+    color: #4aa992 !important;
+  }
+  [data-theme='dark'] .section-band.band-light-surface ol > li:hover > span:first-child {
+    color: #2c7c6a !important;
+  }
+  [data-theme='dark'] .section-band.band-light-surface > .section-ambient-layer,
+  [data-theme='dark'] .section-band.band-light-surface > .section-glow-layer {
+    display: none;
+  }
+
   [data-theme='dark'] .section-ambient-layer {
     /* `--l*-str` scales a slot's alpha and leaves its hue alone, so a
        scene can reuse a token at a level its own geometry needs

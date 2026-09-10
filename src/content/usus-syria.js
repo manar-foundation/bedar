@@ -141,13 +141,10 @@ export const ususSyria = {
      own lines ("21 شركة ناشئة", "3 قطاعات مستهدفة") with nothing
      added.
 
-     They are still the header's block in the DOCUMENT, which is why
-     they live here at the top of this file rather than inside
-     `about`. Where they are DRAWN is a layout decision, and the
-     client made it in Sept 2026: the page carries them as a pair of
-     cards under §2's "مسرعة أعمال متخصصة …" paragraph — the sentence
-     that actually says "تمكين 21 شركة ناشئة" — instead of giving them
-     a ruled row under the hero. See `FigureCard` in
+     They are the header's block in the DOCUMENT, which is why they
+     live here at the top of this file rather than inside `about`,
+     and it is also where they are DRAWN: a ruled `StatRow` band
+     directly under the hero, ahead of §1. See the figures band in
      `pages/public/UsusSyria.jsx`.
 
      Do not pad this back to four to fill a row. Two is what the brief
