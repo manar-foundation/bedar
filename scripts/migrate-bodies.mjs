@@ -29,7 +29,7 @@
    ================================================================ */
 
 import { writeFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
 const ORIGIN = 'https://bedar.webflow.io';
@@ -37,7 +37,15 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = resolve(ROOT, 'src/content/collection-bodies.js');
 
 /* Items to migrate. Paths are the live site's, which mixes
-   /programs/:slug and /program/:slug — see collections.js. */
+   /programs/:slug and /program/:slug — see collections.js.
+
+   `programs/hackathon` is deliberately NOT here. Its Webflow source
+   was a bespoke landing page (no `w-richtext` block), and the client
+   replaced its content with a plain summary + activities article in
+   Sept 2026. That body is now authored directly in
+   `collection-bodies.js`; the merge in `main()` preserves it, so
+   re-running this script refreshes the items below without touching
+   the hand-authored hackathon body. */
 const ITEMS = [
   ['articles', 'stages-of-idea-generation', '/blog/stages-of-idea-generation'],
   ['articles', 'an-idea-equals-profits', '/blog/an-idea-equals-profits'],
@@ -45,14 +53,22 @@ const ITEMS = [
   ['articles', 'become-like-those-successful-people', '/blog/become-like-those-successful-people'],
   ['news', 'gaza-hackathon-launch', '/news/gaza-hackathon-launch'],
   ['news', 'hackathon-press-release', '/news/hackathon-press-release'],
-  ['programs', 'hackathon', '/programs/hackathon'],
   ['programs', 'community-solutions-challenge', '/program/community-solutions-challenge'],
-  ['programs', 'bedar-second-entrepreneurial-program', '/program/bedar-second-entrepreneurial-program'],
+  [
+    'programs',
+    'bedar-second-entrepreneurial-program',
+    '/program/bedar-second-entrepreneurial-program',
+  ],
 ];
 
 const ENTITIES = {
-  '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"',
-  '&#39;': "'", '&apos;': "'", '&nbsp;': ' ',
+  '&amp;': '&',
+  '&lt;': '<',
+  '&gt;': '>',
+  '&quot;': '"',
+  '&#39;': "'",
+  '&apos;': "'",
+  '&nbsp;': ' ',
 };
 
 const decode = (text) =>
@@ -62,11 +78,7 @@ const decode = (text) =>
 
 /** Strip inline tags (<em>, <strong>, <a>, <br>) and collapse space. */
 const toText = (html) =>
-  decode(
-    html
-      .replace(/<br\s*\/?>/gi, ' ')
-      .replace(/<[^>]+>/g, ''),
-  )
+  decode(html.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, ''))
     .replace(/\s+/g, ' ')
     .trim();
 
@@ -128,16 +140,16 @@ function parseBlocks(inner) {
 }
 
 /**
- * Fallback for items that are NOT rich-text CMS entries.
+ * Fallback for items that are NOT rich-text CMS entries — a Webflow
+ * page with no `w-richtext` block, whose prose is walked in document
+ * order instead.
  *
- * `/programs/hackathon` is a bespoke Webflow landing page — six
- * designed sections (hero, goals, who can join, specialisms, a dated
- * timeline) with no `w-richtext` block anywhere. Its prose is still
- * migrated here, in document order, so nothing is lost.
- *
- * What this CANNOT preserve is the page's structure: the timeline
- * flattens into headings and paragraphs. That layout is a page-build
- * job, not a content-migration one — see the README note.
+ * No item in ITEMS currently hits this path: `/programs/hackathon`
+ * used to (a bespoke landing page), but its body is now authored
+ * directly in `collection-bodies.js` and it is no longer migrated.
+ * Kept as the general fallback for any future non-richtext item, and
+ * because flattening a designed page into prose is a lossy last
+ * resort worth keeping visible — see the README note.
  */
 function parsePageProse(html) {
   // Trim to the content between the page's <h1> and the footer, so
@@ -167,9 +179,7 @@ function parsePageProse(html) {
 
   // Drop consecutive duplicates — Webflow renders some headings
   // twice for its desktop/mobile breakpoints.
-  return blocks.filter(
-    (block, index, all) => index === 0 || block.text !== all[index - 1].text,
-  );
+  return blocks.filter((block, index, all) => index === 0 || block.text !== all[index - 1].text);
 }
 
 async function fetchBody(path) {
@@ -181,18 +191,25 @@ async function fetchBody(path) {
   const html = await response.text();
   const openIndex = html.search(/<div[^>]*class="[^"]*w-richtext[^"]*"[^>]*>/i);
 
-  return openIndex === -1
-    ? parsePageProse(html)
-    : parseBlocks(sliceElement(html, openIndex));
+  return openIndex === -1 ? parsePageProse(html) : parseBlocks(sliceElement(html, openIndex));
 }
 
 const HEADER = `/* ================================================================
-   COLLECTION BODIES — GENERATED FILE, DO NOT EDIT BY HAND.
+   COLLECTION BODIES — generated for migrated items, hand-authored for
+   the rest.
 
    Produced by \`scripts/migrate-bodies.mjs\` from bedar.webflow.io.
    Regenerate with:
 
      node scripts/migrate-bodies.mjs
+
+   The script MERGES: it refreshes only the slugs it migrates and
+   leaves every other key untouched, so a body written directly in
+   this file survives a re-run. \`programs/hackathon\` is one such body
+   — the client replaced its Webflow landing page with a plain summary
+   + activities article (Sept 2026), so it is maintained here by hand
+   and is no longer in the migration's item list. Edit those bodies
+   here; do not edit a migrated body here, as the next run overwrites it.
 
    These are the long-form bodies for the \`articles\`, \`news\` and
    \`programs\` collections, keyed by slug. \`collections.js\` attaches
@@ -205,7 +222,18 @@ const HEADER = `/* =============================================================
 
 async function main() {
   const dryRun = process.argv.includes('--dry-run');
-  const bodies = {};
+
+  // Start from whatever the output file already holds, then refresh
+  // only the slugs in ITEMS. Any body authored directly in that file
+  // (e.g. `programs/hackathon`, no longer migrated) is a key not in
+  // ITEMS, so this merge preserves it instead of dropping it.
+  let bodies = {};
+  try {
+    const existing = await import(pathToFileURL(OUT).href);
+    bodies = { ...(existing.bodies ?? existing.default ?? {}) };
+  } catch {
+    // First run, or the file does not exist yet — start empty.
+  }
   let failures = 0;
 
   for (const [collection, slug, path] of ITEMS) {

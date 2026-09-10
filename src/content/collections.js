@@ -64,8 +64,9 @@ const rawPrograms = [
      view is a built page, not a rich-text body: `/programs/usus-syria`
      resolves to `pages/public/UsusSyria.jsx` through the static route
      declared before `:slug` in routes.jsx, which is why this record
-     carries no entry in `collection-bodies.js`. Same arrangement the
-     hackathon has. */
+     carries no entry in `collection-bodies.js`. It is now the only
+     program built that way — the hackathon reverted to a rich-text
+     body in the Sept 2026 content pass. */
   {
     id: 'usus-syria',
     slug: 'usus-syria',
@@ -82,12 +83,12 @@ const rawPrograms = [
     id: 'hackathon',
     slug: 'hackathon',
     href: '/programs/hackathon',
-    title: 'هاكاثون أدوات الإعمار في غزة',
+    title: 'هاكاثون أدوات الإعمار في غزة 2024',
     category: 'البرامج السابقة',
     status: 'past',
     date: '2025-11-13',
     excerpt:
-      'مبادرة مجتمعية لتطوير حلول وأدوات مبتكرة للإسهام في إعادة بناء البنية التحتية وتحسين الحياة الاجتماعية والاقتصادية لسكان غزة. ستنظم منصة بدار هذا الحدث الذي يمتد لمدة يومين، بالتعاون مع الهيئة العربية الدولية لإعمار فلسطين',
+      'انطلق "هاكاثون أدوات الإعمار في غزة" في أغسطس 2024 كمبادرة مجتمعية هدفت إلى جمع المهتمين من مختلف التخصصات لتطوير حلول وأدوات مبتكرة تُسهم في دعم جهود إعمار قطاع غزة وتحسين الظروف المعيشية والاجتماعية والاقتصادية لسكانه.',
     state: PUBLISH_STATE.PUBLISHED,
   },
   {

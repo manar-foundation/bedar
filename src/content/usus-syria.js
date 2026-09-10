@@ -3,11 +3,13 @@
 
    WHY THIS FILE EXISTS
    ----------------------------------------------------------------
-   Same reason `hackathon.js` exists, and the second instance of the
-   same pattern. Most programs on this site are a rich-text body
-   rendered by `CollectionDetail` → `RichText`, which is right for a
-   program written as an article. This one was not written as an
-   article: the client's brief
+   This is the one program on the site with a built page instead of a
+   rich-text body. Most programs are a rich-text body rendered by
+   `CollectionDetail` → `RichText`, which is right for a program
+   written as an article. (The hackathon had a page too until Sept
+   2026, when the client cut its content down to a summary and an
+   activities section and it moved back onto the article renderer.)
+   This one was not written as an article: the client's brief
    ("إنشاء صفحة هبوط أسس سوريا - بدار - يوليو 2026 (1).docx") specifies
    a LANDING PAGE — a numbered set of eight bands, each with its own
    shape: a figure pair, a challenges list, a sector list, a benefits
