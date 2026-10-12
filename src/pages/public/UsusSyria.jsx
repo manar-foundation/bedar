@@ -1,15 +1,20 @@
+import { Fragment } from 'react';
 import {
   ArrowLeft,
   BadgeCheck,
   CalendarCheck,
   Coins,
+  Footprints,
   GraduationCap,
   Handshake,
   MapPin,
+  MessagesSquare,
   Network,
+  NotebookPen,
   PlugZap,
   Puzzle,
   Recycle,
+  RefreshCw,
   Rocket,
   Tags,
   Users,
@@ -38,7 +43,7 @@ import { pageBanners } from '@content/page-banners.js';
 import coverFallback from '@assets/banners/usus-syria.webp';
 import programLogo from '@assets/programs/usus-syria-logo.svg';
 import logoSmedc from '@assets/partners/smedc.webp';
-import logoSdo from '@assets/partners/sdo.webp';
+import logoPresently from '@assets/partners/presently.png';
 
 /* ================================================================
    مشروع أُسُس سورية — /programs/usus-syria.
@@ -48,11 +53,12 @@ import logoSdo from '@assets/partners/sdo.webp';
    The same reason `Hackathon.jsx` does, and this is the second of
    the two. `CollectionDetail` renders a program written as an
    article; the client's brief for this one
-   ("إنشاء صفحة هبوط أسس سوريا - بدار - يوليو 2026 (1).docx") is a
-   LANDING-PAGE brief — eight numbered bands, each a different shape
-   — so it gets a layout instead of a rich-text body.
-   `content/usus-syria.js` is its content half, and the note at the
-   top of that file records what the Sept 2026 re-issue changed.
+   ("صفحة هبوط أسس سورية - بدار - يوليو 2026.docx") is a LANDING-PAGE
+   brief — eight numbered bands, each a different shape — so it gets a
+   layout instead of a rich-text body. `content/usus-syria.js` is its
+   content half, and the note at the top of that file records what the
+   final (8 Oct 2026) brief changed, including the comment-driven rules
+   the body text alone would get wrong.
 
    ASSEMBLED FROM THE SITE'S OWN PRIMITIVES
    ----------------------------------------------------------------
@@ -64,13 +70,14 @@ import logoSdo from '@assets/partners/sdo.webp';
      brief's band              primitive             also used on
      ────────────────────────  ────────────────────  ──────────────
      header                    PageHero              every sub-page
-       + the two figures       StatRow               home, /about
+       + the three figures     StatRow               home, /about
      1 · التحديات              quiet-panel rows      (this page)
      2 · عن المشروع            StickySplit + aside   /social-…
        القطاعات المستهدفة      IconCard grid         home, /about
      3 · على ماذا ستحصل        IconCard grid         /programs/hackathon
      4 · الفئة المستهدفة       panel-quiet list      hackathon conditions
-     5 · رحلة المشروع          ProcessSteps          /about, hackathon
+     5 · رحلة المشروع          phased ProcessSteps   /about, hackathon
+       + الإيقاع الأسبوعي      panel-inset cycle     (this page)
      6 · آلية التقديم          NumberedList          /social-…
      7 · دعوة للتسجيل          CtaBand               every page
      8 · شركاؤنا               panel-quiet plates    (this page)
@@ -98,10 +105,9 @@ import logoSdo from '@assets/partners/sdo.webp';
    ORDER
    ----------------------------------------------------------------
    The brief's own order, unchanged, section 1 through section 8 —
-   which as of Sept 2026 puts رحلة المشروع AFTER الفئة المستهدفة, the
-   reverse of the July brief.
+   which puts رحلة المشروع AFTER الفئة المستهدفة.
 
-   The two figures the brief prints under its header are drawn as a
+   The three figures the brief prints under its header are drawn as a
    ruled `StatRow` band directly under the hero, ahead of §1 — the
    brief's own header block. The location chip stays in the header,
    over the programme name; the figures are the brief's own words.
@@ -159,43 +165,64 @@ const SECTOR_ICONS = {
    strings. Keep the array and the content list in step. */
 const CHALLENGE_ICONS = [PlugZap, Tags, Network, Rocket];
 
-/* ── THE TWO PARTNER LOGOS ─────────────────────────────────────
+/* ── THE WEEKLY-RHYTHM MARKS ────────────────────────────────────
+   The journey closes on a weekly rhythm of three beats (see the
+   `journey` note in `content/usus-syria.js`). No mark is in the brief
+   — it is a flat document — so each is read from what its beat DOES,
+   keyed by the id the content file gives it:
+
+     يوم تدريب كامل       an applied day, not a talk → NotebookPen
+     مهمة ميدانية         out of the room, in field → Footprints
+     جلسة إرشاد           a mentor conversation      → MessagesSquare
+
+   The three PHASES carry no icon: their titles sit on the left of the
+   continuous rail as text, so the line's shape is never interrupted
+   (client instruction). See the §5 note and `ProcessSteps`. */
+const RHYTHM_ICONS = {
+  'training-day': NotebookPen,
+  'field-task': Footprints,
+  mentoring: MessagesSquare,
+};
+
+/* ── THE PARTNER LOGOS ─────────────────────────────────────────
    Keyed by the `partners` id in `content/usus-syria.js`, the way
-   every other mark on this page is keyed. Both files were supplied
-   by the client (Sept 2026); the brief itself embeds no images.
+   every other mark on this page is keyed. The brief embeds no images.
 
      sme-authority        smeda.gov.sy/assets/images/Logo.png
-     syrian-development   the SDO S3 bucket's own
-                          "SDO Logo Horizontal - White.png"
+     presently            NOT SUPPLIED YET — the final brief replaced
+                          منظمة التنمية السورية (SDO) with Presently,
+                          and no Presently artwork has been provided.
+                          Its plate falls back to the name as text (§8)
+                          until a file arrives, and the removed SDO mark
+                          is NOT reused in its place.
 
-   BOTH ARE REVERSED ARTWORK, BECAUSE THIS BAND IS DARK
+   SMEDC IS REVERSED ARTWORK, BECAUSE THIS BAND IS DARK
    ----------------------------------------------------------------
-   SDO publish a white horizontal variant and that is the file used,
-   untouched — the three stars are white in their own reversed
-   artwork, not a change made here.
-
    SMEDC publish no reversed variant, and their file is #231F20 ink
-   plus a #5AB39F teal: on this surface the wordmark and the dotted
-   map both disappeared and only the teal line survived. So the
-   NEUTRAL ink alone was lifted to white and the teal was left exactly
-   as supplied — the partner's second brand colour is intact, and the
-   result matches what SDO's own reversed file does. That is a
-   reversed lockup, not a recolour: no hue is changed, and the
-   alpha channel is untouched so the antialiasing survives.
+   plus a #5AB39F teal: on this surface the wordmark and the dotted map
+   both disappeared and only the teal line survived. So the NEUTRAL ink
+   alone was lifted to white and the teal was left exactly as supplied
+   — the partner's second brand colour is intact. That is a reversed
+   lockup, not a recolour: no hue is changed, and the alpha channel is
+   untouched so the antialiasing survives.
 
    REPLACE THE SMEDC FILE the moment the partner supplies a reversed
-   variant of their own — a partner's own artwork always wins over
-   one derived here. Neither file may be used on a light surface.
+   variant of their own — a partner's own artwork always wins over one
+   derived here. The file may not be used on a light surface.
 
-   Both were trimmed to their ink (the supplied SMEDC file carries
-   baked-in padding that would have made it read smaller than SDO at
-   the same height) and exported at 200px tall, which is 2.5x the
-   80px they render at. Re-export them if that height changes — 2x is
-   the floor for a retina screen, and these are raster files, so the
-   source height is the whole quality budget.                       */
+   It was trimmed to its ink (the supplied file carries baked-in
+   padding) and exported at 200px tall, 2.5x the 80px it renders at.
+   Re-export it if that height changes — 2x is the floor for a retina
+   screen, and it is a raster file, so the source height is the whole
+   quality budget.                                                   */
 const PARTNER_LOGOS = {
   'sme-authority': logoSmedc,
-  'syrian-development': logoSdo,
+   presently: logoPresently,
+  /* 'presently': <file> — the final brief replaced منظمة التنمية
+     السورية (SDO) with Presently, and no Presently artwork is supplied
+     yet. A partner id with no entry here falls back to its name as
+     text on the plate (see §8); the old SDO mark must NOT stand in for
+     the new partner. Add the line the moment the file arrives. */
 };
 
 /**
@@ -211,11 +238,11 @@ function applyLinkProps(cta) {
 }
 
 /* ── A SIGNED NUMBER NEEDS ISOLATING; A PLAIN ONE DOES NOT ─────
-   The Sept 2026 brief writes one benefit as "+50 ساعة تدريبية …",
-   and that leading sign is the one numeric hazard on this page.
+   The brief writes one benefit as "+62 ساعة تدريبية …", and that
+   leading sign is the one numeric hazard on this page.
 
    A BARE digit run inside Arabic prose already typesets correctly on
-   its own — "12 أسبوعًا", "1:1", "5,000 دولار" and "18 و35 عامًا" all
+   its own — "12 أسبوعًا", "3,500 دولار" and "23 و35 عامًا" all
    render left-to-right with no help, because the bidi algorithm
    gives a European-number run its own level inside an RTL paragraph.
    A LEADING SIGN does not: `+` is a bidi TERMINATOR, and at the start
@@ -369,6 +396,16 @@ export default function UsusSyria() {
   const record = collections.programs.find((item) => item.slug === ususSyria.slug);
   const cover = record?.image ? { src: record.image, alt: record.imageAlt ?? '' } : FALLBACK_COVER;
 
+  /* The nine journey stages flattened into one list, so the rail is a
+     single unbroken line (§5 note). The first stage of each phase
+     carries that phase's title and scope chip, which `ProcessSteps`
+     draws on the left of the rail without a row of its own. */
+  const journeySteps = journey.phases.flatMap((phase) =>
+    phase.steps.map((step, index) =>
+      index === 0 ? { ...step, phaseLabel: phase.label, phaseScope: phase.scope } : step,
+    ),
+  );
+
   return (
     <div style={ACCENT_SCOPE}>
       {/* ── Header ───────────────────────────────────────────────
@@ -458,22 +495,22 @@ export default function UsusSyria() {
         }
       />
 
-      {/* ── The two headline figures ─────────────────────────────
-             The brief prints "21 شركة ناشئة" and "3 قطاعات مستهدفة"
-             under its header, and that is where they sit: a ruled
-             `StatRow` band directly under the hero, ahead of the
-             first section — the brief's own header block.
+      {/* ── The three headline figures ───────────────────────────
+             The brief prints "21 مشروع ناشئ", "3 قطاعات مستهدفة" and
+             "12 أسبوعًا تدريبيًا" under its header, and that is where
+             they sit: a ruled `StatRow` band directly under the hero,
+             ahead of the first section — the brief's own header block.
 
-             `StatRow`, not tiled cards or a `band-tile` box: the two
-             numbers are the content, so they run as one hairline-
-             ruled row with no box around either. `max-w-3xl` keeps
-             the pair from stranding across the full container, and
-             `lg:grid-cols-2` holds them 2-up rather than letting the
-             4-up default leave two lonely columns. The count-up and
-             the Western digits are `StatRow`'s own (`useCountUp` +
+             `StatRow`, not tiled cards or a `band-tile` box: the three
+             numbers are the content, so they run as one hairline-ruled
+             row with no box around any. `max-w-4xl` keeps the trio
+             from stranding across the full container, and
+             `lg:grid-cols-3` holds them 3-up rather than letting the
+             4-up default leave a lonely fourth column. The count-up
+             and the Western digits are `StatRow`'s own (`useCountUp` +
              `formatNumber`); the figures are the brief's words. */}
       <Section size="sm">
-        <StatRow stats={facts} className="max-w-3xl lg:grid-cols-2" />
+        <StatRow stats={facts} className="max-w-4xl lg:grid-cols-3" />
       </Section>
 
       <SectionSeam />
@@ -547,14 +584,14 @@ export default function UsusSyria() {
              brief, but three cards inside the split's narrower
              column would sit two-up and break the set.
 
-             THE TWO FIGURES DO NOT SIT HERE
+             THE FIGURES DO NOT SIT HERE
              ---------------------------------------------------------
              They are the brief's header block and run as a ruled
              `StatRow` directly under the hero, ahead of §1 — see the
              band above. Do not fold them back into this paragraph:
-             the paragraph names "تمكين 21 شركة ناشئة" in prose, and a
-             pair of cards repeating the figure here would say the
-             same number twice on one screen. */}
+             the paragraph names "تمكين 21 مشروع شبابي ناشئ" and the
+             12 أسبوعًا in prose, and cards repeating those figures here
+             would say the same numbers twice on one screen. */}
       <Section tone="glow">
         <StickySplit
           aside={<SectionHeading eyebrow={about.eyebrow} title={about.title} layout="aside" />}
@@ -674,7 +711,7 @@ export default function UsusSyria() {
       <SectionSeam />
 
       {/* ── 4 · الفئة المستهدفة ──────────────────────────────────
-             SIX eligibility lines now, up from four. A tonal break
+             SIX eligibility lines. A tonal break
              here rather than a fourth light band, and a checklist
              rather than cards: each line is a condition the reader
              tests themselves against, which is what a tick beside it
@@ -725,29 +762,111 @@ export default function UsusSyria() {
       <SectionSeam />
 
       {/* ── 5 · رحلة المشروع ─────────────────────────────────────
-             Four stages on the scroll-drawn rail — the same
-             component and the same rail as the hackathon's timeline
-             and the strategic goals on /about, so the three read as
-             one device used three times.
+             THE CENTREPIECE, and the one band the client singled out
+             for a visual treatment (Faten Nasman, 8 Oct 2026): the
+             journey must READ as a journey of stages, not as a list of
+             text. So the brief's nine stages run as ONE continuous
+             scroll-drawn rail — the same rail as /about and the
+             hackathon — and each stage carries:
 
-             The brief's "المرحلة الأولى" labels go in the rail's
-             `meta` slot, above each stage's name. The rail numbers
-             the stages itself, so the label and the number say the
-             same thing twice on purpose: the number is the reader's
-             position in the sequence, the label is the brief's own
-             name for the stage.
+               • its week-range as a `meta` chip (الأسابيع 1 إلى 3 …),
+               • its "تخرج بـ…" line as an `outcome` callout, a
+                 different silhouette from the body so the reader sees
+                 at a glance what each stage leaves them holding,
+               • the entry stages' conviction as a `note`.
 
-             Below الفئة المستهدفة, which is where the Sept 2026 brief
-             puts it — it ran above it in July. */}
+             THE LINE IS UNBROKEN; THE PHASE TITLES SIT ON THE LEFT.
+             ---------------------------------------------------------
+             The client was explicit (second pass): the rail must not
+             split between the three phases, and each phase title goes
+             on the left so it does not affect the line's shape. So the
+             nine stages are flattened into a SINGLE `ProcessSteps`
+             (`journeySteps`) — one rail, one count 1-9 — and each
+             phase's first stage carries `phaseLabel`/`phaseScope`,
+             which `ProcessSteps` draws at the top of the copy column,
+             i.e. the left of the rail in RTL. No phase header row
+             interrupts the markers, so the connector runs straight
+             through from stage 1 to stage 9.
+
+             The weekly rhythm closes the band as a repeating three-beat
+             cycle in its own inset — a loop running THROUGH the twelve
+             weeks, not a tenth stage after them — and the brief's final
+             line sits apart as a statement.
+
+             Full width and a centred heading, not a StickySplit: the
+             rail is its own left column and the rhythm's three beats
+             need the whole measure. Phase labels are structural, not
+             copy — see the `journey` notes in `content/usus-syria.js`. */}
       <Section size="lg">
-        <StickySplit
-          ratio="roomy"
-          aside={
-            <SectionHeading title={journey.title} lede={journey.lede} layout="aside" as="h2" />
-          }
+        <SectionHeading title={journey.title} align="center" className="mb-14" />
+
+        <div className="mx-auto max-w-3xl">
+          <ProcessSteps steps={journeySteps} />
+        </div>
+
+        {/* The weekly rhythm — a repeating three-beat cycle, set in its
+            own inset so it reads as a loop running through the weeks
+            above rather than as a stage after them. */}
+        <Reveal className="mx-auto mt-16 max-w-4xl">
+          <div className="panel-inset px-6 py-8 sm:px-10 sm:py-10">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-2xl bg-tint-brand text-tint-brand-fg ring-1 ring-tint-brand-ring">
+                  <RefreshCw className="size-5" aria-hidden="true" strokeWidth={1.75} />
+                </span>
+                <h3 className="text-xl font-bold text-ink lg:text-2xl">{journey.rhythm.title}</h3>
+              </div>
+              <p className="leading-relaxed text-ink-secondary">{journey.rhythm.lede}</p>
+            </div>
+
+            <div className="mt-8 flex flex-col gap-3 lg:flex-row lg:items-stretch">
+              {journey.rhythm.beats.map((beat, beatIndex) => {
+                const BeatIcon = RHYTHM_ICONS[beat.id];
+                const last = beatIndex === journey.rhythm.beats.length - 1;
+                return (
+                  <Fragment key={beat.id}>
+                    <div className="panel-quiet flex flex-1 flex-col gap-3 p-5">
+                      <div className="flex items-center gap-3">
+                        <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-tint-brand text-tint-brand-fg ring-1 ring-tint-brand-ring">
+                          {BeatIcon ? (
+                            <BeatIcon className="size-5" aria-hidden="true" strokeWidth={1.75} />
+                          ) : null}
+                        </span>
+                        <h4 className="text-base font-bold text-ink">{beat.title}</h4>
+                      </div>
+                      <p className="text-sm leading-relaxed text-ink-secondary">
+                        {beat.description}
+                      </p>
+                    </div>
+
+                    {/* The connector to the next beat. "Forward" in RTL
+                        is leftward, so the plain glyph already points to
+                        the next card on desktop; it turns to point down
+                        where the beats stack on a phone. */}
+                    {last ? null : (
+                      <div
+                        aria-hidden="true"
+                        className="flex items-center justify-center lg:px-1"
+                      >
+                        <ArrowLeft className="size-5 -rotate-90 text-brand-300/70 lg:rotate-0" />
+                      </div>
+                    )}
+                  </Fragment>
+                );
+              })}
+            </div>
+          </div>
+        </Reveal>
+
+        {/* The line the brief closes the whole journey on — a
+            statement, not a stage, so it sits apart in the brand quote
+            treatment the site keeps for its strongest single lines. */}
+        <Reveal
+          as="p"
+          className="mx-auto mt-10 max-w-4xl rounded-xl border-s-4 border-brand-300 bg-brand-500/10 px-6 py-5 text-lg font-medium leading-relaxed text-ink dark:border-brand-500"
         >
-          <ProcessSteps className="process-steps-roomy" steps={journey.items} />
-        </StickySplit>
+          {journey.rhythm.conviction}
+        </Reveal>
       </Section>
 
       <SectionSeam />
@@ -836,42 +955,44 @@ export default function UsusSyria() {
       />
 
       {/* ── 8 · شركاؤنا ──────────────────────────────────────────
-             New in the Sept 2026 brief, and the last band on the page
-             — which is where the client's own comment on the brief
-             asks for it ("يفضل وضع الشركاء في آخر الصفحة مع الرعاة").
-             After the closing band on purpose, therefore, rather than
-             before it.
+             The last band on the page — which is where the client's
+             own comment on the brief asks for it ("يفضل وضع الشركاء في
+             آخر الصفحة مع الرعاة"). After the closing band on purpose,
+             therefore, rather than before it.
 
-             A LOGO WALL, so the two marks are the content and the
-             plates only hold them. `PARTNER_LOGOS` resolves the id;
-             the partner's name from the brief becomes the `alt`, so
-             the band says the same thing to a screen reader as it
-             does on screen.
+             A LOGO WALL, so the marks are the content and the plates
+             only hold them. `PARTNER_LOGOS` resolves the id; the
+             partner's name from the brief becomes the `alt`, so the
+             band says the same thing to a screen reader as it does on
+             screen.
 
-             SIZED ON HEIGHT, NEVER ON WIDTH — a logo row reads as a
-             row because every mark shares a cap height, not because
-             the boxes match. The two files are trimmed to their ink
-             and have near-identical aspect ratios (3.14:1 and 2.98:1),
-             so one height puts them at the same optical weight.
-             `max-w-full` is the guard for a narrow phone, where the
-             height would otherwise overflow the plate.
+             PRESENTLY HAS NO LOGO YET — the final brief swapped it in
+             for SDO and supplied no artwork. A partner with no mapped
+             logo renders its NAME as text on the plate, so the band is
+             never shipped with a broken image or, worse, the old SDO
+             mark standing in for the new partner. Drop a `presently`
+             entry into `PARTNER_LOGOS` to turn its plate back into a
+             logo. See the map note above.
+
+             SIZED ON HEIGHT, NEVER ON WIDTH — a logo row reads as a row
+             because every mark shares a cap height, not because the
+             boxes match. `max-w-full` is the guard for a narrow phone,
+             where the height would otherwise overflow the plate.
 
              Quiet plates rather than IconCards: this band shows
              organisations, it does not describe them, and a card with
              an empty description slot would read as unfinished.
 
-             `size="sm"` — the sentence the brief gives ("نعتزّ
-             بشركائنا في إنجاح المشروع") is the whole section, and a
-             closing band should not out-weigh the CTA directly above
-             it.
+             `size="sm"` — the sentence the brief gives ("نعتزّ بشركائنا
+             في إنجاح المشروع") is the whole section, and a closing band
+             should not out-weigh the CTA directly above it.
 
-             Both images are `lazy`: this is the last band on a page
-             about seven screens tall, so neither is anywhere near the
-             first paint.
+             Images are `lazy`: this is the last band on a page about
+             nine screens tall, nowhere near the first paint.
 
              READ THE MOU NOTE in `content/usus-syria.js` before this
-             page is opened to search engines — a logo claims more
-             than a name did. */}
+             page is opened to search engines — a logo claims more than
+             a name did. */}
       <Section size="sm">
         <SectionHeading
           eyebrow={partners.eyebrow}
@@ -882,19 +1003,29 @@ export default function UsusSyria() {
         />
 
         <Stagger className="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2">
-          {partners.items.map((partner) => (
-            <StaggerItem key={partner.id} className="h-full">
-              <div className="panel-quiet flex h-full min-h-36 items-center justify-center p-6">
-                <img
-                  src={PARTNER_LOGOS[partner.id]}
-                  alt={partner.name}
-                  loading="lazy"
-                  decoding="async"
-                  className="h-16 w-auto max-w-full object-contain sm:h-20"
-                />
-              </div>
-            </StaggerItem>
-          ))}
+          {partners.items.map((partner) => {
+            const logo = PARTNER_LOGOS[partner.id];
+            return (
+              <StaggerItem key={partner.id} className="h-full">
+                <div className="panel-quiet flex h-full min-h-36 items-center justify-center p-6 text-center">
+                  {logo ? (
+                    <img
+                      src={logo}
+                      alt={partner.name}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-16 w-auto max-w-full object-contain sm:h-20"
+                    />
+                  ) : (
+                    /* Text stand-in until the partner's artwork arrives.
+                       Not styled as a logo — it reads as a name, which
+                       is the honest claim while the mark is pending. */
+                    <span className="text-xl font-bold text-ink sm:text-2xl">{partner.name}</span>
+                  )}
+                </div>
+              </StaggerItem>
+            );
+          })}
         </Stagger>
       </Section>
     </div>
