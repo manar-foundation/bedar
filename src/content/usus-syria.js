@@ -51,8 +51,9 @@
                  and the one the client flagged for a visual treatment.
                  See the `journey` note below.
      partners    "منظمة التنمية السورية" (SDO) → "Presently". The SDO
-                 logo is gone; Presently's artwork is not supplied yet
-                 — see the partners note at the foot of this file.
+                 logo is retired; Presently's own artwork was supplied
+                 in Oct 2026 — see the partners note at the foot of
+                 this file.
 
    TWO COMMENT-DRIVEN RULES FROM THE SAME DOCUMENT
    ----------------------------------------------------------------
@@ -70,9 +71,9 @@
       2026) — she asks the team to confirm the full engagement length
       (application through follow-up, "ليس 8 أشهر") and it is NOT yet
       answered. So no total-duration figure is invented anywhere on the
-      page. The 12 weeks (intensive programme) and the شهران (post
-      follow-up) are the only durations stated, because they are the
-      only ones the brief states.
+      page. The 12 weeks (intensive programme) and the "لشهرين" in stage
+      9's body (post follow-up) are the only durations on it, worded as
+      the brief words them.
 
    THE WORDS ARE THE CLIENT'S, VERBATIM
    ----------------------------------------------------------------
@@ -311,9 +312,11 @@ export const ususSyria = {
         THE LINE DOES NOT SPLIT BETWEEN PHASES (client, second pass).
         The page flattens these phases into a single `ProcessSteps`, so
         the rail is one unbroken line numbered 1-9 by position, and each
-        phase's FIRST stage carries `phaseLabel`/`scope`, which render
-        on the LEFT of the rail (the copy side in RTL) without a header
-        row of their own. `number` below is the brief's own 1-9, kept as
+        phase's FIRST stage is given this phase's `label` and `scope`
+        as `phaseLabel`/`phaseScope` (the step-level names `ProcessSteps`
+        reads), which render on the LEFT of the rail (the copy side in
+        RTL), in the gap above that stage, without a header row of their
+        own. `number` below is the brief's own 1-9, kept as
         documentation of that order; the rail derives the count itself.
 
         Stage 7's "دعم مالي بقيمة 3,500$" is the brief's "منحة مالية"
@@ -407,9 +410,12 @@ export const ususSyria = {
             outcome: 'تخرج بـ: ظهور أمام المنظومة ولقاءات مباشرة مع جهات مهتمة.',
           },
           {
+            /* NO `meta` chip, unlike stages 3-6. The brief's heading is
+               "9- المتابعة البعدية" with no duration after it; its "لشهرين"
+               lives in the body, below. A "شهران" chip here was copy the
+               brief does not have, and came out on review. */
             id: 'post-follow-up',
             number: 9,
-            meta: 'شهران',
             title: 'المتابعة البعدية',
             description:
               'تنتقل إلى متابعة بعدية لشهرين تنفّذ خلالها خطة التسعين يوماً، مع جلسات مراجعة قصيرة وربط بخبراء أو موردين أو جهات وصول بحسب حاجتك.',
@@ -427,7 +433,6 @@ export const ususSyria = {
     rhythm: {
       title: 'الإيقاع الأسبوعي',
       lede: 'يتكرر ثابتاً طوال الأسابيع الاثني عشر:',
-      repeats: 12,
       beats: [
         {
           id: 'training-day',
@@ -494,13 +499,13 @@ export const ususSyria = {
         `PARTNER_LOGOS` map. The `name` is what a screen reader hears in
         place of the mark, so it stays the brief's own wording.
 
-        PRESENTLY HAS NO LOGO FILE YET. The final brief replaced the
-        second partner (منظمة التنمية السورية / SDO) with "Presently",
-        and no Presently artwork is supplied. The page falls back to
-        rendering the name as text on its plate until a logo arrives —
-        it must NOT show the old SDO mark under the new name. Drop a
-        `presently` entry into `PARTNER_LOGOS` the moment the file is
-        supplied; nothing else changes.
+        PRESENTLY'S LOGO IS `assets/partners/presently.png`. The final
+        brief replaced the second partner (منظمة التنمية السورية / SDO)
+        with "Presently", and the client supplied its artwork in Oct
+        2026. It is the partner's own reversed (white-on-dark) lockup,
+        cropped to its ink so it sits at SMEDC's height — the map note
+        in `pages/public/UsusSyria.jsx` records the measurements. The
+        retired SDO mark must NOT stand in for it.
 
         NEITHER MOU IS SIGNED. The brief carries a comment from the
         client's own team (Akeel Bakkour, 1 Sept 2026) that no
