@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
-import { CalendarDays } from 'lucide-react';
+import { CalendarDays, Sparkles, Target } from 'lucide-react';
 
 import { cn } from '@utils/cn.js';
 
@@ -59,12 +59,47 @@ import { cn } from '@utils/cn.js';
    `variant="plain"` drops the numbers for a sequence that is a list
    of guarantees rather than a set of ordered steps — the marker
    becomes the brand's dot instead.
+
+   TWO OPTIONAL FIELDS A STEP MAY CARRY (أُسُس سورية's journey)
+   ----------------------------------------------------------------
+   Both default to absent, so a plain `{title, description}` step is
+   unaffected and the /about and /social-… rails do not change:
+
+     step.note     a short emphasised line UNDER the body — a
+                   conviction or aside the stage turns on ("نحن لا
+                   نختار من الورق…"). Brand-tinted, no box.
+     step.outcome  what the reader WALKS AWAY WITH from the stage
+                   ("تخرج بـ…"). Drawn as a bordered brand callout so
+                   it reads as a deliverable, distinct from the body —
+                   which is the whole point of not rendering the
+                   journey as a flat list.
+
+   GROUPING WITHOUT BREAKING THE LINE (أُسُس سورية's phases)
+   ----------------------------------------------------------------
+   The journey falls into phases, but a phase header drawn as a row
+   BETWEEN steps would cut the rail in two — the connector runs from a
+   marker to the bottom of its own step's box, so a sibling row in the
+   middle leaves a gap and the line stops looking like one journey.
+   Instead a phase-starting step carries `step.phaseLabel` (and an
+   optional `step.phaseScope` chip), rendered at the TOP OF THE COPY —
+   the inline-END column, i.e. the LEFT of the rail in RTL. It groups
+   the phase on the reading side while the rail runs unbroken down the
+   right. The client's instruction, verbatim: the line must not split,
+   and the group titles go on the left so they don't affect its shape.
+
+   `startNumber` lets a rail start its count somewhere other than 1 —
+   it defaults to 1, and the journey now runs as a SINGLE rail of all
+   nine stages (so the line is continuous), numbering itself 1-9.
    ================================================================ */
 
 /** One row: marker + its segment of the rail + the copy. */
-function Step({ step, index, count, numbered, inverse, progress, animated }) {
+function Step({ step, index, count, numbered, startNumber, inverse, progress, animated }) {
   const title = step.title ?? step.label ?? step;
   const description = step.description ?? step.body;
+  const note = step.note;
+  const outcome = step.outcome;
+  const phaseLabel = step.phaseLabel;
+  const phaseScope = step.phaseScope;
   // `meta` is a short label ABOVE the title — the hackathon timeline's
   // stage dates. A plain string, not a Date: several of those stages
   // are ranges ("15-19/08/2024") and `Intl` cannot format a range, so
@@ -125,7 +160,7 @@ function Step({ step, index, count, numbered, inverse, progress, animated }) {
           ) : null}
           <span className="relative">
             {numbered ? (
-              <span className="ltr-run">{index + 1}</span>
+              <span className="ltr-run">{startNumber + index}</span>
             ) : (
               <span aria-hidden="true" className="block size-2 rounded-full bg-current" />
             )}
@@ -157,6 +192,23 @@ function Step({ step, index, count, numbered, inverse, progress, animated }) {
             and it sidesteps the variant-ordering trap that made
             `sm:pb-*` outrank `last:pb-0` in the first place. */}
       <div className="process-step-copy flex min-w-0 flex-col gap-2">
+        {/* The phase title, on the reading side (left of the rail in
+            RTL), above the stage it opens. It groups the phase without
+            a row of its own, so the rail runs unbroken past it. */}
+        {phaseLabel ? (
+          <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-2">
+            <span className="inline-flex items-center gap-2.5 text-sm font-bold text-brand-200">
+              <span aria-hidden="true" className="h-px w-6 bg-brand-300/70" />
+              {phaseLabel}
+            </span>
+            {phaseScope ? (
+              <span className="inline-flex items-center rounded-full bg-brand-300/10 px-2.5 py-0.5 text-xs font-semibold text-brand-100 ring-1 ring-inset ring-brand-200/25">
+                {phaseScope}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
+
         {meta ? (
           <span
             className={cn(
@@ -189,12 +241,53 @@ function Step({ step, index, count, numbered, inverse, progress, animated }) {
             {description}
           </p>
         ) : null}
+
+        {/* The conviction line — emphasised, brand-tinted, no box, so
+            it reads as the stage's own voice rather than as more body
+            copy. A `Sparkles` mark sets it apart without a heading. */}
+        {note ? (
+          <p
+            className={cn(
+              'mt-1 flex items-start gap-2 text-sm font-medium leading-relaxed',
+              inverse ? 'text-brand-100' : 'text-brand-100 dark:text-brand-100',
+            )}
+          >
+            <Sparkles
+              className="mt-0.5 size-4 shrink-0 text-brand-200"
+              aria-hidden="true"
+              strokeWidth={1.75}
+            />
+            <span>{note}</span>
+          </p>
+        ) : null}
+
+        {/* The deliverable. A bordered brand callout, deliberately a
+            different silhouette from the body paragraph, so a reader
+            skimming the rail sees at a glance what each stage leaves
+            them holding. `border-s-2` so the accent runs down the
+            reading edge in RTL. */}
+        {outcome ? (
+          <p className="mt-2 flex items-start gap-2.5 rounded-lg border-s-2 border-brand-300 bg-brand-500/10 py-2.5 pe-4 ps-3.5 text-sm font-medium leading-relaxed text-ink dark:border-brand-400">
+            <Target
+              className="mt-0.5 size-4 shrink-0 text-brand-200"
+              aria-hidden="true"
+              strokeWidth={1.75}
+            />
+            <span>{outcome}</span>
+          </p>
+        ) : null}
       </div>
     </li>
   );
 }
 
-export function ProcessSteps({ steps = [], variant = 'numbered', tone = 'default', className }) {
+export function ProcessSteps({
+  steps = [],
+  variant = 'numbered',
+  tone = 'default',
+  startNumber = 1,
+  className,
+}) {
   const inverse = tone === 'inverse';
   const numbered = variant === 'numbered';
   const listRef = useRef(null);
@@ -221,6 +314,7 @@ export function ProcessSteps({ steps = [], variant = 'numbered', tone = 'default
           index={index}
           count={steps.length}
           numbered={numbered}
+          startNumber={startNumber}
           inverse={inverse}
           // The spring is always passed — `useTransform` needs a real
           // MotionValue to derive from, and hook order has to be the
