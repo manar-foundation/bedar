@@ -75,8 +75,12 @@ const rawPrograms = [
     category: 'البرامج الحالية',
     status: 'current',
     date: '2026-08-31',
+    /* The brief's own "ما هو أُسُس سورية؟" sentence, as of the final
+       (Oct 2026) brief. This file is only the OFFLINE SEED for the
+       listing card: the live excerpt is the `collection_items` row and
+       has to be changed in the dashboard to match. */
     excerpt:
-      'مسرعة أعمال متخصصة أطلقتها منصة بدار للريادة المجتمعية التابعة لمؤسسة "منار"، وتهدف إلى تمكين 21 شركة ناشئة في دمشق عبر برنامج مكثف يستمر لمدة 12 أسبوعًا.',
+      'مسرعة أعمال متخصصة أطلقتها منصة بدار للريادة المجتمعية التابعة لمؤسسة منار للمشاركة المجتمعية، وتهدف إلى تمكين 21 مشروع شبابي ناشئ في دمشق عبر برنامج مكثف يستمر لمدة 12 أسبوعًا.',
     state: PUBLISH_STATE.PUBLISHED,
   },
   {

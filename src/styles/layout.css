@@ -1154,6 +1154,30 @@
       --step-gap: 5.5rem; /* 88 */
     }
   }
+
+  /* ── A phase boundary inside ONE rail ───────────────────────────
+        أُسُس سورية's journey groups nine stages into phases without
+        splitting the line (client instruction). The step BEFORE a
+        phase-opening step gets this longer gap, and the next phase's
+        title sits in its lower part — absolutely positioned by
+        `ProcessSteps`, so it adds no height above any marker.
+
+        It is still the copy's bottom PADDING, which the connector
+        already spans, so a longer gap is a longer stroke, not a break.
+        Never turn this into a margin on the <li>: margin sits OUTSIDE
+        the step's box, the segment would stop short of it, and the
+        line would open exactly at the phase boundary.
+
+        Declared after the roomy rules so it wins on a tie. */
+  .process-step-copy.process-step-copy-phase-break {
+    --step-gap: 6.5rem; /* 104 */
+  }
+  @media (min-width: 640px) {
+    .process-step-copy.process-step-copy-phase-break {
+      --step-gap: 8rem; /* 128 */
+    }
+  }
+
   .process-step:last-child .process-step-copy {
     padding-block-end: 0;
   }

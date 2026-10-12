@@ -50,9 +50,11 @@ import logoPresently from '@assets/partners/presently.png';
 
    WHY THIS PAGE HAS ITS OWN COMPONENT
    ----------------------------------------------------------------
-   The same reason `Hackathon.jsx` does, and this is the second of
-   the two. `CollectionDetail` renders a program written as an
-   article; the client's brief for this one
+   It is the only program with one. `CollectionDetail` renders a
+   program written as an article — the hackathon had a built page too
+   until Sept 2026, when its content was cut to a summary and it moved
+   back onto that renderer (see `routes.jsx`). The client's brief for
+   this one
    ("صفحة هبوط أسس سورية - بدار - يوليو 2026.docx") is a LANDING-PAGE
    brief — eight numbered bands, each a different shape — so it gets a
    layout instead of a rich-text body. `content/usus-syria.js` is its
@@ -62,29 +64,27 @@ import logoPresently from '@assets/partners/presently.png';
 
    ASSEMBLED FROM THE SITE'S OWN PRIMITIVES
    ----------------------------------------------------------------
-   Nothing below is invented for this page. The brief asks for a
-   design close to the hackathon program page, and the way to get
-   that is not to copy its markup — it is to compose from the same
-   parts, which is what that page does too:
+   Nothing below is invented for this page: it composes the site's
+   own parts rather than copying any one page's markup.
 
      brief's band              primitive             also used on
      ────────────────────────  ────────────────────  ──────────────
      header                    PageHero              every sub-page
        + the three figures     StatRow               home, /about
      1 · التحديات              quiet-panel rows      (this page)
-     2 · عن المشروع            StickySplit + aside   /social-…
+     2 · عن المشروع            StickySplit + aside   /about, /social-…
        القطاعات المستهدفة      IconCard grid         home, /about
-     3 · على ماذا ستحصل        IconCard grid         /programs/hackathon
-     4 · الفئة المستهدفة       panel-quiet list      hackathon conditions
-     5 · رحلة المشروع          phased ProcessSteps   /about, hackathon
+     3 · على ماذا ستحصل        IconCard grid         home, /about
+     4 · الفئة المستهدفة       panel-quiet list      (this page)
+     5 · رحلة المشروع          ProcessSteps, 1 rail  /about, /social-…
        + الإيقاع الأسبوعي      panel-inset cycle     (this page)
-     6 · آلية التقديم          NumberedList          /social-…
-     7 · دعوة للتسجيل          CtaBand               every page
+     6 · آلية التقديم          NumberedList          home
+     7 · دعوة للتسجيل          CtaBand               most pages
      8 · شركاؤنا               panel-quiet plates    (this page)
 
-   The band tones alternate on the hackathon page's own rhythm
-   (plain → glow → glow-alt → dark → plain → wash), which is what
-   keeps a long page from reading as one undifferentiated column.
+   The band tones alternate (plain → glow → glow-alt → dark → plain →
+   wash), which is what keeps a long page from reading as one
+   undifferentiated column.
 
    NO TWO ADJACENT BANDS SHARE A SHAPE
    ----------------------------------------------------------------
@@ -117,8 +117,8 @@ import logoPresently from '@assets/partners/presently.png';
    Section 3 of the brief prefixes each benefit with an emoji. Site
    copy on Bedar carries no emoji — that is a standing brand rule —
    so each one is carried here as the lucide equivalent of the
-   character the brief chose, keyed by id the same way the services,
-   values and hackathon-goal grids key theirs. The intent survives,
+   character the brief chose, keyed by id the same way the site's
+   other icon grids (services, values) key theirs. The intent survives,
    the typeface changes; see the note in `content/usus-syria.js`.
    ================================================================ */
 
@@ -189,12 +189,25 @@ const RHYTHM_ICONS = {
    every other mark on this page is keyed. The brief embeds no images.
 
      sme-authority        smeda.gov.sy/assets/images/Logo.png
-     presently            NOT SUPPLIED YET — the final brief replaced
-                          منظمة التنمية السورية (SDO) with Presently,
-                          and no Presently artwork has been provided.
-                          Its plate falls back to the name as text (§8)
-                          until a file arrives, and the removed SDO mark
-                          is NOT reused in its place.
+     presently            supplied by the client (Oct 2026), after the
+                          final brief replaced منظمة التنمية السورية
+                          (SDO) with Presently. The SDO mark is retired
+                          and must NOT stand in for it.
+
+   PRESENTLY IS ALREADY REVERSED ARTWORK
+   ----------------------------------------------------------------
+   The supplied file is #FFFFFF ink (97% of its opaque pixels) with a
+   #27AAE1 blue dot — the partner's own light-on-dark lockup, so it
+   reads on this band with no change to a single colour. Do not lift or
+   recolour it; a partner's own artwork wins.
+
+   It arrived on a 1826x675 canvas whose ink filled only 60% of the
+   height (168px of transparent margin above, 99px below). Logos here
+   are sized on HEIGHT, so that margin would have drawn Presently ~40%
+   shorter than SMEDC and sat it low in its plate. It was therefore
+   cropped to its ink — 1710x408, transparent margin only: every pixel
+   inside the crop is unchanged and no alpha was discarded. 408px is
+   5x the 80px it renders at, comfortably over the 2x retina floor.
 
    SMEDC IS REVERSED ARTWORK, BECAUSE THIS BAND IS DARK
    ----------------------------------------------------------------
@@ -217,12 +230,7 @@ const RHYTHM_ICONS = {
    quality budget.                                                   */
 const PARTNER_LOGOS = {
   'sme-authority': logoSmedc,
-   presently: logoPresently,
-  /* 'presently': <file> — the final brief replaced منظمة التنمية
-     السورية (SDO) with Presently, and no Presently artwork is supplied
-     yet. A partner id with no entry here falls back to its name as
-     text on the plate (see §8); the old SDO mark must NOT stand in for
-     the new partner. Add the line the moment the file arrives. */
+  presently: logoPresently,
 };
 
 /**
@@ -248,7 +256,7 @@ function applyLinkProps(cta) {
    A LEADING SIGN does not: `+` is a bidi TERMINATOR, and at the start
    of the line there is no number before it to attach to, so it falls
    back to the paragraph's own direction and lands on the far side of
-   the digits. "+50 ساعة" then typesets as "50+ ساعة", which is a
+   the digits. "+62 ساعة" then typesets as "62+ ساعة", which is a
    different claim about the programme, not a cosmetic difference.
 
    `.ltr-run` (rtl.css) is the site's fix for exactly this, and
@@ -629,10 +637,10 @@ export default function UsusSyria() {
 
       {/* ── 3 · على ماذا ستحصل الشركات المشاركة؟ ──────────────────
              FIVE cards, not six — the Sept 2026 brief dropped
-             اختبار السوق as a card of its own. The two headline
-             figures passed through this grid for one round and now
-             live under the عن المشروع paragraph they quantify, at the
-             client's instruction; see the note on §2.
+             اختبار السوق as a card of its own. The headline figures
+             (three since the final brief) are NOT in this grid: they
+             run as the ruled `StatRow` directly under the hero — see
+             the figures band and the note on §2.
 
              Five is the awkward count in a 3-up grid: it leaves two
              orphans hugging the reading edge of the last row. So at
@@ -766,8 +774,8 @@ export default function UsusSyria() {
              for a visual treatment (Faten Nasman, 8 Oct 2026): the
              journey must READ as a journey of stages, not as a list of
              text. So the brief's nine stages run as ONE continuous
-             scroll-drawn rail — the same rail as /about and the
-             hackathon — and each stage carries:
+             scroll-drawn rail — the same rail as /about and
+             /social-entrepreneurship — and each stage carries:
 
                • its week-range as a `meta` chip (الأسابيع 1 إلى 3 …),
                • its "تخرج بـ…" line as an `outcome` callout, a
@@ -783,10 +791,13 @@ export default function UsusSyria() {
              nine stages are flattened into a SINGLE `ProcessSteps`
              (`journeySteps`) — one rail, one count 1-9 — and each
              phase's first stage carries `phaseLabel`/`phaseScope`,
-             which `ProcessSteps` draws at the top of the copy column,
-             i.e. the left of the rail in RTL. No phase header row
-             interrupts the markers, so the connector runs straight
-             through from stage 1 to stage 9.
+             which `ProcessSteps` draws on the copy side — the left of
+             the rail in RTL — in the gap ABOVE that stage, out of the
+             flow. No phase header row interrupts the markers, so the
+             connector runs straight through from stage 1 to stage 9,
+             and every number still sits beside its OWN stage title
+             (the third pass: in the flow, the phase title had pushed
+             stage 3's title below its circle).
 
              The weekly rhythm closes the band as a repeating three-beat
              cycle in its own inset — a loop running THROUGH the twelve
@@ -794,8 +805,9 @@ export default function UsusSyria() {
              line sits apart as a statement.
 
              Full width and a centred heading, not a StickySplit: the
-             rail is its own left column and the rhythm's three beats
-             need the whole measure. Phase labels are structural, not
+             rail carries its own column (inline-start, so the RIGHT in
+             Arabic) and the rhythm's three beats need the whole
+             measure. Phase labels are structural, not
              copy — see the `journey` notes in `content/usus-syria.js`. */}
       <Section size="lg">
         <SectionHeading title={journey.title} align="center" className="mb-14" />
@@ -966,13 +978,13 @@ export default function UsusSyria() {
              band says the same thing to a screen reader as it does on
              screen.
 
-             PRESENTLY HAS NO LOGO YET — the final brief swapped it in
-             for SDO and supplied no artwork. A partner with no mapped
-             logo renders its NAME as text on the plate, so the band is
-             never shipped with a broken image or, worse, the old SDO
-             mark standing in for the new partner. Drop a `presently`
-             entry into `PARTNER_LOGOS` to turn its plate back into a
-             logo. See the map note above.
+             BOTH PARTNERS NOW HAVE ARTWORK (SMEDC, and Presently since
+             Oct 2026 — it replaced SDO in the final brief). The plate
+             still falls back to the partner's NAME as text when an id
+             has no `PARTNER_LOGOS` entry, so a partner added later
+             without a file ships as an honest name, never as a broken
+             image or as a retired partner's mark standing in for it.
+             See the map note above.
 
              SIZED ON HEIGHT, NEVER ON WIDTH — a logo row reads as a row
              because every mark shares a cap height, not because the
@@ -1017,9 +1029,9 @@ export default function UsusSyria() {
                       className="h-16 w-auto max-w-full object-contain sm:h-20"
                     />
                   ) : (
-                    /* Text stand-in until the partner's artwork arrives.
-                       Not styled as a logo — it reads as a name, which
-                       is the honest claim while the mark is pending. */
+                    /* Text stand-in for a partner with no artwork on
+                       file. Not styled as a logo — it reads as a name,
+                       which is the honest claim until a mark exists. */
                     <span className="text-xl font-bold text-ink sm:text-2xl">{partner.name}</span>
                   )}
                 </div>

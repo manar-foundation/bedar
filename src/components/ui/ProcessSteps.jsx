@@ -81,19 +81,34 @@ import { cn } from '@utils/cn.js';
    marker to the bottom of its own step's box, so a sibling row in the
    middle leaves a gap and the line stops looking like one journey.
    Instead a phase-starting step carries `step.phaseLabel` (and an
-   optional `step.phaseScope` chip), rendered at the TOP OF THE COPY —
-   the inline-END column, i.e. the LEFT of the rail in RTL. It groups
-   the phase on the reading side while the rail runs unbroken down the
-   right. The client's instruction, verbatim: the line must not split,
-   and the group titles go on the left so they don't affect its shape.
+   optional `step.phaseScope` chip), drawn on the copy side — the LEFT
+   of the rail in RTL — in the gap ABOVE that step. The client's
+   instruction, verbatim: the line must not split, and the group titles
+   go on the left so they don't affect its shape.
 
-   `startNumber` lets a rail start its count somewhere other than 1 —
-   it defaults to 1, and the journey now runs as a SINGLE rail of all
-   nine stages (so the line is continuous), numbering itself 1-9.
+   "Don't affect the shape" is why the title is ABSOLUTELY positioned
+   (`bottom-full`) rather than placed first in the copy column. In the
+   flow it sat level with the marker and pushed the stage's own title
+   down — on stage 3, below the circle entirely — so the number read as
+   the PHASE's number and the marker-to-title rhythm broke on exactly
+   the stages that open a phase. Out of the flow, every marker lines up
+   with its own meta/title, as on every other step.
+
+   It needs room, so the step BEFORE a phase-opening step gets a longer
+   gap (`process-step-copy-phase-break`, layout.css). That gap is the
+   copy's bottom padding, which the connector already runs through, so
+   the longer gap lengthens the stroke rather than breaking it. When
+   the FIRST step opens a phase there is no step above it, so the list
+   reserves that room itself with top padding instead of leaning on the
+   caller's margin.
+
+   The journey is ONE rail of all nine stages, so it numbers itself
+   1-9 like any other list — no offset is needed (an earlier three-rail
+   draft carried a `startNumber` prop for that; it went with the rails).
    ================================================================ */
 
 /** One row: marker + its segment of the rail + the copy. */
-function Step({ step, index, count, numbered, startNumber, inverse, progress, animated }) {
+function Step({ step, index, count, numbered, phaseBreakAfter, inverse, progress, animated }) {
   const title = step.title ?? step.label ?? step;
   const description = step.description ?? step.body;
   const note = step.note;
@@ -160,7 +175,7 @@ function Step({ step, index, count, numbered, startNumber, inverse, progress, an
           ) : null}
           <span className="relative">
             {numbered ? (
-              <span className="ltr-run">{startNumber + index}</span>
+              <span className="ltr-run">{index + 1}</span>
             ) : (
               <span aria-hidden="true" className="block size-2 rounded-full bg-current" />
             )}
@@ -191,12 +206,17 @@ function Step({ step, index, count, numbered, startNumber, inverse, progress, an
             the rail's trailing segment, so the two cannot disagree,
             and it sidesteps the variant-ordering trap that made
             `sm:pb-*` outrank `last:pb-0` in the first place. */}
-      <div className="process-step-copy flex min-w-0 flex-col gap-2">
+      <div
+        className={cn(
+          'process-step-copy relative flex min-w-0 flex-col gap-2',
+          phaseBreakAfter && 'process-step-copy-phase-break',
+        )}
+      >
         {/* The phase title, on the reading side (left of the rail in
-            RTL), above the stage it opens. It groups the phase without
-            a row of its own, so the rail runs unbroken past it. */}
+            RTL), in the gap ABOVE the stage it opens. Absolute, so it
+            adds no height above the marker — see the note at the top. */}
         {phaseLabel ? (
-          <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-2">
+          <div className="absolute bottom-full start-0 end-0 mb-4 flex flex-wrap items-center gap-x-3 gap-y-2">
             <span className="inline-flex items-center gap-2.5 text-sm font-bold text-brand-200">
               <span aria-hidden="true" className="h-px w-6 bg-brand-300/70" />
               {phaseLabel}
@@ -244,14 +264,11 @@ function Step({ step, index, count, numbered, startNumber, inverse, progress, an
 
         {/* The conviction line — emphasised, brand-tinted, no box, so
             it reads as the stage's own voice rather than as more body
-            copy. A `Sparkles` mark sets it apart without a heading. */}
+            copy. A `Sparkles` mark sets it apart without a heading.
+            One tone, not an `inverse` split: the public site is dark
+            on both tones, and mint-100 reads on either. */}
         {note ? (
-          <p
-            className={cn(
-              'mt-1 flex items-start gap-2 text-sm font-medium leading-relaxed',
-              inverse ? 'text-brand-100' : 'text-brand-100 dark:text-brand-100',
-            )}
-          >
+          <p className="mt-1 flex items-start gap-2 text-sm font-medium leading-relaxed text-brand-100">
             <Sparkles
               className="mt-0.5 size-4 shrink-0 text-brand-200"
               aria-hidden="true"
@@ -281,13 +298,7 @@ function Step({ step, index, count, numbered, startNumber, inverse, progress, an
   );
 }
 
-export function ProcessSteps({
-  steps = [],
-  variant = 'numbered',
-  tone = 'default',
-  startNumber = 1,
-  className,
-}) {
+export function ProcessSteps({ steps = [], variant = 'numbered', tone = 'default', className }) {
   const inverse = tone === 'inverse';
   const numbered = variant === 'numbered';
   const listRef = useRef(null);
@@ -305,16 +316,20 @@ export function ProcessSteps({
   });
   const progress = useSpring(scrollYProgress, { stiffness: 80, damping: 24, mass: 0.4 });
 
+  // A phase title on the FIRST step has no gap above it to sit in, so
+  // the list reserves the room itself (see the note at the top).
+  const opensWithPhase = Boolean(steps[0]?.phaseLabel);
+
   return (
-    <ol ref={listRef} className={cn('flex flex-col', className)}>
+    <ol ref={listRef} className={cn('flex flex-col', opensWithPhase && 'pt-12', className)}>
       {steps.map((step, index) => (
         <Step
           key={step.id ?? (typeof step === 'string' ? step.slice(0, 24) : (step.title ?? index))}
           step={step}
           index={index}
           count={steps.length}
+          phaseBreakAfter={Boolean(steps[index + 1]?.phaseLabel)}
           numbered={numbered}
-          startNumber={startNumber}
           inverse={inverse}
           // The spring is always passed — `useTransform` needs a real
           // MotionValue to derive from, and hook order has to be the
