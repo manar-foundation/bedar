@@ -25,6 +25,24 @@ import { formatNumber } from '@utils/format.js';
 
    Numbers go through `formatNumber` and are zero-padded to two
    digits, matching the reference's `01.` and the Western-digits rule.
+
+   `align="center"` PUTS A ROW'S COPY LEVEL WITH ITS NUMERAL
+   ----------------------------------------------------------------
+   The default tops the copy against the numeral, which is right for a
+   row that is a title plus a paragraph — the homepage's audience
+   segments run four or five lines deep, and a numeral floating beside
+   their middle would read as unattached to the heading it counts.
+
+   أُسُس سورية's funnel is the other shape: one short sentence per row
+   and no title, so the copy sat at the cap height of a 48px numeral
+   with the rest of it hanging below empty space ("لماذا الكلام جانب
+   الأرقام رايح للأعلى وليس على نفس مستوى الأرقام" — client, Oct 2026
+   notes §6). Centring is the fix, and it is the CALLER's call because
+   it depends on how deep the rows are.
+
+   `sm:` only: below that breakpoint the row is a column, where
+   `items-center` would centre the numeral horizontally over the text
+   instead of levelling the two.
    ================================================================ */
 
 export function NumberedList({
@@ -32,6 +50,8 @@ export function NumberedList({
   /** `title` + `description` keys, when the data names them otherwise. */
   titleKey = 'title',
   descriptionKey = 'description',
+  /** `'center'` levels each row's copy with its numeral. */
+  align = 'start',
   className,
 }) {
   if (items.length === 0) return null;
@@ -53,6 +73,7 @@ export function NumberedList({
             delay={index % 4}
             className={cn(
               'group flex flex-col gap-3 py-7 sm:flex-row sm:gap-8 sm:py-8',
+              align === 'center' && 'sm:items-center',
               // A rule between rows, never above the first or below
               // the last — the section's own edges do that job.
               //

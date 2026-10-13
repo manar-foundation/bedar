@@ -23,14 +23,36 @@ import { formatNumber } from '@utils/format.js';
    `formatNumber` is not optional. It passes `ar-u-nu-latn`, and a
    bare Intl call with the `ar` locale renders ١٢٠ — which breaks the
    Western-digits brand rule on the most-read number on the site.
+
+   `align="center"` CENTRES EACH FIGURE IN ITS OWN COLUMN
+   ----------------------------------------------------------------
+   The default is reading-edge aligned, which is right for a row that
+   sits under a split header and shares that header's edge. أُسُس
+   سورية's figures do not: they are a band of their own under the hero
+   and the client asked for them centred across the section (Oct 2026
+   notes §1). It is the COLUMN's content that centres — the hairlines
+   between the columns are `.stat-row`'s and do not move.
    ================================================================ */
 
-function Stat({ value, suffix, prefix, label, countUp = true, grouped = true, index = 0 }) {
+function Stat({
+  value,
+  suffix,
+  prefix,
+  label,
+  countUp = true,
+  grouped = true,
+  index = 0,
+  align = 'start',
+}) {
   const [ref, current] = useCountUp(countUp ? value : 0);
   const shown = countUp ? current : value;
 
   return (
-    <Reveal as="li" delay={index % 4} className="flex flex-col gap-2">
+    <Reveal
+      as="li"
+      delay={index % 4}
+      className={cn('flex flex-col gap-2', align === 'center' && 'items-center text-center')}
+    >
       <span
         ref={ref}
         className="flex items-baseline text-4xl font-bold tabular-nums text-brand-200 lg:text-5xl"
@@ -53,13 +75,18 @@ function Stat({ value, suffix, prefix, label, countUp = true, grouped = true, in
   );
 }
 
-export function StatRow({ stats = [], className }) {
+export function StatRow({ stats = [], align = 'start', className }) {
   if (stats.length === 0) return null;
 
   return (
-    <ul className={cn('stat-row', className)}>
+    // `.stat-row-center` only squares up the column padding the default
+    // row drops on its first item — see the note beside it in
+    // layout.css. The centring itself is on the item.
+    <ul className={cn('stat-row', align === 'center' && 'stat-row-center', className)}>
       {stats.map((stat, index) => (
-        <Stat key={stat.id ?? stat.label} {...stat} index={index} />
+        // `align` after the spread: it is the caller's layout decision,
+        // not a field a stat record may carry.
+        <Stat key={stat.id ?? stat.label} {...stat} index={index} align={align} />
       ))}
     </ul>
   );

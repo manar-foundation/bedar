@@ -405,14 +405,11 @@ export default function UsusSyria() {
   const cover = record?.image ? { src: record.image, alt: record.imageAlt ?? '' } : FALLBACK_COVER;
 
   /* The nine journey stages flattened into one list, so the rail is a
-     single unbroken line (§5 note). The first stage of each phase
-     carries that phase's title and scope chip, which `ProcessSteps`
-     draws on the left of the rail without a row of its own. */
-  const journeySteps = journey.phases.flatMap((phase) =>
-    phase.steps.map((step, index) =>
-      index === 0 ? { ...step, phaseLabel: phase.label, phaseScope: phase.scope } : step,
-    ),
-  );
+     single unbroken line (§5 note). The phase grouping stays in the
+     content file because it is the brief's own structure; it is not
+     LABELLED on the page any more — the client's Oct 2026 notes §5
+     struck all three titles ("حذف هذه"). */
+  const journeySteps = journey.phases.flatMap((phase) => phase.steps);
 
   return (
     <div style={ACCENT_SCOPE}>
@@ -511,14 +508,21 @@ export default function UsusSyria() {
 
              `StatRow`, not tiled cards or a `band-tile` box: the three
              numbers are the content, so they run as one hairline-ruled
-             row with no box around any. `max-w-4xl` keeps the trio
-             from stranding across the full container, and
-             `lg:grid-cols-3` holds them 3-up rather than letting the
-             4-up default leave a lonely fourth column. The count-up
-             and the Western digits are `StatRow`'s own (`useCountUp` +
-             `formatNumber`); the figures are the brief's words. */}
+             row with no box around any. `lg:grid-cols-3` holds them
+             3-up rather than letting the 4-up default leave a lonely
+             fourth column. The count-up and the Western digits are
+             `StatRow`'s own (`useCountUp` + `formatNumber`); the
+             figures are the brief's words.
+
+             FULL SECTION WIDTH, EACH FIGURE CENTRED IN ITS COLUMN —
+             the client's Oct 2026 notes §1, verbatim: "نحتاج تكون
+             موجودة بعرض القسم وتكون aligned center". A `max-w-4xl` held
+             the trio to 896px of a 1280px container and each figure sat
+             on its column's reading edge. Do not put the cap back: it is
+             the instruction this band exists in its current shape to
+             follow. */}
       <Section size="sm">
-        <StatRow stats={facts} className="max-w-4xl lg:grid-cols-3" />
+        <StatRow stats={facts} align="center" className="lg:grid-cols-3" />
       </Section>
 
       <SectionSeam />
@@ -546,7 +550,14 @@ export default function UsusSyria() {
             const Icon = CHALLENGE_ICONS[index];
             return (
               <StaggerItem key={item.slice(0, 24)} className="h-full">
-                <div className="panel-quiet flex h-full items-start gap-4 p-6">
+                {/* `items-center`, not `items-start`: every row in a
+                    pair stretches to the taller of the two, and topped
+                    copy then sat high in its box — one line of it on a
+                    row sized for two ("الكتابة رايحة لفوق أكثر داخل
+                    الصندوق", client, Oct 2026 notes §2). Centred, a
+                    line and a pair of lines both sit on the box's
+                    middle. The §4 rows below carry the same fix. */}
+                <div className="panel-quiet flex h-full items-center gap-4 p-6">
                   <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-2xl border border-subtle bg-sunken text-ink-secondary">
                     {Icon ? (
                       <Icon className="size-5" aria-hidden="true" strokeWidth={1.75} />
@@ -621,10 +632,23 @@ export default function UsusSyria() {
             const Icon = SECTOR_ICONS[sector.id];
             return (
               <StaggerItem key={sector.id} className="h-full">
+                {/* `titleLines={1}` — the client's Oct 2026 notes §3:
+                    "المساحة الفارغة بين العنوان والوصف كبير داخل
+                    البطاقات بالصفحة.. لازم تكون اقل". `IconCard`
+                    reserves two lines for a title by default so the
+                    paragraphs of a row start on one baseline, and all
+                    three of these titles are ONE line — so the second
+                    line was 23px of blank between every title and its
+                    description, and the baselines stay level without
+                    it. The §3 grid below is the same case.
+
+                    It is a floor, not a cap: a title that wraps still
+                    wraps. Re-check it if the copy ever grows. */}
                 <IconCard
                   title={sector.title}
                   description={sector.description}
                   lines={null}
+                  titleLines={1}
                   icon={Icon ? <Icon aria-hidden="true" strokeWidth={1.75} /> : null}
                 />
               </StaggerItem>
@@ -693,10 +717,14 @@ export default function UsusSyria() {
             const Icon = BENEFIT_ICONS[benefit.id];
             return (
               <StaggerItem key={benefit.id} className="h-full">
+                {/* `titleLines={1}` for the same reason as §2's grid —
+                    see the note there. All five titles are one word or
+                    two. */}
                 <IconCard
                   title={benefit.title}
                   description={bidiSafe(benefit.description)}
                   lines={null}
+                  titleLines={1}
                   icon={Icon ? <Icon aria-hidden="true" strokeWidth={1.75} /> : null}
                 />
               </StaggerItem>
@@ -745,7 +773,8 @@ export default function UsusSyria() {
         <Stagger className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2">
           {audience.items.map((item) => (
             <StaggerItem key={item.slice(0, 24)} className="h-full">
-              <div className="panel-quiet flex h-full items-start gap-4 p-6">
+              {/* Centred for the same reason as §1's rows — see there. */}
+              <div className="panel-quiet flex h-full items-center gap-4 p-6">
                 <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-tint-brand text-tint-brand-fg ring-1 ring-tint-brand-ring">
                   <BadgeCheck className="size-5" aria-hidden="true" strokeWidth={1.75} />
                 </span>
@@ -781,23 +810,27 @@ export default function UsusSyria() {
                • its "تخرج بـ…" line as an `outcome` callout, a
                  different silhouette from the body so the reader sees
                  at a glance what each stage leaves them holding,
-               • the entry stages' conviction as a `note`.
+               • the entry stages' conviction as a `note`, drawn in the
+                 SAME box as an outcome since the client's Oct 2026
+                 notes §5 asked for the two to match.
 
-             THE LINE IS UNBROKEN; THE PHASE TITLES SIT ON THE LEFT.
+             THE LINE IS UNBROKEN, AND NOTHING LABELS THE PHASES.
              ---------------------------------------------------------
-             The client was explicit (second pass): the rail must not
-             split between the three phases, and each phase title goes
-             on the left so it does not affect the line's shape. So the
-             nine stages are flattened into a SINGLE `ProcessSteps`
-             (`journeySteps`) — one rail, one count 1-9 — and each
-             phase's first stage carries `phaseLabel`/`phaseScope`,
-             which `ProcessSteps` draws on the copy side — the left of
-             the rail in RTL — in the gap ABOVE that stage, out of the
-             flow. No phase header row interrupts the markers, so the
-             connector runs straight through from stage 1 to stage 9,
-             and every number still sits beside its OWN stage title
-             (the third pass: in the flow, the phase title had pushed
-             stage 3's title below its circle).
+             The client was explicit (second pass) that the rail must
+             not split between the three phases, so the nine stages are
+             flattened into a SINGLE `ProcessSteps` (`journeySteps`) —
+             one rail, one count 1-9, no header row to interrupt the
+             markers, and a connector that runs straight through from
+             stage 1 to stage 9.
+
+             The three phase TITLES ("التقديم والقبول", "البرنامج
+             المكثّف · 12 أسبوعًا", "العرض وما بعد البرنامج") rode on the
+             left of that rail until the Oct 2026 notes §5 struck all
+             three ("حذف هذه"). They are gone from the page AND from
+             `ProcessSteps`, which had carried them for this page
+             alone. The brief's grouping survives as the shape of
+             `journey.phases` in the content file, which is what the
+             flatten above reads; do not draw it again.
 
              The weekly rhythm closes the band as a repeating three-beat
              cycle in its own inset — a loop running THROUGH the twelve
@@ -807,8 +840,8 @@ export default function UsusSyria() {
              Full width and a centred heading, not a StickySplit: the
              rail carries its own column (inline-start, so the RIGHT in
              Arabic) and the rhythm's three beats need the whole
-             measure. Phase labels are structural, not
-             copy — see the `journey` notes in `content/usus-syria.js`. */}
+             measure. See the `journey` notes in
+             `content/usus-syria.js`. */}
       <Section size="lg">
         <SectionHeading title={journey.title} align="center" className="mb-14" />
 
@@ -921,7 +954,16 @@ export default function UsusSyria() {
         <StickySplit
           aside={<SectionHeading title={applying.title} lede={applying.lede} layout="aside" />}
         >
-          <NumberedList items={applying.items} />
+          {/* `align="center"` — the client's Oct 2026 notes §6:
+              "لماذا الكلام جانب الأرقام رايح للأعلى وليس على نفس مستوى
+              الأرقام". Each row here is ONE short sentence with no
+              title, so topping it against a 48px numeral left the copy
+              at the numeral's cap height with the rest of the figure
+              hanging below it. The homepage's rows keep the default —
+              they are a heading plus a four-line paragraph, where a
+              centred numeral would float beside the middle of the
+              paragraph rather than beside the heading it counts. */}
+          <NumberedList items={applying.items} align="center" />
 
           {/* The one thing in this light band that stays DARK, exactly
               as the file draws it: a dark inset under the funnel. Its
@@ -991,6 +1033,17 @@ export default function UsusSyria() {
              boxes match. `max-w-full` is the guard for a narrow phone,
              where the height would otherwise overflow the plate.
 
+             THAT HEIGHT IS 48/56px, DOWN FROM 64/80 (client, Oct 2026
+             notes §7: "اللوجوهات كبيرة عم تظهر.. بدنا نجعلهم اصغر").
+             At 80px the Presently wordmark ran 335px wide in a 376px
+             plate — 89% of it — and read as the plate's content rather
+             than as a mark sitting in it; at 56px it is 235px, or 62%.
+             Both files are raster and were exported for the old
+             height — 200px for SMEDC, 408px for Presently — so they
+             now draw at 3.6x and 7.3x, comfortably over the 2x retina
+             floor. Going back UP is what would need a re-export, not
+             coming down.
+
              Quiet plates rather than IconCards: this band shows
              organisations, it does not describe them, and a card with
              an empty description slot would read as unfinished.
@@ -1026,7 +1079,7 @@ export default function UsusSyria() {
                       alt={partner.name}
                       loading="lazy"
                       decoding="async"
-                      className="h-16 w-auto max-w-full object-contain sm:h-20"
+                      className="h-12 w-auto max-w-full object-contain sm:h-14"
                     />
                   ) : (
                     /* Text stand-in for a partner with no artwork on
