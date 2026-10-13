@@ -92,9 +92,12 @@
    2. THE THREE MID-PAGE CTA LINES ARE BUTTONS.
       The brief closes §1, §3 and §4 with a line that is an
       instruction rather than a sentence ("قدّم الآن وابدأ رحلة تجاوز
-      هذه التحديات", "لا تفوّت الفرصة، قدّم طلبك الآن.", "هل تنطبق
+      هذه التحديات", "لا تفوّت الفرصة، قدّم طلبك الآن", "هل تنطبق
       عليك الشروط؟ قدّم طلبك الآن"). Each is carried whole, as the
       label of that band's button — no words added, removed or split.
+      The ONE character that is not the brief's is §3's closing full
+      stop, which the client's Oct 2026 notes §4 asked to drop; see the
+      note on that `cta` below.
 
    3. SEO IS ASSEMBLED FROM THE BRIEF'S OWN SENTENCES.
       The brief specifies no `<title>`/`<meta description>` — it is a
@@ -263,7 +266,14 @@ export const ususSyria = {
         description: 'دعم مالي للفرق الثلاثة الفائزة بقيمة 3,500 دولار.',
       },
     ],
-    cta: { label: 'لا تفوّت الفرصة، قدّم طلبك الآن.', href: APPLY_URL },
+    /* The brief's line, minus its full stop — the client's Oct 2026
+       notes §4, verbatim: "شيل النقطة من الكتابة اللي بالزر". It is
+       the one place on the page where a brief sentence is edited, and
+       it is edited because a button label is not a sentence. The other
+       two mid-page CTAs ("قدّم الآن وابدأ رحلة تجاوز هذه التحديات",
+       "هل تنطبق عليك الشروط؟ قدّم طلبك الآن") carry no stop in the
+       brief, so there is nothing to strip from them. */
+    cta: { label: 'لا تفوّت الفرصة، قدّم طلبك الآن', href: APPLY_URL },
   },
 
   /* ── 4 · الفئة المستهدفة ──────────────────────────────────────
@@ -297,27 +307,29 @@ export const ususSyria = {
         as a chip and its outcome ("تخرج بـ…") as a distinct callout,
         and the weekly rhythm as a repeating three-beat cycle.
 
-        THE STRUCTURE IS THE BRIEF'S; THE GROUPING IS LAYOUT.
+        THE STRUCTURE IS THE BRIEF'S, AND NOTHING NAMES THE PHASES.
         --------------------------------------------------------------
         The brief numbers nine stages 1-9 and then a weekly rhythm. The
         nine fall into three natural PHASES by their own content — the
         two entry stages, the four 12-week stages (which carry the
-        brief's week ranges), and the three show-and-after stages. The
-        phase labels below (`label`) are the only added words on this
-        band, and they are structural, not claims: they name a group of
-        the brief's own stages, the way a table of contents names a
-        part. Every stage's title, body, `meta` (week range) and
-        `outcome` is the brief's wording, unchanged.
+        brief's week ranges), and the three show-and-after stages. That
+        grouping is why they are nested here, and it is ALL this nesting
+        does now: every string below is the brief's own wording,
+        unchanged.
+
+        The phases carried a `label` apiece ("التقديم والقبول",
+        "البرنامج المكثّف" with a `scope` of "12 أسبوعًا", "العرض وما
+        بعد البرنامج") — the only added words on the band — and the page
+        drew them beside the rail. The client's Oct 2026 notes §5 struck
+        all three ("حذف هذه"), so they are gone from this file as well
+        as from the page: an unrendered label is a string waiting to be
+        put back by mistake.
 
         THE LINE DOES NOT SPLIT BETWEEN PHASES (client, second pass).
         The page flattens these phases into a single `ProcessSteps`, so
-        the rail is one unbroken line numbered 1-9 by position, and each
-        phase's FIRST stage is given this phase's `label` and `scope`
-        as `phaseLabel`/`phaseScope` (the step-level names `ProcessSteps`
-        reads), which render on the LEFT of the rail (the copy side in
-        RTL), in the gap above that stage, without a header row of their
-        own. `number` below is the brief's own 1-9, kept as
-        documentation of that order; the rail derives the count itself.
+        the rail is one unbroken line numbered 1-9 by position. `number`
+        below is the brief's own 1-9, kept as documentation of that
+        order; the rail derives the count itself.
 
         Stage 7's "دعم مالي بقيمة 3,500$" is the brief's "منحة مالية"
         with rule A applied — see the top of this file. ──────────── */
@@ -326,7 +338,6 @@ export const ususSyria = {
     phases: [
       {
         id: 'join',
-        label: 'التقديم والقبول',
         steps: [
           {
             id: 'apply',
@@ -348,10 +359,6 @@ export const ususSyria = {
       },
       {
         id: 'program',
-        label: 'البرنامج المكثّف',
-        /* The only phase with a stated span, and it is the brief's own
-           headline figure — so the chip is factual, not invented. */
-        scope: '12 أسبوعًا',
         steps: [
           {
             id: 'know-customer',
@@ -392,7 +399,6 @@ export const ususSyria = {
       },
       {
         id: 'beyond',
-        label: 'العرض وما بعد البرنامج',
         steps: [
           {
             id: 'demo-day',

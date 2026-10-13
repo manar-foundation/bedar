@@ -67,54 +67,48 @@ import { cn } from '@utils/cn.js';
 
      step.note     a short emphasised line UNDER the body — a
                    conviction or aside the stage turns on ("نحن لا
-                   نختار من الورق…"). Brand-tinted, no box.
+                   نختار من الورق…").
      step.outcome  what the reader WALKS AWAY WITH from the stage
-                   ("تخرج بـ…"). Drawn as a bordered brand callout so
-                   it reads as a deliverable, distinct from the body —
-                   which is the whole point of not rendering the
+                   ("تخرج بـ…") — a deliverable, distinct from the
+                   body, which is the whole point of not rendering the
                    journey as a flat list.
 
-   GROUPING WITHOUT BREAKING THE LINE (أُسُس سورية's phases)
+   BOTH ARE DRAWN IN THE SAME BOX (client, Oct 2026 notes §5)
    ----------------------------------------------------------------
-   The journey falls into phases, but a phase header drawn as a row
-   BETWEEN steps would cut the rail in two — the connector runs from a
-   marker to the bottom of its own step's box, so a sibling row in the
-   middle leaves a gap and the line stops looking like one journey.
-   Instead a phase-starting step carries `step.phaseLabel` (and an
-   optional `step.phaseScope` chip), drawn on the copy side — the LEFT
-   of the rail in RTL — in the gap ABOVE that step. The client's
-   instruction, verbatim: the line must not split, and the group titles
-   go on the left so they don't affect its shape.
+   `note` was a bare tinted line with no box, beside an `outcome` that
+   had one; the client asked for the note to take the outcome's shape
+   ("نجعل شكل هذه نفس شكل البوكس اللي بالفقرة ٣"). So they share ONE
+   className constant and differ only in their mark — `Sparkles` for a
+   conviction, `Target` for a deliverable. Keep them sharing it: two
+   copies of the same box drift the moment one is touched.
 
-   "Don't affect the shape" is why the title is ABSOLUTELY positioned
-   (`bottom-full`) rather than placed first in the copy column. In the
-   flow it sat level with the marker and pushed the stage's own title
-   down — on stage 3, below the circle entirely — so the number read as
-   the PHASE's number and the marker-to-title rhythm broke on exactly
-   the stages that open a phase. Out of the flow, every marker lines up
-   with its own meta/title, as on every other step.
+   THE RAIL IS ONE UNBROKEN LINE
+   ----------------------------------------------------------------
+   The connector runs from a marker to the bottom of its own step's
+   box, so a header row dropped BETWEEN two steps would leave a gap and
+   the line would stop looking like one journey. أُسُس سورية's journey
+   therefore passes all nine of its stages as one flat list — it
+   numbers itself 1-9 like any other, and no offset is needed.
 
-   It needs room, so the step BEFORE a phase-opening step gets a longer
-   gap (`process-step-copy-phase-break`, layout.css). That gap is the
-   copy's bottom padding, which the connector already runs through, so
-   the longer gap lengthens the stroke rather than breaking it. When
-   the FIRST step opens a phase there is no step above it, so the list
-   reserves that room itself with top padding instead of leaning on the
-   caller's margin.
-
-   The journey is ONE rail of all nine stages, so it numbers itself
-   1-9 like any other list — no offset is needed (an earlier three-rail
-   draft carried a `startNumber` prop for that; it went with the rails).
+   It carried its three PHASE titles too until the client's Oct 2026
+   notes deleted them ("حذف هذه", on all three). They were drawn out of
+   the flow above the step that opened each phase, from a `phaseLabel`
+   / `phaseScope` pair on the step plus a longer gap on the step before
+   it; nothing else on the site ever set them, so the whole path came
+   out with the labels rather than being left behind unreachable.
    ================================================================ */
 
+/* The box both callouts are drawn in — see the note above. `border-s-2`
+   so the accent runs down the reading edge in RTL. */
+const CALLOUT =
+  'mt-2 flex items-start gap-2.5 rounded-lg border-s-2 border-brand-300 bg-brand-500/10 py-2.5 pe-4 ps-3.5 text-sm font-medium leading-relaxed text-ink dark:border-brand-400';
+
 /** One row: marker + its segment of the rail + the copy. */
-function Step({ step, index, count, numbered, phaseBreakAfter, inverse, progress, animated }) {
+function Step({ step, index, count, numbered, inverse, progress, animated }) {
   const title = step.title ?? step.label ?? step;
   const description = step.description ?? step.body;
   const note = step.note;
   const outcome = step.outcome;
-  const phaseLabel = step.phaseLabel;
-  const phaseScope = step.phaseScope;
   // `meta` is a short label ABOVE the title — the hackathon timeline's
   // stage dates. A plain string, not a Date: several of those stages
   // are ranges ("15-19/08/2024") and `Intl` cannot format a range, so
@@ -206,29 +200,7 @@ function Step({ step, index, count, numbered, phaseBreakAfter, inverse, progress
             the rail's trailing segment, so the two cannot disagree,
             and it sidesteps the variant-ordering trap that made
             `sm:pb-*` outrank `last:pb-0` in the first place. */}
-      <div
-        className={cn(
-          'process-step-copy relative flex min-w-0 flex-col gap-2',
-          phaseBreakAfter && 'process-step-copy-phase-break',
-        )}
-      >
-        {/* The phase title, on the reading side (left of the rail in
-            RTL), in the gap ABOVE the stage it opens. Absolute, so it
-            adds no height above the marker — see the note at the top. */}
-        {phaseLabel ? (
-          <div className="absolute bottom-full start-0 end-0 mb-4 flex flex-wrap items-center gap-x-3 gap-y-2">
-            <span className="inline-flex items-center gap-2.5 text-sm font-bold text-brand-200">
-              <span aria-hidden="true" className="h-px w-6 bg-brand-300/70" />
-              {phaseLabel}
-            </span>
-            {phaseScope ? (
-              <span className="inline-flex items-center rounded-full bg-brand-300/10 px-2.5 py-0.5 text-xs font-semibold text-brand-100 ring-1 ring-inset ring-brand-200/25">
-                {phaseScope}
-              </span>
-            ) : null}
-          </div>
-        ) : null}
-
+      <div className="process-step-copy flex min-w-0 flex-col gap-2">
         {meta ? (
           <span
             className={cn(
@@ -262,13 +234,12 @@ function Step({ step, index, count, numbered, phaseBreakAfter, inverse, progress
           </p>
         ) : null}
 
-        {/* The conviction line — emphasised, brand-tinted, no box, so
-            it reads as the stage's own voice rather than as more body
-            copy. A `Sparkles` mark sets it apart without a heading.
-            One tone, not an `inverse` split: the public site is dark
-            on both tones, and mint-100 reads on either. */}
+        {/* The conviction the stage turns on — the stage's own voice
+            rather than more body copy, which the `Sparkles` mark says
+            without needing a heading. One tone, not an `inverse` split:
+            the public site is dark on both tones. */}
         {note ? (
-          <p className="mt-1 flex items-start gap-2 text-sm font-medium leading-relaxed text-brand-100">
+          <p className={CALLOUT}>
             <Sparkles
               className="mt-0.5 size-4 shrink-0 text-brand-200"
               aria-hidden="true"
@@ -278,13 +249,11 @@ function Step({ step, index, count, numbered, phaseBreakAfter, inverse, progress
           </p>
         ) : null}
 
-        {/* The deliverable. A bordered brand callout, deliberately a
-            different silhouette from the body paragraph, so a reader
-            skimming the rail sees at a glance what each stage leaves
-            them holding. `border-s-2` so the accent runs down the
-            reading edge in RTL. */}
+        {/* The deliverable — a different silhouette from the body
+            paragraph, so a reader skimming the rail sees at a glance
+            what each stage leaves them holding. */}
         {outcome ? (
-          <p className="mt-2 flex items-start gap-2.5 rounded-lg border-s-2 border-brand-300 bg-brand-500/10 py-2.5 pe-4 ps-3.5 text-sm font-medium leading-relaxed text-ink dark:border-brand-400">
+          <p className={CALLOUT}>
             <Target
               className="mt-0.5 size-4 shrink-0 text-brand-200"
               aria-hidden="true"
@@ -316,19 +285,14 @@ export function ProcessSteps({ steps = [], variant = 'numbered', tone = 'default
   });
   const progress = useSpring(scrollYProgress, { stiffness: 80, damping: 24, mass: 0.4 });
 
-  // A phase title on the FIRST step has no gap above it to sit in, so
-  // the list reserves the room itself (see the note at the top).
-  const opensWithPhase = Boolean(steps[0]?.phaseLabel);
-
   return (
-    <ol ref={listRef} className={cn('flex flex-col', opensWithPhase && 'pt-12', className)}>
+    <ol ref={listRef} className={cn('flex flex-col', className)}>
       {steps.map((step, index) => (
         <Step
           key={step.id ?? (typeof step === 'string' ? step.slice(0, 24) : (step.title ?? index))}
           step={step}
           index={index}
           count={steps.length}
-          phaseBreakAfter={Boolean(steps[index + 1]?.phaseLabel)}
           numbered={numbered}
           inverse={inverse}
           // The spring is always passed — `useTransform` needs a real

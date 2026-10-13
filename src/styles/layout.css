@@ -480,6 +480,38 @@
     }
   }
 
+  /* ── …centred in its own column (`StatRow align="center"`) ──────
+        The rules above drop the LEADING padding from the first item of
+        each row, so its figure sits flush on the container's reading
+        edge. That is right for a row aligned to a split header's edge
+        and wrong the moment the figures are centred INSIDE their
+        columns: the item keeps its 40px trailing padding, so its
+        content box is 40px narrower than its grid track and the figure
+        lands 20px off the track's middle while its neighbours sit dead
+        centre — measured, and visible as a row that does not line up.
+
+        Restoring the symmetry is all this does. The hairlines are left
+        exactly as they are: the rule belongs to the EDGE between two
+        columns, not to the figure, and it is still suppressed on the
+        item that opens a row.
+
+        Specificity ties with the rules above (one class, one
+        pseudo-class), so this block has to stay AFTER them. */
+  .stat-row-center > *:nth-child(2n + 1) {
+    padding-inline-start: var(--space-4);
+  }
+  @media (min-width: 1024px) {
+    /* BOTH selectors, and at this breakpoint, because the base rule
+       above is unconditional: without the odd-child half repeated
+       here it would hold a 3-up row's third figure at the mobile 16px
+       while its neighbours took 40px, which is the same 20px
+       misalignment one column further along. */
+    .stat-row-center > *:nth-child(2n + 1),
+    .stat-row-center > *:first-child {
+      padding-inline-start: var(--space-8);
+    }
+  }
+
   /* ================================================================
      THE REFERENCE'S TWO OTHER HOVER SIGNATURES
      ----------------------------------------------------------------
@@ -1155,28 +1187,14 @@
     }
   }
 
-  /* ── A phase boundary inside ONE rail ───────────────────────────
-        أُسُس سورية's journey groups nine stages into phases without
-        splitting the line (client instruction). The step BEFORE a
-        phase-opening step gets this longer gap, and the next phase's
-        title sits in its lower part — absolutely positioned by
-        `ProcessSteps`, so it adds no height above any marker.
-
-        It is still the copy's bottom PADDING, which the connector
-        already spans, so a longer gap is a longer stroke, not a break.
-        Never turn this into a margin on the <li>: margin sits OUTSIDE
-        the step's box, the segment would stop short of it, and the
-        line would open exactly at the phase boundary.
-
-        Declared after the roomy rules so it wins on a tie. */
-  .process-step-copy.process-step-copy-phase-break {
-    --step-gap: 6.5rem; /* 104 */
-  }
-  @media (min-width: 640px) {
-    .process-step-copy.process-step-copy-phase-break {
-      --step-gap: 8rem; /* 128 */
-    }
-  }
+  /* A phase boundary inside أُسُس سورية's one rail used to widen this
+     gap, so the next phase's title had room to sit in it. The client's
+     Oct 2026 notes deleted those titles, and the wider gap went with
+     them — `ProcessSteps` no longer has a phase to mark. Any gap that
+     is ever added back belongs in this PADDING, which the connector
+     already spans, and never in a margin on the <li>: margin sits
+     outside the step's box, the rail's segment would stop short of it,
+     and the line would open exactly at the boundary. */
 
   .process-step:last-child .process-step-copy {
     padding-block-end: 0;
