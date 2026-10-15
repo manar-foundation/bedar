@@ -513,22 +513,47 @@ export const ususSyria = {
         in `pages/public/UsusSyria.jsx` records the measurements. The
         retired SDO mark must NOT stand in for it.
 
-        NEITHER MOU IS SIGNED. The brief carries a comment from the
-        client's own team (Akeel Bakkour, 1 Sept 2026) that no
-        memorandum of understanding has been signed with either partner
-        yet — signature depends on Bedar securing sponsorship and on the
-        partners approving the MOU terms. /programs/usus-syria is still
-        held out of search (`content/noindex-paths.js`); SHOWING A
-        PARTNER'S LOGO IS THE CLIENT'S CALL, not this file's, and a logo
-        is a stronger claim of partnership than a name. Confirm before
-        the page is opened to crawlers. A sponsors row, when there is
-        one, belongs beside `items` here rather than in a ninth band. */
+        SANAD YOUTH JOINED IN OCT 2026 (client), third in `items`.
+        Artwork supplied as the partner's own reversed lockup; see the
+        logo-map note in `pages/public/UsusSyria.jsx`.
+
+        `organiser` IS NOT A PARTNER. منار is the foundation Bedar
+        belongs to — `site.js` already says so in the footer ("بدار
+        إحدى منصات مؤسسة منار للمشاركة المجتمعية") — so its mark sits
+        alone on its own row ABOVE the partner row rather than inside
+        `items`. Putting it in `items` would have the section heading
+        claim the parent organisation as a partner of its own
+        programme. Keep the two lists separate.
+
+        It carries NO LABEL. A "بتنظيم من" caption was drafted above
+        the mark and the client asked for the mark alone (Oct 2026),
+        which is why `organiser` has no copy in it — only the `id` the
+        logo map is keyed by and the `name` that becomes the `alt`.
+
+        NO MOU IS SIGNED WITH ANY PARTNER. The brief carries a comment
+        from the client's own team (Akeel Bakkour, 1 Sept 2026) that no
+        memorandum of understanding has been signed with either of the
+        first two partners yet — signature depends on Bedar securing
+        sponsorship and on the partners approving the MOU terms. Nothing
+        has said otherwise for Sanad Youth either. /programs/usus-syria
+        is still held out of search (`content/noindex-paths.js`);
+        SHOWING A PARTNER'S LOGO IS THE CLIENT'S CALL, not this file's,
+        and a logo is a stronger claim of partnership than a name.
+        Confirm before the page is opened to crawlers. `organiser` is
+        exempt from that caution — it is Bedar's own parent, not a
+        claim about a third party. A sponsors row, when there is one,
+        belongs beside `items` here rather than in a ninth band. */
   partners: {
     eyebrow: 'شركاؤنا',
     title: 'نعتزّ بشركائنا في إنجاح المشروع',
+    organiser: {
+      id: 'manar',
+      name: 'مؤسسة منار للمشاركة المجتمعية',
+    },
     items: [
       { id: 'sme-authority', name: 'هيئة تنمية المشروعات الصغيرة والمتوسطة' },
       { id: 'presently', name: 'Presently' },
+      { id: 'sanad-youth', name: 'سند الشباب للتنمية' },
     ],
   },
 };

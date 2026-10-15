@@ -44,6 +44,8 @@ import coverFallback from '@assets/banners/usus-syria.webp';
 import programLogo from '@assets/programs/usus-syria-logo.svg';
 import logoSmedc from '@assets/partners/smedc.webp';
 import logoPresently from '@assets/partners/presently.png';
+import logoSanadYouth from '@assets/partners/sanad-youth.webp';
+import logoManar from '@assets/partners/manar.svg';
 
 /* ================================================================
    مشروع أُسُس سورية — /programs/usus-syria.
@@ -193,6 +195,49 @@ const RHYTHM_ICONS = {
                           final brief replaced منظمة التنمية السورية
                           (SDO) with Presently. The SDO mark is retired
                           and must NOT stand in for it.
+     sanad-youth          supplied by the client (Oct 2026) when سند
+                          الشباب للتنمية joined as the third partner.
+     manar                NOT A PARTNER — the foundation Bedar belongs
+                          to. It is keyed here because this band is the
+                          only place on the page that draws it, but it
+                          renders on its own row above the partners,
+                          from `partners.organiser`. See the content
+                          file's note.
+
+   SANAD YOUTH AND MANAR ARE BOTH ALREADY REVERSED ARTWORK
+   ----------------------------------------------------------------
+   Sanad Youth arrived as #FFFFFF ink with #1BC6C6 accents on a
+   3508x2481 transparent canvas whose ink filled only half of it. It
+   was cropped to that ink (x 872..2624, y 191..2332 => 1753x2142,
+   transparent margin only — no opaque pixel was touched) and exported
+   at 384px tall, 4x the 96px it renders at.
+
+   Manar is vector (`manar.svg`, the client's export), so it has no
+   render-height budget to spend. Its viewBox is already the ink box.
+   Its second brand colour is a #61DDF2 blue — a partner's own artwork
+   wins over the teal palette, the same exemption Presently's #27AAE1
+   already has.
+
+   THE FOUR MARKS ARE BOUNDED, NOT HEIGHT-MATCHED
+   ----------------------------------------------------------------
+   This band used to size on HEIGHT alone, which works only while
+   every mark is a single-line wordmark. Sanad Youth is a stacked
+   lockup — 0.82:1 against Presently's 4.19:1 — so one shared cap
+   height would have drawn it 39px wide beside Presently's 201px and
+   read as a speck. Every mark is therefore fitted inside ONE box
+   (`max-h` + `max-w` + object-contain): the wide marks bind on width,
+   the stacked one binds on height, and the four land within a third
+   of each other by area instead of a factor of five. At the lg box
+   (176x96) that is Presently 176x42, SMEDC 176x56, Manar 176x49,
+   Sanad 78x96.
+
+   It also answers the client's own note §7 ("اللوجوهات كبيرة عم
+   تظهر") at its source: Presently was the mark that overran its
+   plate, and a width bound is what actually holds it.
+
+   Raster headroom at that box: SMEDC 200px tall draws at 3.6x,
+   Presently 408px at 9.7x, Sanad 384px at 4x — all over the 2x retina
+   floor. Growing the box is what would need a re-export.
 
    PRESENTLY IS ALREADY REVERSED ARTWORK
    ----------------------------------------------------------------
@@ -231,7 +276,57 @@ const RHYTHM_ICONS = {
 const PARTNER_LOGOS = {
   'sme-authority': logoSmedc,
   presently: logoPresently,
+  'sanad-youth': logoSanadYouth,
+  manar: logoManar,
 };
+
+/* The one box every mark in §8 is fitted into — the organiser's row
+   and the partner row share it, so all four read as one set. It steps
+   down at `md`, where the partner row becomes three columns and each
+   plate loses roughly a third of its width; `lg` is where there is
+   room for the full box again. Widths are checked against the plate's
+   inner width at each step, so no mark is ever clamped by
+   `max-w-full` (which would silently drop it below the others). */
+const PARTNER_LOGO_BOX = 'h-auto w-auto object-contain max-h-20 max-w-40 lg:max-h-24 lg:max-w-44';
+
+/* ONE PLATE, DRAWN ONCE ───────────────────────────────────────
+   §8 has two rows — the organiser alone, then the three partners —
+   and they have to read as one set. Sharing this component is what
+   guarantees that: a plate, a box and a fallback cannot drift apart
+   between the rows if there is only one of each.
+
+   Quiet plates rather than IconCards: this band shows organisations,
+   it does not describe them, and a card with an empty description
+   slot would read as unfinished.
+
+   The plate still falls back to the organisation's NAME as text when
+   an id has no `PARTNER_LOGOS` entry, so a partner added later
+   without a file ships as an honest name, never as a broken image or
+   as a retired partner's mark standing in for it.
+
+   Images are `lazy`: this is the last band on a page about nine
+   screens tall, nowhere near the first paint. */
+function PartnerPlate({ entry }) {
+  const logo = PARTNER_LOGOS[entry.id];
+
+  return (
+    <div className="panel-quiet flex h-full min-h-36 items-center justify-center p-5 text-center lg:min-h-40 lg:p-6">
+      {logo ? (
+        <img
+          src={logo}
+          alt={entry.name}
+          loading="lazy"
+          decoding="async"
+          className={PARTNER_LOGO_BOX}
+        />
+      ) : (
+        /* Not styled as a logo — it reads as a name, which is the
+           honest claim until a mark exists. */
+        <span className="text-xl font-bold text-ink sm:text-2xl">{entry.name}</span>
+      )}
+    </div>
+  );
+}
 
 /**
  * `to` for an in-app path, `href` for a form on another host.
@@ -694,8 +789,7 @@ export default function UsusSyria() {
         data-theme="light"
         className="band-light-surface"
         style={{
-          '--band-light-surface':
-            'linear-gradient(180deg, #dcf1ea 0%, #cbe9df 52%, #e4f4ee 100%)',
+          '--band-light-surface': 'linear-gradient(180deg, #dcf1ea 0%, #cbe9df 52%, #e4f4ee 100%)',
           /* Inline, not in the stylesheet: `[data-theme='light']`
              declares these on this very element from an unlayered
              rule, and unlayered CSS beats anything in a `@layer`
@@ -889,10 +983,7 @@ export default function UsusSyria() {
                         the next card on desktop; it turns to point down
                         where the beats stack on a phone. */}
                     {last ? null : (
-                      <div
-                        aria-hidden="true"
-                        className="flex items-center justify-center lg:px-1"
-                      >
+                      <div aria-hidden="true" className="flex items-center justify-center lg:px-1">
                         <ArrowLeft className="size-5 -rotate-90 text-brand-300/70 lg:rotate-0" />
                       </div>
                     )}
@@ -1016,44 +1107,48 @@ export default function UsusSyria() {
 
              A LOGO WALL, so the marks are the content and the plates
              only hold them. `PARTNER_LOGOS` resolves the id; the
-             partner's name from the brief becomes the `alt`, so the
-             band says the same thing to a screen reader as it does on
-             screen.
+             organisation's name from the brief becomes the `alt`, so
+             the band says the same thing to a screen reader as it does
+             on screen. `PartnerPlate` draws every one of them.
 
-             BOTH PARTNERS NOW HAVE ARTWORK (SMEDC, and Presently since
-             Oct 2026 — it replaced SDO in the final brief). The plate
-             still falls back to the partner's NAME as text when an id
-             has no `PARTNER_LOGOS` entry, so a partner added later
-             without a file ships as an honest name, never as a broken
-             image or as a retired partner's mark standing in for it.
-             See the map note above.
+             TWO ROWS, AND THE SPLIT IS SEMANTIC (client, Oct 2026).
+             The upper row is ONE plate, centred: منار, the foundation
+             Bedar belongs to. The lower row is the three partners.
+             منار is not inside `items` precisely so that the "شركاؤنا"
+             heading does not end up claiming Bedar's own parent as a
+             partner of Bedar's own programme — see the content file's
+             note.
 
-             SIZED ON HEIGHT, NEVER ON WIDTH — a logo row reads as a row
-             because every mark shares a cap height, not because the
-             boxes match. `max-w-full` is the guard for a narrow phone,
-             where the height would otherwise overflow the plate.
+             THE UPPER PLATE CARRIES NO CAPTION. It was drafted with a
+             "بتنظيم من" label above it and the client asked for the
+             mark alone (Oct 2026). Position and the gap carry the
+             distinction instead; the organisation's name still reaches
+             a screen reader through the plate's `alt`. Do not re-add a
+             caption without asking.
 
-             THAT HEIGHT IS 48/56px, DOWN FROM 64/80 (client, Oct 2026
-             notes §7: "اللوجوهات كبيرة عم تظهر.. بدنا نجعلهم اصغر").
-             At 80px the Presently wordmark ran 335px wide in a 376px
-             plate — 89% of it — and read as the plate's content rather
-             than as a mark sitting in it; at 56px it is 235px, or 62%.
-             Both files are raster and were exported for the old
-             height — 200px for SMEDC, 408px for Presently — so they
-             now draw at 3.6x and 7.3x, comfortably over the 2x retina
-             floor. Going back UP is what would need a re-export, not
-             coming down.
+             The organiser's plate is `max-w-sm` — 384px against the
+             288px a partner column gets at `lg`. One notch wider, not
+             a full-width banner: the band reads as a pyramid, and the
+             apex is deliberate rather than accidental.
 
-             Quiet plates rather than IconCards: this band shows
-             organisations, it does not describe them, and a card with
-             an empty description slot would read as unfinished.
+             THREE PARTNERS NOW HAVE ARTWORK — SMEDC, Presently (since
+             Oct 2026, replacing SDO in the final brief) and سند الشباب
+             (Oct 2026). See the map note above for the sizing, which
+             is a bounded BOX rather than a shared cap height now that
+             one of the four marks is a stacked lockup.
+
+             THE PARTNER ROW GOES 3-UP AT `md`, NOT AT `sm`. Three
+             columns inside a 640px viewport leave ~152px of inner
+             width per plate, and the widest mark needs 160; the row
+             would have clamped it and broken the set. Below `md` the
+             three stack full-width, where every mark gets the whole
+             box. The `h-full` on each item and on the plate is what
+             keeps the three one height whatever each mark's own
+             proportions are.
 
              `size="sm"` — the sentence the brief gives ("نعتزّ بشركائنا
              في إنجاح المشروع") is the whole section, and a closing band
              should not out-weigh the CTA directly above it.
-
-             Images are `lazy`: this is the last band on a page about
-             nine screens tall, nowhere near the first paint.
 
              READ THE MOU NOTE in `content/usus-syria.js` before this
              page is opened to search engines — a logo claims more than
@@ -1067,30 +1162,18 @@ export default function UsusSyria() {
           className="mb-10"
         />
 
-        <Stagger className="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2">
-          {partners.items.map((partner) => {
-            const logo = PARTNER_LOGOS[partner.id];
-            return (
-              <StaggerItem key={partner.id} className="h-full">
-                <div className="panel-quiet flex h-full min-h-36 items-center justify-center p-6 text-center">
-                  {logo ? (
-                    <img
-                      src={logo}
-                      alt={partner.name}
-                      loading="lazy"
-                      decoding="async"
-                      className="h-12 w-auto max-w-full object-contain sm:h-14"
-                    />
-                  ) : (
-                    /* Text stand-in for a partner with no artwork on
-                       file. Not styled as a logo — it reads as a name,
-                       which is the honest claim until a mark exists. */
-                    <span className="text-xl font-bold text-ink sm:text-2xl">{partner.name}</span>
-                  )}
-                </div>
-              </StaggerItem>
-            );
-          })}
+        {partners.organiser ? (
+          <Reveal className="mx-auto mb-4 w-full max-w-sm">
+            <PartnerPlate entry={partners.organiser} />
+          </Reveal>
+        ) : null}
+
+        <Stagger className="mx-auto grid max-w-4xl gap-4 md:grid-cols-3">
+          {partners.items.map((partner) => (
+            <StaggerItem key={partner.id} className="h-full">
+              <PartnerPlate entry={partner} />
+            </StaggerItem>
+          ))}
         </Stagger>
       </Section>
     </div>
