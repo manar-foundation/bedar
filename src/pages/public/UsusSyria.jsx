@@ -528,17 +528,18 @@ function RegistrationForm() {
   }, []);
 
   return (
+    /* The client's embed VERBATIM — its own `aria-label`, `frameborder`
+       and inline `width:99%; height:500px; border:none`. No box, no
+       frame, no imposed sizing: the form takes its natural size inside
+       the page container, exactly as the supplied snippet draws it. */
     <iframe
       ref={frameRef}
-      title="استمارة التسجيل في برنامج أُسُس سورية"
+      aria-label="استمارة التسجيل"
       src={FORM_SRC}
+      frameBorder="0"
       /* Last band on a nine-screen page — nowhere near first paint. */
       loading="lazy"
-      /* Zoho's own embed is a fixed-height frame with no auto-resize
-         script, so the height is ours to set: tall enough that the
-         registration form shows without the frame scrolling inside
-         itself on a desktop. */
-      className="block h-[820px] w-full border-0"
+      style={{ height: '500px', width: '99%', border: 'none' }}
     />
   );
 }
@@ -1266,11 +1267,10 @@ export default function UsusSyria() {
 
              `scroll-mt` so the native hash scroll lands the heading
              clear of the FIXED navbar (`--nav-h`) rather than tucked
-             under it. The iframe is framed the way the hero's cover
-             and §8's plates are — rounded, elevated, hairline-ringed —
-             on a white base, since the form itself is Zoho's own light
-             surface and the card edge is what seats that light box on
-             the dark page. */}
+             under it. The form is the client's embed as supplied — no
+             frame or box around it, keeping its own width:99% /
+             height:500px — so it takes its natural size inside the page
+             container. */}
       <Section
         id="register"
         size="lg"
@@ -1278,10 +1278,8 @@ export default function UsusSyria() {
       >
         <SectionHeading title="سجّل الآن في برنامج أُسُس سورية" align="center" className="mb-12" />
 
-        <Reveal className="mx-auto max-w-3xl">
-          <div className="overflow-hidden rounded-2xl bg-white shadow-e3 ring-1 ring-white/10">
-            <RegistrationForm />
-          </div>
+        <Reveal>
+          <RegistrationForm />
         </Reveal>
       </Section>
     </div>
