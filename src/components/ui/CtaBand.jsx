@@ -6,20 +6,24 @@ import { Reveal } from '@components/motion/Reveal.jsx';
 import { cn } from '@utils/cn.js';
 
 /**
- * `to` for an in-app path, `href` for anything that leaves the site.
+ * `to` for an in-app path, `href` for an in-page anchor or anything
+ * that leaves the site.
  *
  * `Button` already routes on which of the two it is given — `to`
  * renders a react-router `<Link>`, `href` an `<a>` with the external
  * `rel`/`target` handling. This band used to hardcode `to`, which
  * turned an absolute URL into a client-side navigation to the path
  * `/https://…`. It matters for program pages whose call to action is
- * an application form on a form host (see `APPLY_URL` in
- * `content/usus-syria.js`), and it is inert for every band that
- * already passes an internal path.
+ * an application form — on a form host, or embedded on the page itself
+ * behind an anchor (see `APPLY_URL` in `content/usus-syria.js`, now
+ * `#register`) — so a `#` hash routes as an `href` too, which keeps it
+ * a plain `<a>` the browser scrolls natively rather than a `<Link>`
+ * react-router would not scroll. Inert for every band that passes an
+ * internal path.
  */
 function linkProps(target) {
   const href = target?.href ?? '';
-  return /^(https?:|mailto:|tel:)/.test(href) ? { href } : { to: href };
+  return /^(https?:|mailto:|tel:|#)/.test(href) ? { href } : { to: href };
 }
 
 /**
