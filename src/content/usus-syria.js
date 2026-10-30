@@ -113,21 +113,22 @@
  * Where "قدّم الآن" goes.
  *
  * The brief specifies the BUTTON (five times — the header, the end of
- * §1, §3 and §4, and the closing band) but not its destination: there
- * is no application-form URL anywhere in the document, and no form for
- * this programme exists on the site yet.
+ * §1, §3 and §4, and the closing band) but not its destination. For a
+ * long time there was no form, so this pointed at the contact page as a
+ * real, working stand-in.
  *
- * So this points at the contact page, which is a real, working
- * destination that reaches the team — not a `#` that dead-ends and not
- * a fabricated URL. It is a single constant, used by all five CTAs, so
- * pointing the programme at its real form is a ONE-LINE change here
- * once the client supplies it.
+ * The client supplied the form in Oct 2026 — a Zoho embed — and it now
+ * lives ON this page as its own closing section (§9, `#register`). So
+ * all five CTAs point at that in-page anchor and SCROLL DOWN to the
+ * form rather than leaving the page. The single constant that the old
+ * note promised would be a one-line change is exactly that change.
  *
- * An absolute `https://…` is supported as well as an internal path —
- * `CtaBand` and the page's own buttons all route on the shape of this
- * string, so an external form host needs no further change.
+ * An in-page anchor (`#…`), an absolute `https://…` and an internal
+ * path are all supported — `CtaBand` and the page's own buttons route
+ * on the shape of this string: a `#` or an external URL renders a plain
+ * `<a>` (native hash scroll / new tab), an internal path a router Link.
  */
-const APPLY_URL = '/contact-us';
+const APPLY_URL = '#register';
 
 const APPLY_LABEL = 'قدّم الآن';
 

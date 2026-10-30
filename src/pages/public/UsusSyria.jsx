@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, useEffect, useRef } from 'react';
 import {
   ArrowLeft,
   BadgeCheck,
@@ -329,15 +329,20 @@ function PartnerPlate({ entry }) {
 }
 
 /**
- * `to` for an in-app path, `href` for a form on another host.
+ * `to` for an in-app path, `href` for an in-page anchor or a form on
+ * another host.
  *
  * The apply CTA's destination is a single constant in the content
- * file and the client has not supplied the real form yet, so this
- * page must not assume its shape. Same rule `CtaBand` applies to its
- * own buttons, and all five of this page's CTAs go through it.
+ * file (`APPLY_URL`), so this page must not assume its shape. It is now
+ * the in-page `#register` anchor, so the match includes `#`: a hash and
+ * an external URL both render a plain `<a>` — the hash so the browser
+ * does its native, smooth (base.css) scroll down to the form section,
+ * the URL so it opens in a new tab — while an internal path stays a
+ * router `<Link>`. Same rule `CtaBand` applies to its own button, and
+ * all five of this page's CTAs go through one of the two.
  */
 function applyLinkProps(cta) {
-  return /^(https?:|mailto:|tel:)/.test(cta.href) ? { href: cta.href } : { to: cta.href };
+  return /^(https?:|mailto:|tel:|#)/.test(cta.href) ? { href: cta.href } : { to: cta.href };
 }
 
 /* ── A SIGNED NUMBER NEEDS ISOLATING; A PLAIN ONE DOES NOT ─────
@@ -464,6 +469,79 @@ const ACCENT_SCOPE = {
   '--action-accent-glow': 'rgba(105, 193, 169, 0.42)',
   '--hero-aurora-c': 'rgba(105, 193, 169, 0.26)',
 };
+
+/* ── THE REGISTRATION FORM ─────────────────────────────────────
+   The client's Zoho embed (manarfoundation1 / أُسُس سورية), supplied
+   Oct 2026, as the programme's own registration form — the real
+   destination the five "قدّم الآن" CTAs used to stand in for with a
+   link to /contact-us (see `APPLY_URL`). It is why the page now has a
+   ninth band, and why those CTAs scroll to it instead of leaving.
+
+   THE EMBED'S <script>, AS AN EFFECT
+   ----------------------------------------------------------------
+   The supplied snippet ships an inline <script> that does ONE thing:
+   append a `referrername` query param carrying the page URL, so Zoho
+   records where a submission came from. An inline <script> in JSX does
+   not execute, so the exact same logic runs here in an effect against
+   the iframe's ref — it only writes the frame's own `src`, never any
+   React state, so it is clear of the `set-state-in-effect` rule. */
+const FORM_SRC =
+  'https://forms.zohopublic.eu/manarfoundation1/form/Untitled5/formperma/CnfKUcwh9VegeJGGk7uGcEHYCbrLygyhvcAYWibwlc0';
+
+function RegistrationForm() {
+  const frameRef = useRef(null);
+
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+
+    // Already carries the param (e.g. a re-run) — leave it be.
+    let src = frame.src;
+    if (/[?&]referrername=/.test(src)) return;
+
+    // The page URL, read exactly as the embed reads it: the top
+    // window's when framed and reachable, otherwise this window's own,
+    // and only when it is a real http(s) address.
+    let referrer = window.location.href;
+    try {
+      referrer =
+        window.self !== window.top
+          ? window.top.location.href
+          : /^https?:\/\/[\w.-]+\.[a-zA-Z]{2,}/i.test(referrer)
+            ? referrer
+            : '';
+    } catch {
+      /* cross-origin top — keep this window's own href */
+    }
+    if (!referrer) return;
+
+    // Zoho's own 1800-char cap: drop the query string first, then hard
+    // truncate if it is still too long.
+    if (referrer.length > 1800) {
+      const queryIndex = referrer.indexOf('?');
+      if (queryIndex > -1) referrer = referrer.slice(0, queryIndex);
+      if (referrer.length > 1800) referrer = referrer.slice(0, 1800);
+    }
+
+    src += (src.indexOf('?') > 0 ? '&' : '?') + 'referrername=' + encodeURIComponent(referrer);
+    frame.src = src;
+  }, []);
+
+  return (
+    <iframe
+      ref={frameRef}
+      title="استمارة التسجيل في برنامج أُسُس سورية"
+      src={FORM_SRC}
+      /* Last band on a nine-screen page — nowhere near first paint. */
+      loading="lazy"
+      /* Zoho's own embed is a fixed-height frame with no auto-resize
+         script, so the height is ours to set: tall enough that the
+         registration form shows without the frame scrolling inside
+         itself on a desktop. */
+      className="block h-[820px] w-full border-0"
+    />
+  );
+}
 
 export default function UsusSyria() {
   useSeo(ususSyria.seo);
@@ -1175,6 +1253,36 @@ export default function UsusSyria() {
             </StaggerItem>
           ))}
         </Stagger>
+      </Section>
+
+      <SectionSeam />
+
+      {/* ── 9 · التسجيل ──────────────────────────────────────────
+             The client's Zoho form, embedded as the page's closing
+             band and the destination every "قدّم الآن" on the page
+             scrolls to (`#register`). It sits AFTER the partners —
+             the true last thing on the page — because it is where the
+             reader acts, and all five CTAs above lead down to it.
+
+             `scroll-mt` so the native hash scroll lands the heading
+             clear of the FIXED navbar (`--nav-h`) rather than tucked
+             under it. The iframe is framed the way the hero's cover
+             and §8's plates are — rounded, elevated, hairline-ringed —
+             on a white base, since the form itself is Zoho's own light
+             surface and the card edge is what seats that light box on
+             the dark page. */}
+      <Section
+        id="register"
+        size="lg"
+        className="scroll-mt-[calc(var(--nav-h)+1.5rem)]"
+      >
+        <SectionHeading title="سجّل الآن في برنامج أُسُس سورية" align="center" className="mb-12" />
+
+        <Reveal className="mx-auto max-w-3xl">
+          <div className="overflow-hidden rounded-2xl bg-white shadow-e3 ring-1 ring-white/10">
+            <RegistrationForm />
+          </div>
+        </Reveal>
       </Section>
     </div>
   );
