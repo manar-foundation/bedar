@@ -7,6 +7,7 @@ import {
   Footprints,
   GraduationCap,
   Handshake,
+  HeartPulse,
   MapPin,
   MessagesSquare,
   Network,
@@ -75,7 +76,7 @@ import logoManar from '@assets/partners/manar.svg';
        + the three figures     StatRow               home, /about
      1 · التحديات              quiet-panel rows      (this page)
      2 · عن المشروع            StickySplit + aside   /about, /social-…
-       القطاعات المستهدفة      IconCard grid         home, /about
+       القطاعات (أولوية)       compact IconCard grid home, /about
      3 · على ماذا ستحصل        IconCard grid         home, /about
      4 · الفئة المستهدفة       panel-quiet list      (this page)
      5 · رحلة المشروع          ProcessSteps, 1 rail  /about, /social-…
@@ -83,6 +84,7 @@ import logoManar from '@assets/partners/manar.svg';
      6 · آلية التقديم          NumberedList          home
      7 · دعوة للتسجيل          CtaBand               most pages
      8 · شركاؤنا               panel-quiet plates    (this page)
+     9 · منظومة الدعم          panel-quiet plates    (this page)
 
    The band tones alternate (plain → glow → glow-alt → dark → plain →
    wash), which is what keeps a long page from reading as one
@@ -95,7 +97,7 @@ import logoManar from '@assets/partners/manar.svg';
    given different silhouettes:
 
      §1 التحديات      quiet rows, MUTED mark, split header
-     §2 عن المشروع     sticky aside header, then a 3-up IconCard grid
+     §2 عن المشروع     sticky aside header, then 4-up compact tiles
      §3 ستحصل         split header, 5-up IconCard grid, brand mark
      §4 الفئة         centred inverse header on dark, tick list
 
@@ -140,15 +142,17 @@ const BENEFIT_ICONS = {
   'seed-funding': Coins,
 };
 
-/* One mark per target sector, read from what the sector's own line
-   says rather than from its title alone:
+/* One mark per PRIORITY sector. The final brief lists four bare names
+   with no sentence to read from, so each mark is read from the name:
 
-     الطاقة والحلول اللامركزية      إنتاج الطاقة وإدارتها     → Zap
-     الاقتصاد الدائري وإعادة التدوير  إعادة الاستخدام والنفايات → Recycle
-     تقنيات التعليم والمهارات       تطوير التعلم وتنمية المهارات → GraduationCap */
+     الصحة العامة                 → HeartPulse
+     الطاقة والحلول اللامركزية     → Zap
+     البيئة وإعادة التدوير         → Recycle
+     تقنيات التعليم والمهارات       → GraduationCap */
 const SECTOR_ICONS = {
+  'public-health': HeartPulse,
   energy: Zap,
-  'circular-economy': Recycle,
+  'environment-recycling': Recycle,
   edtech: GraduationCap,
 };
 
@@ -558,6 +562,7 @@ export default function UsusSyria() {
     applying,
     closing,
     partners,
+    ecosystem,
   } = ususSyria;
 
   /* The programme's own record, for the one thing on this page that
@@ -795,45 +800,56 @@ export default function UsusSyria() {
           >
             {about.body}
           </Reveal>
+
+          {/* The eligibility question the final brief adds under the
+              paragraph, in the same column — a question and its answer,
+              so it reads as a continuation of "ما هو أُسُس سورية؟"
+              rather than as a new band. */}
+          <Reveal as="h3" className="mt-10 text-lg font-bold text-ink lg:text-xl">
+            {about.eligibilityTitle}
+          </Reveal>
+          <Reveal as="p" className="mt-4 leading-relaxed text-ink-secondary">
+            {about.eligibilityBody}
+          </Reveal>
         </StickySplit>
 
+        {/* The PRIORITY sectors — names only in the final brief, so they
+            are compact label tiles (icon + title, no paragraph), the
+            same treatment /social-entrepreneurship gives its sector
+            labels. Four, so the grid runs 2-up then 4-up. */}
         <Reveal as="h3" className="mb-8 mt-14 text-lg font-bold text-ink lg:text-xl">
           {about.sectorsTitle}
         </Reveal>
 
-        <Stagger className="grid auto-rows-fr gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <Stagger className="grid auto-rows-fr gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {about.sectors.map((sector) => {
             const Icon = SECTOR_ICONS[sector.id];
             return (
               <StaggerItem key={sector.id} className="h-full">
-                {/* `titleLines={1}` — the client's Oct 2026 notes §3:
-                    "المساحة الفارغة بين العنوان والوصف كبير داخل
-                    البطاقات بالصفحة.. لازم تكون اقل". `IconCard`
-                    reserves two lines for a title by default so the
-                    paragraphs of a row start on one baseline, and all
-                    three of these titles are ONE line — so the second
-                    line was 23px of blank between every title and its
-                    description, and the baselines stay level without
-                    it. The §3 grid below is the same case.
-
-                    It is a floor, not a cap: a title that wraps still
-                    wraps. Re-check it if the copy ever grows. */}
+                {/* `compact` — a label, not a description. The brief
+                    gives these sectors no sentence, so the card is the
+                    icon-plus-name tile with nothing held back behind a
+                    clamp. */}
                 <IconCard
+                  compact
                   title={sector.title}
-                  description={sector.description}
-                  lines={null}
-                  titleLines={1}
                   icon={Icon ? <Icon aria-hidden="true" strokeWidth={1.75} /> : null}
                 />
               </StaggerItem>
             );
           })}
         </Stagger>
+
+        {/* The brief's closing line on the sector list: priority, not a
+            gate — the door stays open to every sector. */}
+        <Reveal as="p" className="mt-8 leading-relaxed text-ink-secondary">
+          {about.sectorsNote}
+        </Reveal>
       </Section>
 
       <SectionSeam />
 
-      {/* ── 3 · على ماذا ستحصل الشركات المشاركة؟ ──────────────────
+      {/* ── 3 · على ماذا ستحصل المشاريع المشاركة؟ ──────────────────
              FIVE cards, not six — the Sept 2026 brief dropped
              اختبار السوق as a card of its own. The headline figures
              (three since the final brief) are NOT in this grid: they
@@ -1210,19 +1226,19 @@ export default function UsusSyria() {
              a full-width banner: the band reads as a pyramid, and the
              apex is deliberate rather than accidental.
 
-             THREE PARTNERS NOW HAVE ARTWORK — SMEDC, Presently (since
+             FOUR PARTNERS, THREE WITH ARTWORK — SMEDC, Presently (since
              Oct 2026, replacing SDO in the final brief) and سند الشباب
-             (Oct 2026). See the map note above for the sizing, which
-             is a bounded BOX rather than a shared cap height now that
-             one of the four marks is a stacked lockup.
+             (Oct 2026). Ebla Ventures is the fourth, added by the final
+             brief with no mark yet, so its plate falls back to the name
+             as text (see `PartnerPlate`). See the map note above for the
+             sizing, which is a bounded BOX rather than a shared cap
+             height now that one of the marks is a stacked lockup.
 
-             THE PARTNER ROW GOES 3-UP AT `md`, NOT AT `sm`. Three
-             columns inside a 640px viewport leave ~152px of inner
-             width per plate, and the widest mark needs 160; the row
-             would have clamped it and broken the set. Below `md` the
-             three stack full-width, where every mark gets the whole
-             box. The `h-full` on each item and on the plate is what
-             keeps the three one height whatever each mark's own
+             THE PARTNER ROW GOES 2-UP AT `sm`, 4-UP AT `lg`. Four plates
+             share the row now, so below `sm` they stack full-width, at
+             `sm` they pair, and at `lg` the full box fits all four
+             across. The `h-full` on each item and on the plate is what
+             keeps the row one height whatever each mark's own
              proportions are.
 
              `size="sm"` — the sentence the brief gives ("نعتزّ بشركائنا
@@ -1247,7 +1263,7 @@ export default function UsusSyria() {
           </Reveal>
         ) : null}
 
-        <Stagger className="mx-auto grid max-w-4xl gap-4 md:grid-cols-3">
+        <Stagger className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {partners.items.map((partner) => (
             <StaggerItem key={partner.id} className="h-full">
               <PartnerPlate entry={partner} />
@@ -1258,7 +1274,38 @@ export default function UsusSyria() {
 
       <SectionSeam />
 
-      {/* ── 9 · التسجيل ──────────────────────────────────────────
+      {/* ── 9 · منظومة الدعم ──────────────────────────────────────
+             The support-ecosystem row the final brief adds after the
+             partners — the actors backing the programme, listed apart
+             from the شركاء because an ecosystem backer is a different
+             claim from a signed partner (and none has a mark yet, so
+             each renders as its name through the same `PartnerPlate`
+             fallback). Its own band because the brief gives it its own
+             heading and number; see the `ecosystem` note in the content
+             file. `size="sm"`, mirroring §8, so neither closing row
+             out-weighs the CTA above them. */}
+      {ecosystem?.items?.length ? (
+        <>
+          <Section size="sm">
+            {/* The brief gives this band a heading alone, no sentence
+                under it — so its name is the `title`, not an eyebrow
+                over an empty slot. */}
+            <SectionHeading title={ecosystem.eyebrow} align="center" size="sm" className="mb-10" />
+
+            <Stagger className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {ecosystem.items.map((member) => (
+                <StaggerItem key={member.id} className="h-full">
+                  <PartnerPlate entry={member} />
+                </StaggerItem>
+              ))}
+            </Stagger>
+          </Section>
+
+          <SectionSeam />
+        </>
+      ) : null}
+
+      {/* ── التسجيل (form) ────────────────────────────────────────
              The client's Zoho form, embedded as the page's closing
              band and the destination every "قدّم الآن" on the page
              scrolls to (`#register`). It sits AFTER the partners —
