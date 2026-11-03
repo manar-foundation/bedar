@@ -24,6 +24,12 @@ import { formatNumber } from '@utils/format.js';
    bare Intl call with the `ar` locale renders ١٢٠ — which breaks the
    Western-digits brand rule on the most-read number on the site.
 
+   A STAT'S `value` MAY BE A WORD. Most figures are numbers and get the
+   count-up, the digit grouping and the LTR isolation above. أُسُس
+   سورية has one that is not — "مختلف القطاعات" in a figure's place —
+   and a string `value` (with no `label`) is drawn as a plain phrase
+   instead, skipping all three. See the branch in `Stat`.
+
    `align="center"` CENTRES EACH FIGURE IN ITS OWN COLUMN
    ----------------------------------------------------------------
    The default is reading-edge aligned, which is right for a row that
@@ -44,8 +50,14 @@ function Stat({
   index = 0,
   align = 'start',
 }) {
-  const [ref, current] = useCountUp(countUp ? value : 0);
-  const shown = countUp ? current : value;
+  // A WORD IN A NUMBER'S PLACE. أُسُس سورية's middle figure is the
+  // phrase "مختلف القطاعات", not a count (see its `facts` note). A
+  // non-numeric `value` gets none of the number machinery — no count-up
+  // (which would animate toward NaN), no digit grouping, and no
+  // `.ltr-run` (the run is RTL Arabic, not a left-to-right figure).
+  const numeric = typeof value === 'number';
+  const [ref, current] = useCountUp(numeric && countUp ? value : 0);
+  const shown = numeric && countUp ? current : value;
 
   return (
     <Reveal
@@ -55,22 +67,36 @@ function Stat({
     >
       <span
         ref={ref}
-        className="flex items-baseline text-4xl font-bold tabular-nums text-brand-200 lg:text-5xl"
+        className={cn(
+          'flex items-baseline font-bold text-brand-200',
+          numeric
+            ? 'text-4xl tabular-nums lg:text-5xl'
+            : // A phrase runs smaller than a bare numeral and may wrap,
+              // so it keeps the figure row's height without a numeral's
+              // display scale. Centred callers already centre it.
+              'text-2xl leading-tight lg:text-3xl',
+        )}
       >
-        {/* ONE `.ltr-run` around the whole figure, not just the digits.
-            The unit is part of the number, so prefix + digits + suffix
-            have to be typeset as a single LTR run: with the suffix
-            outside it, RTL flow laid the three flex items out
-            right-to-left and "20" + "M" rendered as `M20`. Isolated
-            together they read `20M`, which is what the figure is. */}
-        <span className="ltr-run">
-          {prefix}
-          {grouped ? formatNumber(shown) : String(shown)}
-          {suffix}
-        </span>
+        {numeric ? (
+          /* ONE `.ltr-run` around the whole figure, not just the digits.
+             The unit is part of the number, so prefix + digits + suffix
+             have to be typeset as a single LTR run: with the suffix
+             outside it, RTL flow laid the three flex items out
+             right-to-left and "20" + "M" rendered as `M20`. Isolated
+             together they read `20M`, which is what the figure is. */
+          <span className="ltr-run">
+            {prefix}
+            {grouped ? formatNumber(shown) : String(shown)}
+            {suffix}
+          </span>
+        ) : (
+          shown
+        )}
       </span>
 
-      <span className="text-sm leading-relaxed text-ink-secondary">{label}</span>
+      {label ? (
+        <span className="text-sm leading-relaxed text-ink-secondary">{label}</span>
+      ) : null}
     </Reveal>
   );
 }

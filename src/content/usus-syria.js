@@ -29,10 +29,11 @@
    copy from git — are:
 
      wording     the programme now speaks of "المشاريع" and "مشروع
-                 ناشئ", not "الشركات"/"شركة ناشئة", throughout (§3's
-                 heading "الشركات المشاركة" is the one phrase the brief
-                 keeps). "منظمة التنمية السورية" → "منار للمشاركة
-                 المجتمعية" as منار's full name in §2.
+                 ناشئ", not "الشركات"/"شركة ناشئة", throughout — the
+                 final brief closed the one remaining exception, so §3's
+                 heading is now "المشاريع المشاركة" too. "منظمة التنمية
+                 السورية" → "منار للمشاركة المجتمعية" as منار's full name
+                 in §2.
      figures     TWO headline figures (21 / 3) → THREE: 21 مشروع ناشئ,
                  3 قطاعات مستهدفة, 12 أسبوعًا تدريبيًا. The weeks figure
                  is a headline number again (it still also appears in
@@ -177,7 +178,14 @@ export const ususSyria = {
      not an accident. */
   facts: [
     { id: 'startups', value: 21, label: 'مشروع ناشئ' },
-    { id: 'sectors', value: 3, label: 'قطاعات مستهدفة' },
+    /* No longer a number. The final brief opened the programme to all
+       sectors ("صارت كل القطاعات" — the client's own comment on the
+       brief) and prints this figure as the words "مختلف القطاعات", not
+       as "3 قطاعات مستهدفة". It is carried as a non-numeric stat: a
+       string `value` and no `label`, which `StatRow` draws as a plain
+       phrase in the figure's place (no count-up, no digit formatting,
+       no LTR isolation — see the note in `StatRow.jsx`). */
+    { id: 'sectors', value: 'مختلف القطاعات' },
     { id: 'weeks', value: 12, label: 'أسبوعًا تدريبيًا' },
   ],
 
@@ -204,32 +212,42 @@ export const ususSyria = {
     cta: { label: 'قدّم الآن وابدأ رحلة تجاوز هذه التحديات', href: APPLY_URL },
   },
 
-  /* ── 2 · عن المشروع ──────────────────────────────────────────── */
+  /* ── 2 · عن المشروع ──────────────────────────────────────────
+        The final brief carries three blocks under this section: the
+        "ما هو أُسُس سورية؟" paragraph, an eligibility question ("ما هي
+        المشاريع المؤهلة للمشاركة؟") with its own paragraph, and then a
+        PRIORITY list of sectors — no longer the programme's "targeted"
+        sectors but the ones given preference at admission, with the
+        door left open to every other sector.
+
+        THE SECTORS ARE NAMES NOW, NOT NAME + DESCRIPTION.
+        --------------------------------------------------------------
+        The September brief gave each sector a sentence; the final brief
+        lists four bare names (الصحة العامة, الطاقة والحلول اللامركزية,
+        البيئة وإعادة التدوير, تقنيات التعليم والمهارات). So they are
+        carried as titles alone and drawn as compact label tiles — the
+        same treatment /social-entrepreneurship gives its sector
+        labels — not as the IconCards with a paragraph they used to be.
+        `sectorsTitle` is the brief's own lead-in line, and
+        `sectorsNote` is the line it closes the list on. ──────────── */
   about: {
     eyebrow: 'عن المشروع',
     title: 'ما هو أُسُس سورية؟',
     body: 'مسرعة أعمال متخصصة أطلقتها منصة بدار للريادة المجتمعية التابعة لمؤسسة منار للمشاركة المجتمعية، وتهدف إلى تمكين 21 مشروع شبابي ناشئ في دمشق عبر برنامج مكثف يستمر لمدة 12 أسبوعًا.',
-    sectorsTitle: 'القطاعات المستهدفة:',
+    eligibilityTitle: 'ما هي المشاريع المؤهلة للمشاركة؟',
+    eligibilityBody:
+      'المشاريع الشبابية الناشئة ذات الأثر المجتمعي، من مختلف القطاعات، والتي تطوّر منتجات أو خدمات قابلة للبيع أو الشراكة أو التوسع، وتجمع بين الجدوى الاقتصادية والمساهمة في حل مشكلات مجتمعية واضحة.',
+    sectorsTitle: 'تُعطى الأولوية عند القبول للمشاريع العاملة في مجالات:',
     sectors: [
-      {
-        id: 'energy',
-        title: 'الطاقة والحلول اللامركزية',
-        description: 'حلول وتقنيات تسهم في تحسين إنتاج الطاقة وإدارتها واستخدامها.',
-      },
-      {
-        id: 'circular-economy',
-        title: 'الاقتصاد الدائري وإعادة التدوير',
-        description: 'حلول تعزز كفاءة استخدام الموارد وإعادة الاستخدام وإدارة النفايات.',
-      },
-      {
-        id: 'edtech',
-        title: 'تقنيات التعليم والمهارات',
-        description: 'حلول تعليمية وتدريبية تسهم في تطوير التعلم وتنمية المهارات.',
-      },
+      { id: 'public-health', title: 'الصحة العامة' },
+      { id: 'energy', title: 'الطاقة والحلول اللامركزية' },
+      { id: 'environment-recycling', title: 'البيئة وإعادة التدوير' },
+      { id: 'edtech', title: 'تقنيات التعليم والمهارات' },
     ],
+    sectorsNote: 'ويظل التقديم متاحًا للمشاريع العاملة في مختلف القطاعات.',
   },
 
-  /* ── 3 · على ماذا ستحصل الشركات المشاركة؟ ──────────────────────
+  /* ── 3 · على ماذا ستحصل المشاريع المشاركة؟ ──────────────────────
         Five cards. The emoji the brief prefixes each title with are
         carried as lucide marks in the page component; see note 1 at
         the top of this file. The seed-funding line reads "دعم مالي",
@@ -238,7 +256,7 @@ export const ususSyria = {
         Five does not divide into a 3-up grid, and the page centres the
         trailing row rather than padding the set to six. ─────────── */
   benefits: {
-    title: 'على ماذا ستحصل الشركات المشاركة؟',
+    title: 'على ماذا ستحصل المشاريع المشاركة؟',
     lede: 'توفر لك المسرعة رحلة عملية تساعدك على تطوير مشروعك، من خلال:',
     items: [
       {
@@ -278,22 +296,23 @@ export const ususSyria = {
   },
 
   /* ── 4 · الفئة المستهدفة ──────────────────────────────────────
-        Six eligibility lines. Plain strings, not title+description
-        pairs — each one IS a sentence, and splitting it to earn a card
-        title would be rewriting the client's copy.
+        FOUR eligibility lines in the final brief — the September
+        draft's six were rewritten and the two sector/impact conditions
+        folded away (the programme is open to all sectors now, §2). Plain
+        strings, not title+description pairs — each one IS a sentence,
+        and splitting it to earn a card title would be rewriting the
+        client's copy.
 
-        Six is why this grid is 2-up rather than 3-up: three even rows
-        beat two rows of three under a centred heading. ────────── */
+        Four keeps the grid 2-up: two even rows under a centred
+        heading. ────────────────────────────────────────────────── */
   audience: {
     title: 'الفئة المستهدفة',
     lede: 'يمكنك التقديم إذا كنت:',
     items: [
-      'شاب/ة يتراوح عمرك ما بين 23 و35 عامًا.',
-      'تقود مشروع شبابي ناشئ أو تشارك في تأسيسه.',
-      'تمتلك منتجًا أوليًا (MVP) قابل للاختبار.',
-      'تعمل بنموذج عمل يُحقق أثر اجتماعي.',
-      'تعمل في أحد القطاعات المستهدفة أو في تقاطع واضح بينها.',
-      'تمتلك فريقًا قادرًا على الالتزام طوال مدة المشروع وتوثيق النتائج.',
+      'شابًا أو شابة يتراوح عمرك بين 23 و35 عامًا.',
+      'مؤسسًا أو شريكًا مؤسسًا في مشروع شبابي ناشئ.',
+      'تمتلك منتجًا أو خدمة أولية قابلة للاختبار مع العملاء أو المستخدمين.',
+      'تمتلك فريقًا قادرًا على الالتزام بمتطلبات البرنامج طوال مدته وتوثيق النتائج.',
     ],
     cta: { label: 'هل تنطبق عليك الشروط؟ قدّم طلبك الآن', href: APPLY_URL },
   },
@@ -341,12 +360,16 @@ export const ususSyria = {
         id: 'join',
         steps: [
           {
+            /* No `note`. The September draft closed stages 1 and 2 with
+               a conviction line apiece ("لا نطلب خطة عمل…", "نحن لا نختار
+               من الورق…"); the final brief carries neither, so they are
+               gone from here. An unrendered note is copy waiting to be
+               put back by mistake. */
             id: 'apply',
             number: 1,
             title: 'تتقدّم',
             description:
               'تملأ الاستمارة في نحو عشرين دقيقة، وترفق دليلاً بسيطاً على وجود منتجك: صوراً، أو فيديو قصيراً، أو لقطات شاشة.',
-            note: 'لا نطلب خطة عمل ولا عرضاً تقديمياً؛ نريد أن نرى شيئاً حقيقياً يمكن اختباره.',
           },
           {
             id: 'prove',
@@ -354,7 +377,6 @@ export const ususSyria = {
             title: 'تُثبت جديتك',
             description:
               'إن اجتاز طلبك الفرز الأولي، تحضر مقابلة تشخيصية مدتها ثلاثون دقيقة تُشغّل فيها منتجك أمام اللجنة وتتحدث عن سوقك.',
-            note: 'نحن لا نختار من الورق. نختار بعد أن نرى ما بنيته.',
           },
         ],
       },
@@ -477,7 +499,6 @@ export const ususSyria = {
       'مراجعة الطلبات والتحقق من استيفاء معايير الأهلية.',
       'تنفيذ المهمة القبلية والمشاركة في المقابلة.',
       'اختيار 21 مشروع ناشئ للانضمام إلى المشروع.',
-      'انطلاق المشروع.',
     ],
     note: 'يعتمد الاختيار على مدى جاهزية المشروع، واستيفائه للشروط، وقدرة الفريق على الاستفادة من الرحلة التدريبية.',
   },
@@ -542,8 +563,11 @@ export const ususSyria = {
         and a logo is a stronger claim of partnership than a name.
         Confirm before the page is opened to crawlers. `organiser` is
         exempt from that caution — it is Bedar's own parent, not a
-        claim about a third party. A sponsors row, when there is one,
-        belongs beside `items` here rather than in a ninth band. */
+        claim about a third party. The support ecosystem the final brief
+        adds (منظومة الدعم) sits in its OWN band (§9, `ecosystem` below),
+        not inside `items`: the brief gives it its own heading and
+        number, and an ecosystem backer is a different claim from a
+        programme partner. */
   partners: {
     eyebrow: 'شركاؤنا',
     title: 'نعتزّ بشركائنا في إنجاح المشروع',
@@ -554,7 +578,38 @@ export const ususSyria = {
     items: [
       { id: 'sme-authority', name: 'هيئة تنمية المشروعات الصغيرة والمتوسطة' },
       { id: 'presently', name: 'Presently' },
-      { id: 'sanad-youth', name: 'سند الشباب للتنمية' },
+      { id: 'sanad-youth', name: 'سند الشباب' },
+      /* Added by the final brief, fourth in the row. NO artwork has been
+         supplied yet, so `PARTNER_LOGOS` has no entry for it and the
+         plate falls back to the name as text — the deliberate "honest
+         name until a mark exists" behaviour (see `PartnerPlate`). Drop a
+         file into `assets/partners/ebla-ventures.*` and key it in the
+         logo map when the client supplies it. */
+      { id: 'ebla-ventures', name: 'Ebla Ventures' },
+    ],
+  },
+
+  /* ── 9 · منظومة الدعم ─────────────────────────────────────────
+        A support-ecosystem row the final brief adds after the partners:
+        the actors in Syria's community-entrepreneurship ecosystem that
+        back the programme, listed apart from the شركاء because they are
+        a different kind of relationship (an ecosystem, not a signed
+        partnership — and the MOU caution in the §8 note applies here in
+        full: showing a mark claims more than a name).
+
+        NONE OF THE FOUR HAS ARTWORK YET, so each renders as its name
+        through the same `PartnerPlate` fallback the partners use. Three
+        are Latin wordmarks (DIGIT, TechTown, Startup Grind) and one is
+        Arabic; key them in `PARTNER_LOGOS` as the client supplies the
+        files. Kept as its own band — not folded into §8 — because the
+        brief gives it its own heading and number. */
+  ecosystem: {
+    eyebrow: 'منظومة الدعم',
+    items: [
+      { id: 'digit', name: 'DIGIT' },
+      { id: 'techtown', name: 'TechTown' },
+      { id: 'startup-grind', name: 'Startup Grind' },
+      { id: 'ssci', name: 'الجمعية العلمية السورية للمعلوماتية' },
     ],
   },
 };
