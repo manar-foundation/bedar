@@ -80,7 +80,7 @@ export const NOINDEX_PATHS = new Set([
      claim of partnership than a list of names was, so confirm that
      band with the client before removing this entry. See the note on
      `partners` in `content/usus-syria.js`. */
-  '/programs/usus-syria',
+  '/programs/osos',
 ]);
 
 /** The robots directive for a held-back route. */

@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef } from 'react';
+import { Fragment } from 'react';
 import {
   ArrowLeft,
   BadgeCheck,
@@ -47,6 +47,11 @@ import logoSmedc from '@assets/partners/smedc.webp';
 import logoPresently from '@assets/partners/presently.png';
 import logoSanadYouth from '@assets/partners/sanad-youth.webp';
 import logoManar from '@assets/partners/manar.svg';
+import logoEblaVentures from '@assets/partners/ebla-ventures.webp';
+import logoDigit from '@assets/partners/digit.webp';
+import logoTechTown from '@assets/partners/techtown.webp';
+import logoStartupGrind from '@assets/partners/startup-grind.svg';
+import logoSsci from '@assets/partners/ssci.png';
 
 /* ================================================================
    مشروع أُسُس سورية — /programs/usus-syria.
@@ -282,6 +287,11 @@ const PARTNER_LOGOS = {
   presently: logoPresently,
   'sanad-youth': logoSanadYouth,
   manar: logoManar,
+  'ebla-ventures': logoEblaVentures,
+  digit: logoDigit,
+  techtown: logoTechTown,
+  'startup-grind': logoStartupGrind,
+  ssci: logoSsci,
 };
 
 /* The one box every mark in §8 is fitted into — the organiser's row
@@ -473,80 +483,6 @@ const ACCENT_SCOPE = {
   '--action-accent-glow': 'rgba(105, 193, 169, 0.42)',
   '--hero-aurora-c': 'rgba(105, 193, 169, 0.26)',
 };
-
-/* ── THE REGISTRATION FORM ─────────────────────────────────────
-   The client's Zoho embed (manarfoundation1 / أُسُس سورية), supplied
-   Oct 2026, as the programme's own registration form — the real
-   destination the five "قدّم الآن" CTAs used to stand in for with a
-   link to /contact-us (see `APPLY_URL`). It is why the page now has a
-   ninth band, and why those CTAs scroll to it instead of leaving.
-
-   THE EMBED'S <script>, AS AN EFFECT
-   ----------------------------------------------------------------
-   The supplied snippet ships an inline <script> that does ONE thing:
-   append a `referrername` query param carrying the page URL, so Zoho
-   records where a submission came from. An inline <script> in JSX does
-   not execute, so the exact same logic runs here in an effect against
-   the iframe's ref — it only writes the frame's own `src`, never any
-   React state, so it is clear of the `set-state-in-effect` rule. */
-const FORM_SRC =
-  'https://forms.zohopublic.eu/manarfoundation1/form/Untitled5/formperma/CnfKUcwh9VegeJGGk7uGcEHYCbrLygyhvcAYWibwlc0';
-
-function RegistrationForm() {
-  const frameRef = useRef(null);
-
-  useEffect(() => {
-    const frame = frameRef.current;
-    if (!frame) return;
-
-    // Already carries the param (e.g. a re-run) — leave it be.
-    let src = frame.src;
-    if (/[?&]referrername=/.test(src)) return;
-
-    // The page URL, read exactly as the embed reads it: the top
-    // window's when framed and reachable, otherwise this window's own,
-    // and only when it is a real http(s) address.
-    let referrer = window.location.href;
-    try {
-      referrer =
-        window.self !== window.top
-          ? window.top.location.href
-          : /^https?:\/\/[\w.-]+\.[a-zA-Z]{2,}/i.test(referrer)
-            ? referrer
-            : '';
-    } catch {
-      /* cross-origin top — keep this window's own href */
-    }
-    if (!referrer) return;
-
-    // Zoho's own 1800-char cap: drop the query string first, then hard
-    // truncate if it is still too long.
-    if (referrer.length > 1800) {
-      const queryIndex = referrer.indexOf('?');
-      if (queryIndex > -1) referrer = referrer.slice(0, queryIndex);
-      if (referrer.length > 1800) referrer = referrer.slice(0, 1800);
-    }
-
-    src += (src.indexOf('?') > 0 ? '&' : '?') + 'referrername=' + encodeURIComponent(referrer);
-    frame.src = src;
-  }, []);
-
-  return (
-    /* The client's embed VERBATIM — its own `aria-label`, `frameborder`
-       and inline `width:99%; height:500px; border:none`. No box, no
-       frame, no imposed sizing: the form takes its natural size inside
-       the page container, exactly as the supplied snippet draws it. */
-    <iframe
-      ref={frameRef}
-      aria-label="استمارة التسجيل"
-      src={FORM_SRC}
-      frameBorder="0"
-      /* Last band on a nine-screen page — nowhere near first paint. */
-      loading="lazy"
-      style={{ height: '500px', width: '99%', border: 'none' }}
-    />
-  );
-}
 
 export default function UsusSyria() {
   useSeo(ususSyria.seo);
@@ -1305,30 +1241,20 @@ export default function UsusSyria() {
         </>
       ) : null}
 
-      {/* ── التسجيل (form) ────────────────────────────────────────
-             The client's Zoho form, embedded as the page's closing
-             band and the destination every "قدّم الآن" on the page
-             scrolls to (`#register`). It sits AFTER the partners —
-             the true last thing on the page — because it is where the
-             reader acts, and all five CTAs above lead down to it.
-
-             `scroll-mt` so the native hash scroll lands the heading
-             clear of the FIXED navbar (`--nav-h`) rather than tucked
-             under it. The form is the client's embed as supplied — no
-             frame or box around it, keeping its own width:99% /
-             height:500px — so it takes its natural size inside the page
-             container. */}
-      <Section
-        id="register"
-        size="lg"
-        className="scroll-mt-[calc(var(--nav-h)+1.5rem)]"
-      >
-        <SectionHeading title="سجّل الآن في برنامج أُسُس سورية" align="center" className="mb-12" />
-
-        <Reveal>
-          <RegistrationForm />
-        </Reveal>
-      </Section>
+      {/* ── Registration call ────────────────────────────────────
+             A second copy of the closing CTA, retitled "سجّل الآن في
+             برنامج أُسُس سورية", in place of the Zoho embed that used
+             to close the page. The form moved out to its own tab
+             (`APPLY_URL` is now the Zoho URL and every "قدّم الآن" on
+             the page opens it in a new window), so the page closes on
+             a second registration call rather than on the form itself —
+             the client's Nov 2026 instruction. */}
+      <CtaBand
+        title="سجّل الآن في برنامج أُسُس سورية"
+        lede={closing.lede}
+        cta={closing.cta}
+        mark={<img src={programLogo} alt="" className="h-auto w-28 lg:w-32" />}
+      />
     </div>
   );
 }

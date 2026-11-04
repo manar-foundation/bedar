@@ -129,7 +129,8 @@
  * on the shape of this string: a `#` or an external URL renders a plain
  * `<a>` (native hash scroll / new tab), an internal path a router Link.
  */
-const APPLY_URL = '#register';
+const APPLY_URL =
+  'https://forms.zohopublic.eu/manarfoundation1/form/OsosSyriaApplication/formperma/CnfKUcwh9VegeJGGk7uGcEHYCbrLygyhvcAYWibwlc0';
 
 const APPLY_LABEL = 'قدّم الآن';
 

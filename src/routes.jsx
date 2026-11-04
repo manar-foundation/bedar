@@ -82,7 +82,11 @@ export default function AppRoutes() {
               appears in the /programs listing like any other; only this
               one program's detail view differs. See the header of
               pages/public/UsusSyria.jsx. */}
-          <Route path="programs/usus-syria" element={<UsusSyria />} />
+          {/* أُسُس سورية lives at /programs/osos (client, Nov 2026). The
+              old /programs/usus-syria 301-redirects to it so inbound links
+              keep working. */}
+          <Route path="programs/osos" element={<UsusSyria />} />
+          <Route path="programs/usus-syria" element={<Navigate to="/programs/osos" replace />} />
           <Route path="programs/:slug" element={<ProgramDetail />} />
           {/* The live site linked some detail pages under the singular
               /program/:slug. The path is now unified on the plural
