@@ -82,11 +82,11 @@ export default function AppRoutes() {
               appears in the /programs listing like any other; only this
               one program's detail view differs. See the header of
               pages/public/UsusSyria.jsx. */}
-          {/* أُسُس سورية lives at /programs/osos (client, Nov 2026). The
-              old /programs/usus-syria 301-redirects to it so inbound links
-              keep working. */}
-          <Route path="programs/osos" element={<UsusSyria />} />
-          <Route path="programs/usus-syria" element={<Navigate to="/programs/osos" replace />} />
+          {/* أُسُس سورية lives at /osos (client, Nov 2026). The older
+              /programs/osos and /programs/usus-syria both redirect to it so
+              inbound links keep working. */}
+          <Route path="programs/osos" element={<Navigate to="/osos" replace />} />
+          <Route path="programs/usus-syria" element={<Navigate to="/osos" replace />} />
           <Route path="programs/:slug" element={<ProgramDetail />} />
           {/* The live site linked some detail pages under the singular
               /program/:slug. The path is now unified on the plural
@@ -100,6 +100,8 @@ export default function AppRoutes() {
           <Route path="news" element={<News />} />
           <Route path="news/:slug" element={<NewsDetail />} />
           <Route path="contact-us" element={<Contact />} />
+          {/* أُسُس سورية — its own top-level address (client, Nov 2026). */}
+          <Route path="osos" element={<UsusSyria />} />
           {/* 404 — fixed content, never editable from the dashboard
               (Dashboard spec §14, out of scope for v1) */}
           <Route path="*" element={<NotFound />} />
