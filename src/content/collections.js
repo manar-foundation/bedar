@@ -70,7 +70,7 @@ const rawPrograms = [
   {
     id: 'usus-syria',
     slug: 'usus-syria',
-    href: '/programs/osos',
+    href: '/osos',
     title: 'مشروع أُسُس سورية',
     category: 'البرامج الحالية',
     status: 'current',

@@ -649,7 +649,7 @@ rich-text body, and they share one arrangement:
 | Program                       | Route                   | Content                 | Layout                          |
 | ----------------------------- | ----------------------- | ----------------------- | ------------------------------- |
 | هاكاثون أدوات الإعمار في غزة  | `/programs/hackathon`   | `content/hackathon.js`  | `pages/public/Hackathon.jsx`    |
-| مشروع أُسُس سورية             | `/programs/usus-syria`  | `content/usus-syria.js` | `pages/public/UsusSyria.jsx`    |
+| مشروع أُسُس سورية             | `/osos` (old `/programs/osos` redirects) | `content/usus-syria.js` | `pages/public/UsusSyria.jsx`    |
 
 Both declare a **static route ahead of `programs/:slug`** in `routes.jsx`, both
 are lazy so no other page pays for them, and both still appear in the /programs

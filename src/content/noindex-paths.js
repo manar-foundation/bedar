@@ -80,6 +80,10 @@ export const NOINDEX_PATHS = new Set([
      claim of partnership than a list of names was, so confirm that
      band with the client before removing this entry. See the note on
      `partners` in `content/usus-syria.js`. */
+  '/osos',
+  /* The old address only redirects; keep it held back too so a crawler
+     that lands on it before the client-side redirect runs never gets an
+     indexable copy. */
   '/programs/osos',
 ]);
 
