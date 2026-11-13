@@ -37,10 +37,10 @@ export default function UsusSyriaThankYou() {
           </a>
         </p>
 
-        <div className="mt-16 flex items-center justify-center gap-10 border-t border-white/10 pt-12">
-          <img src={logoManar} alt="مؤسسة منار" className="h-12 w-auto md:h-14" draggable="false" />
-          <span aria-hidden="true" className="h-10 w-px bg-white/20" />
-          <img src={logoBedarWhite} alt="بدار" className="h-12 w-auto md:h-14" draggable="false" />
+        <div className="mt-16 flex flex-col items-center justify-center gap-8 border-t border-white/10 pt-12 sm:flex-row sm:gap-10">
+          <img src={logoManar} alt="مؤسسة منار" className="h-11 w-auto max-w-full sm:h-12 md:h-14" draggable="false" />
+          <span aria-hidden="true" className="h-px w-16 bg-white/20 sm:h-10 sm:w-px" />
+          <img src={logoBedarWhite} alt="بدار" className="h-11 w-auto max-w-full sm:h-12 md:h-14" draggable="false" />
         </div>
       </div>
     </Section>
