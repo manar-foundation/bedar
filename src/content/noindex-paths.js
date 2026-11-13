@@ -85,6 +85,8 @@ export const NOINDEX_PATHS = new Set([
      that lands on it before the client-side redirect runs never gets an
      indexable copy. */
   '/programs/osos',
+  /* The application form's confirmation page — never a search result. */
+  '/osos/thank-you',
 ]);
 
 /** The robots directive for a held-back route. */
