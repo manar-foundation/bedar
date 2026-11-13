@@ -26,21 +26,26 @@ export default function UsusSyriaThankYou() {
 
         <p className="mt-12 text-lg font-medium leading-loose text-white">{copy.promise}</p>
 
-        <p className="mt-8 leading-loose text-brand-100/80">
-          {copy.contact.label}{' '}
-          <a href={`mailto:${copy.contact.email}`} className="ltr-run underline underline-offset-4">
-            {copy.contact.email}
-          </a>
-          {' — '}
-          <a href={`tel:${copy.contact.phone}`} className="ltr-run underline underline-offset-4">
-            {copy.contact.phone}
-          </a>
-        </p>
+        {/* Label on its own line, then each contact on a line of its own —
+            side by side they wrapped mid-pair on a phone. */}
+        <div className="mt-8 leading-loose text-brand-100/80">
+          <p>{copy.contact.label}</p>
+          <p>
+            <a href={`mailto:${copy.contact.email}`} className="ltr-run underline underline-offset-4">
+              {copy.contact.email}
+            </a>
+          </p>
+          <p>
+            <a href={`tel:${copy.contact.phone}`} className="ltr-run underline underline-offset-4">
+              {copy.contact.phone}
+            </a>
+          </p>
+        </div>
 
-        <div className="mt-16 flex flex-col items-center justify-center gap-8 border-t border-white/10 pt-12 sm:flex-row sm:gap-10">
-          <img src={logoManar} alt="مؤسسة منار" className="h-11 w-auto max-w-full sm:h-12 md:h-14" draggable="false" />
-          <span aria-hidden="true" className="h-px w-16 bg-white/20 sm:h-10 sm:w-px" />
-          <img src={logoBedarWhite} alt="بدار" className="h-11 w-auto max-w-full sm:h-12 md:h-14" draggable="false" />
+        <div className="mt-16 flex items-center justify-center gap-5 border-t border-white/10 pt-12 sm:gap-10">
+          <img src={logoManar} alt="مؤسسة منار" className="h-7 w-auto min-w-0 sm:h-12 md:h-14" draggable="false" />
+          <span aria-hidden="true" className="h-7 w-px bg-white/20 sm:h-10" />
+          <img src={logoBedarWhite} alt="بدار" className="h-7 w-auto min-w-0 sm:h-12 md:h-14" draggable="false" />
         </div>
       </div>
     </Section>
