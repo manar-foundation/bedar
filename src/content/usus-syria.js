@@ -615,4 +615,31 @@ export const ususSyria = {
   },
 };
 
+/* ================================================================
+   /osos/thank-you — the page the Zoho application form redirects to
+   after a successful submit. Held out of search (`noindex-paths.js`):
+   it is a confirmation, not something a visitor should land on from
+   a results page.
+   ================================================================ */
+export const ususSyriaThankYou = {
+  seo: { title: 'تم استلام طلبك | أُسُس سورية' },
+  title: 'تم استلام طلبك',
+  lede: 'شكراً لك — وصلنا طلبك للانضمام إلى «أُسُس سورية».',
+  stepsHeading: 'ما يحدث الآن:',
+  steps: [
+    { title: 'يُراجَع طلبك ضمن الفرز الأولي بعد إغلاق باب التقديم في 26 نوفمبر.' },
+    {
+      title:
+        'إن انتقل طلبك للمرحلة التالية، سنتواصل معك خلال 5 أيام من انتهاء التقديم لدعوتك لمقابلة تشخيصية في دمشق لعرض منتجكم.',
+    },
+    { title: 'تُعلَن النتائج النهائية لجميع المتقدمين بحلول 15 ديسمبر.' },
+  ],
+  promise: 'سنرد عليك في كل الأحوال — سواء قُبل طلبك أو لم يُقبل.',
+  contact: {
+    label: 'للاستفسار:',
+    email: 'm.rustom@manar.org',
+    phone: '+905056687133',
+  },
+};
+
 export default ususSyria;

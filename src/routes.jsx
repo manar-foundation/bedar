@@ -25,6 +25,7 @@ const ProgramDetail = lazy(() => import('@pages/public/ProgramDetail.jsx'));
 /* One program has a page rather than an article body — see the note
    on its route below, and the header of pages/public/UsusSyria.jsx. */
 const UsusSyria = lazy(() => import('@pages/public/UsusSyria.jsx'));
+const UsusSyriaThankYou = lazy(() => import('@pages/public/UsusSyriaThankYou.jsx'));
 const Services = lazy(() => import('@pages/public/Services.jsx'));
 const Blog = lazy(() => import('@pages/public/Blog.jsx'));
 const ArticleDetail = lazy(() => import('@pages/public/ArticleDetail.jsx'));
@@ -102,6 +103,7 @@ export default function AppRoutes() {
           <Route path="contact-us" element={<Contact />} />
           {/* أُسُس سورية — its own top-level address (client, Nov 2026). */}
           <Route path="osos" element={<UsusSyria />} />
+          <Route path="osos/thank-you" element={<UsusSyriaThankYou />} />
           {/* 404 — fixed content, never editable from the dashboard
               (Dashboard spec §14, out of scope for v1) */}
           <Route path="*" element={<NotFound />} />
