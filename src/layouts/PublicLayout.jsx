@@ -10,6 +10,7 @@ import SiteIntegrations from '@components/layout/SiteIntegrations.jsx';
 import SiteSchema from '@components/layout/SiteSchema.jsx';
 import AutoReveal from '@components/motion/AutoReveal.jsx';
 import { useContent } from '@context/ContentContext.jsx';
+import { showAnnouncement } from '@content/site.js';
 import { NOINDEX_CONTENT, isNoindexPath } from '@content/noindex-paths.js';
 
 /**
@@ -155,7 +156,7 @@ export default function PublicLayout() {
     // `data-theme` cannot be the discriminator.
     <div
       data-theme="dark"
-      className="public-site page-ambient relative flex min-h-dvh flex-col bg-app"
+      className={`public-site page-ambient relative flex min-h-dvh flex-col bg-app${showAnnouncement(pathname) ? ' has-announcement' : ''}`}
     >
       {chrome}
       <AutoReveal />

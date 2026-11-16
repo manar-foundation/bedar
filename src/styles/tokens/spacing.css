@@ -51,5 +51,6 @@
      token because Hero's top padding has to clear a FIXED navbar
      (see components/ui/Hero.jsx) and a magic 4.5rem repeated in two
      files is how the two silently drift apart later. */
-  --nav-h: 4.5rem;
+  --nav-row-h: 4.5rem;
+  --nav-h: var(--nav-row-h);
 }

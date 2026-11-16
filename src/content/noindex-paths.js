@@ -68,23 +68,10 @@
  * whole branch of the site is the failure mode worth designing out.
  */
 export const NOINDEX_PATHS = new Set([
-  /* مشروع أُسُس سورية — live for review by link only, at the
-     client's request (Aug 2026). Its listing card is held back
-     separately, by keeping the `collection_items` row a draft. Remove
-     both together when the programme is announced.
-
-     Sept 2026: there is now a SECOND reason to keep this here. The
-     re-issued brief adds a شركاؤنا band, and the client has since
-     supplied both partner LOGOS — while telling us in the same
-     document that neither MOU is signed. A logo wall is a stronger
-     claim of partnership than a list of names was, so confirm that
-     band with the client before removing this entry. See the note on
-     `partners` in `content/usus-syria.js`. */
-  '/osos',
-  /* The old address only redirects; keep it held back too so a crawler
-     that lands on it before the client-side redirect runs never gets an
-     indexable copy. */
-  '/programs/osos',
+  /* مشروع أُسُس سورية — announced and indexable as of the launch
+     (Nov 2026); `/osos` and its old `/programs/osos` redirect were
+     removed from this list then. Only the application form's
+     confirmation page stays held back, below. */
   /* The application form's confirmation page — never a search result. */
   '/osos/thank-you',
 ]);
