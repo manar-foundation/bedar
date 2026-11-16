@@ -512,6 +512,28 @@
     }
   }
 
+  /* ── …with the MIDDLE figure promoted on mobile (`.stat-row-lead-mid`)
+        أُسُس سورية's three figures: on a phone the middle one is a
+        phrase ("مختلف القطاعات"), so it takes a full-width first row,
+        centred, and the two numbers share the row beneath it — the first
+        on the reading start, the second on the end, with the hairline
+        between them. DOM order is untouched (`order` only), so desktop
+        and the reading order for assistive tech are unchanged.
+
+        The hairline moves because `nth-child(2n + 1)` strips it from the
+        THIRD figure and gives it to the second, which is now the
+        full-width one: a rule down the edge of a spanning row is wrong. */
+  @media (max-width: 1023.98px) {
+    .stat-row-lead-mid > *:nth-child(2) {
+      grid-column: 1 / -1;
+      order: -1;
+      border-inline-start: 0;
+    }
+    .stat-row-lead-mid > *:nth-child(3) {
+      border-inline-start: 1px solid rgba(169, 225, 211, 0.16);
+    }
+  }
+
   /* ================================================================
      THE REFERENCE'S TWO OTHER HOVER SIGNATURES
      ----------------------------------------------------------------
