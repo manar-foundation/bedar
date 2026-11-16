@@ -52,6 +52,7 @@ import logoDigit from '@assets/partners/digit.webp';
 import logoTechTown from '@assets/partners/techtown.webp';
 import logoStartupGrind from '@assets/partners/startup-grind.svg';
 import logoSsci from '@assets/partners/ssci.png';
+import logoRiyadaPlus from '@assets/partners/riyada-plus.svg';
 
 /* ================================================================
    مشروع أُسُس سورية — /programs/usus-syria.
@@ -292,6 +293,7 @@ const PARTNER_LOGOS = {
   techtown: logoTechTown,
   'startup-grind': logoStartupGrind,
   ssci: logoSsci,
+  'riyada-plus': logoRiyadaPlus,
 };
 
 /* The one box every mark in §8 is fitted into — the organiser's row
@@ -1228,9 +1230,15 @@ export default function UsusSyria() {
                 over an empty slot. */}
             <SectionHeading title={ecosystem.eyebrow} align="center" size="sm" className="mb-10" />
 
-            <Stagger className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Flex-wrap, not a 4-up grid: with five members a grid strands
+                the last one at the row's start, and a centred trailing
+                row is what the page does everywhere else. */}
+            <Stagger className="mx-auto flex max-w-4xl flex-wrap justify-center gap-4">
               {ecosystem.items.map((member) => (
-                <StaggerItem key={member.id} className="h-full">
+                <StaggerItem
+                  key={member.id}
+                  className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(25%-0.75rem)]"
+                >
                   <PartnerPlate entry={member} />
                 </StaggerItem>
               ))}

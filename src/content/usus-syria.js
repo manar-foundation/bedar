@@ -612,6 +612,7 @@ export const ususSyria = {
       { id: 'techtown', name: 'TechTown' },
       { id: 'startup-grind', name: 'Startup Grind' },
       { id: 'ssci', name: 'الجمعية العلمية السورية للمعلوماتية' },
+      { id: 'riyada-plus', name: 'ريادة +' },
     ],
   },
 };
