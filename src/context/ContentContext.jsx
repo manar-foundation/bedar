@@ -159,17 +159,26 @@ function databaseHasCollections(db) {
   return Boolean(db) && (db.programs.length > 0 || db.articles.length > 0 || db.news.length > 0);
 }
 
+/**
+ * The أُسُس سورية program is a BUILT page at /osos; its dashboard row
+ * keeps the old slug, so the row's default link is /programs/usus-syria,
+ * which only redirects. Cards link straight to the final address so the
+ * visitor never sees the old one in the address bar (the redirect stays
+ * for old inbound links). The row also can arrive without a cover, which
+ * paints a black card: the built page falls back to the bundled banner
+ * (UsusSyria.jsx) and the card does the same — an uploaded cover wins.
+ */
+const USUS_SYRIA_HREF = '/osos';
+
 function mergeCollections(db) {
   if (!databaseHasCollections(db)) return SEED_COLLECTIONS;
-  // The أُسُس سورية listing row can reach the dashboard without a cover,
-  // which paints a black card. The built page already falls back to this
-  // bundled banner (UsusSyria.jsx); the card does the same until an
-  // editor uploads one — an uploaded cover always wins.
-  if (!db.programs?.some((item) => item.slug === 'usus-syria' && !item.image)) return db;
+  if (!db.programs?.some((item) => item.slug === 'usus-syria')) return db;
   return {
     ...db,
     programs: db.programs.map((item) =>
-      item.slug === 'usus-syria' && !item.image ? { ...item, image: ususSyriaCover } : item,
+      item.slug === 'usus-syria'
+        ? { ...item, href: USUS_SYRIA_HREF, image: item.image || ususSyriaCover }
+        : item,
     ),
   };
 }
