@@ -637,7 +637,7 @@ export default function UsusSyria() {
              the instruction this band exists in its current shape to
              follow. */}
       <Section size="sm">
-        <StatRow stats={facts} align="center" className="lg:grid-cols-3" />
+        <StatRow stats={facts} align="center" className="stat-row-lead-mid lg:grid-cols-3" />
       </Section>
 
       <SectionSeam />
