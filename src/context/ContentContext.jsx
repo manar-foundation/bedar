@@ -9,6 +9,7 @@ import {
 } from 'react';
 
 import { navigation, footer, headerCta } from '@content/site.js';
+import ususSyriaCover from '@assets/banners/usus-syria.webp';
 import { deepMerge, mergeSettings } from '@utils/merge-settings.js';
 import { programs, articles, news } from '@content/collections.js';
 import * as seedPages from '@content/pages.js';
@@ -159,7 +160,18 @@ function databaseHasCollections(db) {
 }
 
 function mergeCollections(db) {
-  return databaseHasCollections(db) ? db : SEED_COLLECTIONS;
+  if (!databaseHasCollections(db)) return SEED_COLLECTIONS;
+  // The أُسُس سورية listing row can reach the dashboard without a cover,
+  // which paints a black card. The built page already falls back to this
+  // bundled banner (UsusSyria.jsx); the card does the same until an
+  // editor uploads one — an uploaded cover always wins.
+  if (!db.programs?.some((item) => item.slug === 'usus-syria' && !item.image)) return db;
+  return {
+    ...db,
+    programs: db.programs.map((item) =>
+      item.slug === 'usus-syria' && !item.image ? { ...item, image: ususSyriaCover } : item,
+    ),
+  };
 }
 
 /**
