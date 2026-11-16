@@ -7,6 +7,8 @@ import Logo from '@components/ui/Logo.jsx';
 import { Button } from '@components/ui/Button.jsx';
 import { SocialIcon } from '@components/ui/SocialIcon.jsx';
 import { NavDropdown } from './NavDropdown.jsx';
+import AnnouncementBar from './AnnouncementBar.jsx';
+import { announcement, showAnnouncement } from '@content/site.js';
 import { useContent } from '@context/ContentContext.jsx';
 import { cn } from '@utils/cn.js';
 
@@ -169,8 +171,10 @@ export default function Navbar() {
         تخطَّ إلى المحتوى
       </a>
 
+      {showAnnouncement(pathname) ? <AnnouncementBar {...announcement} /> : null}
+
       <nav aria-label="التنقل الرئيسي" className="container-page">
-        <div className="grid h-(--nav-h) grid-cols-[auto_1fr] items-center gap-6 lg:grid-cols-[auto_1fr_auto]">
+        <div className="grid h-(--nav-row-h) grid-cols-[auto_1fr] items-center gap-6 lg:grid-cols-[auto_1fr_auto]">
           {/* Dark-only site: the navy/teal wordmark would vanish both
               on the floating dark hero and on the dark solid header, so
               the white silhouette is used in every state. */}

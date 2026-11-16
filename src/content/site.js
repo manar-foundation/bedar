@@ -49,6 +49,27 @@ export const navigation = [
   { id: 'news', label: 'الأخبار', href: '/news' },
 ];
 
+/**
+ * Announcement bar — the thin strip above the navbar. Text, button
+ * label and link are separate fields so the dashboard can edit each;
+ * `enabled: false` removes the bar AND the space it reserves.
+ */
+export const announcement = {
+  enabled: true,
+  text: 'مشروع أُسُس سورية: مسرعة أعمال متخصصة لتمكين مشاريع الريادة المجتمعية في دمشق',
+  ctaLabel: 'ابدأ رحلتك اليوم',
+  href: '/osos',
+};
+
+/**
+ * The bar exists to send people to `announcement.href`, so it hides
+ * on that page and on anything under it (the thank-you page).
+ */
+export function showAnnouncement(pathname) {
+  if (!announcement.enabled) return false;
+  return pathname !== announcement.href && !pathname.startsWith(`${announcement.href}/`);
+}
+
 /** Header CTA. Text and link are separate fields — Dashboard spec §2. */
 export const headerCta = {
   label: 'تواصل معنا',
@@ -324,4 +345,4 @@ export const siteSettings = {
   },
 };
 
-export default { navigation, headerCta, footer, siteSettings };
+export default { navigation, headerCta, announcement, footer, siteSettings };

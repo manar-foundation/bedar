@@ -1400,3 +1400,19 @@
     transform: scale(0.74);
   }
 }
+
+/* ── Announcement bar ────────────────────────────────────────────
+      The bar lives INSIDE the fixed header, above the nav row, so it
+      adds to the height every hero has to clear. `--nav-h` is that
+      total, so Hero / PageHero / the sticky column keep working
+      unchanged; `--nav-row-h` is the nav row alone. Phones get a
+      taller bar because the sentence wraps to two lines there. */
+.public-site.has-announcement {
+  --bar-h: 3.75rem;
+  --nav-h: calc(var(--nav-row-h) + var(--bar-h));
+}
+@media (min-width: 768px) {
+  .public-site.has-announcement {
+    --bar-h: 2.75rem;
+  }
+}
