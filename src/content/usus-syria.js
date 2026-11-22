@@ -516,6 +516,31 @@ export const ususSyria = {
     cta: { label: APPLY_LABEL, href: APPLY_URL },
   },
 
+  /* ── الخبراء ──────────────────────────────────────────────────
+        The mentors who accompany the founders through the programme
+        (client, Nov 2026). Sits directly above §8 شركاؤنا, as the
+        client asked. The heading is the client's own artwork's wording,
+        without its trailing colon.
+
+        `id` KEYS THE PHOTO in the page's `EXPERT_PHOTOS` map
+        (`assets/experts/usus-syria/<id>.webp`); `name` is both the
+        caption and the photo's `alt`. ORDER IS THE CLIENT'S: the
+        artwork reads right to left, so it is the source order here and
+        the RTL grid lays it out the same way. Names only — the artwork
+        carries no job titles, so none are invented here. */
+  experts: {
+    eyebrow: 'الخبراء',
+    title: 'من يرافق أصحاب المشاريع خلال رحلتهم في المشروع',
+    items: [
+      { id: 'walid-alsafadi', name: 'وليد الصفدي' },
+      { id: 'mohammad-kawwas', name: 'محمد قواص' },
+      { id: 'sinan-hatahet', name: 'د. سنان حتاحت' },
+      { id: 'ahmad-rashed-alhafez', name: 'أحمد راشد الحافظ' },
+      { id: 'ahmad-algherbal', name: 'أحمد الغربال' },
+      { id: 'ali-diab', name: 'علي ذياب' },
+    ],
+  },
+
   /* ── 8 · شركاؤنا ──────────────────────────────────────────────
         The last band on the page — which is where the client's own
         comment on the brief asks for it ("يفضل وضع الشركاء في آخر

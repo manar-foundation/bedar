@@ -53,6 +53,12 @@ import logoTechTown from '@assets/partners/techtown.webp';
 import logoStartupGrind from '@assets/partners/startup-grind.svg';
 import logoSsci from '@assets/partners/ssci.png';
 import logoRiyadaPlus from '@assets/partners/riyada-plus.svg';
+import photoWalidAlsafadi from '@assets/experts/usus-syria/walid-alsafadi.webp';
+import photoMohammadKawwas from '@assets/experts/usus-syria/mohammad-kawwas.webp';
+import photoSinanHatahet from '@assets/experts/usus-syria/sinan-hatahet.webp';
+import photoAhmadRashedAlhafez from '@assets/experts/usus-syria/ahmad-rashed-alhafez.webp';
+import photoAhmadAlgherbal from '@assets/experts/usus-syria/ahmad-algherbal.webp';
+import photoAliDiab from '@assets/experts/usus-syria/ali-diab.webp';
 
 /* ================================================================
    مشروع أُسُس سورية — /programs/usus-syria.
@@ -89,6 +95,7 @@ import logoRiyadaPlus from '@assets/partners/riyada-plus.svg';
        + الإيقاع الأسبوعي      panel-inset cycle     (this page)
      6 · آلية التقديم          NumberedList          home
      7 · دعوة للتسجيل          CtaBand               most pages
+       الخبراء                 ringed portrait row   (this page)
      8 · شركاؤنا               panel-quiet plates    (this page)
      9 · منظومة الدعم          panel-quiet plates    (this page)
 
@@ -344,6 +351,65 @@ function PartnerPlate({ entry }) {
   );
 }
 
+/* THE EXPERTS' PORTRAITS ────────────────────────────────────
+   Keyed by the `experts` id in `content/usus-syria.js`. Each file is
+   a 320px square cut from the client's transparent-background photo,
+   framed so every head fills about half the frame and the shoulders
+   reach the bottom edge — the source photos differ wildly in crop,
+   and without that the six would read as six different zoom levels. */
+const EXPERT_PHOTOS = {
+  'walid-alsafadi': photoWalidAlsafadi,
+  'mohammad-kawwas': photoMohammadKawwas,
+  'sinan-hatahet': photoSinanHatahet,
+  'ahmad-rashed-alhafez': photoAhmadRashedAlhafez,
+  'ahmad-algherbal': photoAhmadAlgherbal,
+  'ali-diab': photoAliDiab,
+};
+
+/* ONE PORTRAIT ─────────────────────────────────────────────────
+   The client's artwork: a cut-out on a teal disc, inside thin
+   concentric rings. Everything is drawn INSIDE the cell's own square —
+   the rings are insets, not outsets — so the row can never push past
+   the container at any width (the mobile brief: three to a row, inside
+   the page's edge). The photo is transparent, so the disc's gradient
+   is the background the person stands on, exactly as in the artwork.
+
+   No photo for an id → the disc shows the person's initial instead of
+   a broken image, the same honest-fallback rule `PartnerPlate` uses. */
+function ExpertPortrait({ entry }) {
+  const photo = EXPERT_PHOTOS[entry.id];
+
+  return (
+    <figure className="flex flex-col items-center text-center">
+      <div className="relative aspect-square w-full max-w-44">
+        <span aria-hidden="true" className="absolute inset-0 rounded-full border border-brand-300/15" />
+        <span aria-hidden="true" className="absolute inset-[5%] rounded-full border border-brand-300/25" />
+        <span aria-hidden="true" className="absolute inset-[10%] rounded-full border border-brand-200/40" />
+        <div className="absolute inset-[14%] overflow-hidden rounded-full bg-[radial-gradient(circle_at_50%_35%,var(--color-brand-400),var(--color-brand-700)_75%)] shadow-[0_0_24px_rgb(169_225_211/0.18)]">
+          {photo ? (
+            <img
+              src={photo}
+              alt={entry.name}
+              width="320"
+              height="320"
+              loading="lazy"
+              decoding="async"
+              className="size-full object-cover"
+            />
+          ) : (
+            <span className="flex size-full items-center justify-center text-2xl font-bold text-ink">
+              {entry.name.replace(/^د\.\s*/, '').charAt(0)}
+            </span>
+          )}
+        </div>
+      </div>
+      <figcaption className="mt-2 text-sm font-bold text-balance text-ink sm:mt-3 sm:text-base">
+        {entry.name}
+      </figcaption>
+    </figure>
+  );
+}
+
 /**
  * `to` for an in-app path, `href` for an in-page anchor or a form on
  * another host.
@@ -499,6 +565,7 @@ export default function UsusSyria() {
     journey,
     applying,
     closing,
+    experts,
     partners,
     ecosystem,
   } = ususSyria;
@@ -1131,6 +1198,41 @@ export default function UsusSyria() {
            the programme's name twice. */
         mark={<img src={programLogo} alt="" className="h-auto w-28 lg:w-32" />}
       />
+
+      {/* ── الخبراء ───────────────────────────────────────────────
+             The mentors (client, Nov 2026), directly above شركاؤنا as
+             asked. The client's artwork is the spec: six ringed
+             portraits on ONE row on a desktop, and on a phone THREE to
+             a row — so `grid-cols-3`, then `lg:grid-cols-6`. Each cell
+             is a fraction of the container, and the portrait fills its
+             cell (capped at `max-w-44`), so the rows always end at the
+             container's edge rather than overflowing it. Source order
+             is the artwork's right-to-left order, which the RTL grid
+             reproduces. A `glow` band, like the artwork's own teal
+             field — names only, no body copy, so the glowing surface
+             is allowed here. */}
+      {experts?.items?.length ? (
+        <>
+          <Section tone="glow">
+            <SectionHeading
+              eyebrow={experts.eyebrow}
+              title={experts.title}
+              align="center"
+              className="mb-12"
+            />
+
+            <Stagger className="grid grid-cols-3 gap-x-3 gap-y-8 sm:gap-x-6 lg:grid-cols-6 lg:gap-x-4">
+              {experts.items.map((expert) => (
+                <StaggerItem key={expert.id}>
+                  <ExpertPortrait entry={expert} />
+                </StaggerItem>
+              ))}
+            </Stagger>
+          </Section>
+
+          <SectionSeam />
+        </>
+      ) : null}
 
       {/* ── 8 · شركاؤنا ──────────────────────────────────────────
              The last band on the page — which is where the client's
