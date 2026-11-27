@@ -292,14 +292,14 @@ export const about = {
 
   /* Impact stats. `countUp: false` on nothing here — all four are
      quantities, not years, so all four animate. `grouped` is left on
-     so 24000 renders as 24,000 in Western digits; the live site
-     abbreviates two of them, so those carry an explicit suffix and
-     a smaller base value. */
+     so 2472 renders as 2,472 in Western digits; the investment figure
+     is abbreviated, so it carries an explicit suffix. Figures and
+     labels follow the client's table (Nov 2026). */
   stats: [
-    { id: 'projects', value: 120, label: 'مشروع تم احتضانه وتطويره' },
-    { id: 'hours', value: 350, label: 'ساعة تدريبية واستشارية' },
-    { id: 'investment', value: 20, suffix: 'M', label: 'قيمة الجولات الاستثمارية' },
-    { id: 'ideas', value: 24, suffix: 'K', label: 'فكرة مشروع تم تقييمها' },
+    { id: 'projects', value: 248, label: 'مشروعاً تم احتضانه وتطويره' },
+    { id: 'hours', value: 757, label: 'ساعة تدريبية واستشارية قدّمت' },
+    { id: 'investment', value: 4, suffix: 'M', label: 'قيمة الجولات الاستثمارية' },
+    { id: 'ideas', value: 2472, label: 'فكرة ومشروعاً جرى تقييمها' },
   ],
 
   vision: {
